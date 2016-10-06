@@ -10,7 +10,7 @@ folder in your app project and add the reference to its `build.gradle` file.
 For version `1.0.0` it would be:
 
 ```
-compile 'com.spotify.sdk:spotify-android-auth-1.0.0.aar@aar'
+compile 'com.spotify.sdk:spotify-android-auth-1.0.0@aar'
 ```
 
 To learn more about working with authentication see the
