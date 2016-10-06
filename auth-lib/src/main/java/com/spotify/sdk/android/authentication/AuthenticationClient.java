@@ -22,7 +22,6 @@
 package com.spotify.sdk.android.authentication;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 
 import java.util.ArrayList;
@@ -299,17 +298,6 @@ public class AuthenticationClient {
      */
     public static void stopLoginActivity(Activity contextActivity, int requestCode) {
         contextActivity.finishActivity(requestCode);
-    }
-
-    /**
-     * Helper method to clear any Spotify and Facebook cookies from the WebView browser.
-     * <p>
-     * Calling this method will not affect the validity of the obtained access tokens and current Player session.
-     *
-     * @param context Android context.
-     */
-    public static void clearCookies(Context context) {
-        LoginDialog.clearCookies(context);
     }
 
     /**
