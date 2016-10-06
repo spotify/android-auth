@@ -4,13 +4,13 @@ Spotify Authentication Library
 This library is responsible for authenticating the user and fetching the access token
 that can subsequently be used to play music or be used in requests to the Spotify Web API.
 
-To add this library to your project copy the `spotify-auth-*.aar` file from the
+To add this library to your project copy the `spotify-android-auth-*.aar` file from the
 [Android SDK repo](https://github.com/spotify/android-sdk) to the `libs`
 folder in your app project and add the reference to its `build.gradle` file.
-For version `beta22-noconnect-2.20b` it would be:
+For version `1.0.0` it would be:
 
 ```
-compile 'com.spotify.sdk:spotify-auth-beta22-noconnect-2.20b@aar'
+compile 'com.spotify.sdk:spotify-android-auth-1.0.0.aar@aar'
 ```
 
 To learn more about working with authentication see the

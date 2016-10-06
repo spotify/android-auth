@@ -29,7 +29,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 24
         versionCode 1
-        versionName '1.0'
+        versionName '1.0.0'
     }
 
     buildTypes {
@@ -39,6 +39,14 @@ android {
         }
         debug {
             testCoverageEnabled true
+        }
+    }
+
+    libraryVariants.all { v ->
+        v.outputs.each { o ->
+            if (o.outputFile != null && o.outputFile.name.endsWith('.aar')) {
+                o.outputFile = new File(o.outputFile.parent, "spotify-android-auth-${v.mergedFlavor.versionName}.aar")
+            }
         }
     }
 }
