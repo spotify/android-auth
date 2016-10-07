@@ -159,7 +159,7 @@ public class LoginActivity extends Activity implements AuthenticationClient.Auth
                 if (intent == null) {
                     errorMessage = "Invalid message format";
                 } else {
-                    errorMessage = intent.getStringExtra(SpotifyAuthActivity.EXTRA_ERROR);
+                    errorMessage = intent.getStringExtra(SpotifyNativeAuthUtil.EXTRA_ERROR);
                 }
                 if (errorMessage == null) {
                     errorMessage = "Unknown error";
@@ -167,27 +167,27 @@ public class LoginActivity extends Activity implements AuthenticationClient.Auth
                 response.setError(errorMessage);
 
             } else if (resultCode == RESULT_OK) {
-                Bundle data = intent.getParcelableExtra(SpotifyAuthActivity.EXTRA_REPLY);
+                Bundle data = intent.getParcelableExtra(SpotifyNativeAuthUtil.EXTRA_REPLY);
 
                 if (data == null) {
                     response.setType(AuthenticationResponse.Type.ERROR);
                     response.setError("Missing response data");
                 } else {
 
-                    String responseType = data.getString(SpotifyAuthActivity.KEY_RESPONSE_TYPE, "unknown");
+                    String responseType = data.getString(SpotifyNativeAuthUtil.KEY_RESPONSE_TYPE, "unknown");
                     Log.d(TAG, "Response: " + responseType);
 
                     switch (responseType) {
-                        case SpotifyAuthActivity.RESPONSE_TYPE_TOKEN:
-                            String token = data.getString(SpotifyAuthActivity.KEY_ACCESS_TOKEN);
-                            int expiresIn = data.getInt(SpotifyAuthActivity.KEY_EXPIRES_IN);
+                        case SpotifyNativeAuthUtil.RESPONSE_TYPE_TOKEN:
+                            String token = data.getString(SpotifyNativeAuthUtil.KEY_ACCESS_TOKEN);
+                            int expiresIn = data.getInt(SpotifyNativeAuthUtil.KEY_EXPIRES_IN);
 
                             response.setType(AuthenticationResponse.Type.TOKEN);
                             response.setAccessToken(token);
                             response.setExpiresIn(expiresIn);
                             break;
-                        case SpotifyAuthActivity.RESPONSE_TYPE_CODE:
-                            String code = data.getString(SpotifyAuthActivity.KEY_AUTHORIZATION_CODE);
+                        case SpotifyNativeAuthUtil.RESPONSE_TYPE_CODE:
+                            String code = data.getString(SpotifyNativeAuthUtil.KEY_AUTHORIZATION_CODE);
                             response.setType(AuthenticationResponse.Type.CODE);
                             response.setCode(code);
                             break;

@@ -28,20 +28,20 @@ class SpotifyAuthHandler implements AuthenticationHandler {
 
     private static String TAG = SpotifyAuthHandler.class.getSimpleName();
 
-    private SpotifyAuthActivity mSpotifyAuthActivity;
+    private SpotifyNativeAuthUtil mSpotifyNativeAuthUtil;
 
     @Override
     public boolean start(Activity contextActivity, AuthenticationRequest request) {
         Log.d(TAG, "start");
-        mSpotifyAuthActivity = new SpotifyAuthActivity(contextActivity, request);
-        return mSpotifyAuthActivity.startAuthActivity();
+        mSpotifyNativeAuthUtil = new SpotifyNativeAuthUtil(contextActivity, request);
+        return mSpotifyNativeAuthUtil.startAuthActivity();
     }
 
     @Override
     public void stop() {
         Log.d(TAG, "stop");
-        if (mSpotifyAuthActivity != null) {
-            mSpotifyAuthActivity.stopAuthActivity();
+        if (mSpotifyNativeAuthUtil != null) {
+            mSpotifyNativeAuthUtil.stopAuthActivity();
         }
     }
 

@@ -25,8 +25,15 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 
-public class SpotifyAuthActivity {
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+public class SpotifyNativeAuthUtil {
 
     /*
      * This is used to pass information about the protocol version
@@ -69,12 +76,19 @@ public class SpotifyAuthActivity {
             ".partners",
             ""
     };
+    private static final String[] SPOTIFY_SIGNATURE_HASH = new String[] {
+            "80abdd17dcc4cb3a33815d354355bf87c9378624",
+            "88df4d670ed5e01fc7b3eff13b63258628ff5a00",
+            "d834ae340d1e854c5f4092722f9788216d9221e5",
+            "1cbedd9e7345f64649bad2b493a20d9eea955352",
+            "4b3d76a2de89033ea830f476a1f815692938e33b",
+    };
 
 
     private Activity mContextActivity;
     private AuthenticationRequest mRequest;
 
-    public SpotifyAuthActivity(Activity contextActivity, AuthenticationRequest request) {
+    public SpotifyNativeAuthUtil(Activity contextActivity, AuthenticationRequest request) {
         mContextActivity = contextActivity;
         mRequest = request;
     }
@@ -120,10 +134,64 @@ public class SpotifyAuthActivity {
         if (componentName == null) {
             return null;
         }
+
+        if (!validateSignature(componentName.getPackageName())) {
+            return null;
+        }
+
         return intent;
+    }
+
+    private boolean validateSignature(String spotifyPackageName) {
+        try {
+            final PackageInfo packageInfo = mContextActivity.getPackageManager().getPackageInfo(spotifyPackageName, PackageManager.GET_SIGNATURES);
+            if (packageInfo.signatures == null) {
+                return false;
+            }
+
+            for (Signature signature : packageInfo.signatures) {
+                final String signatureString = signature.toCharsString();
+                final String sha1Signatire = sha1Hash(signatureString);
+                for (String s : SPOTIFY_SIGNATURE_HASH) {
+                    if (s.equals(sha1Signatire)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (PackageManager.NameNotFoundException ignored) {
+        }
+        return false;
     }
 
     public void stopAuthActivity() {
         mContextActivity.finishActivity(LoginActivity.REQUEST_CODE);
+    }
+
+    private static String sha1Hash(String toHash) {
+        String hash = null;
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            byte[] bytes = toHash.getBytes("UTF-8");
+            digest.update(bytes, 0, bytes.length);
+            bytes = digest.digest();
+
+            hash = bytesToHex(bytes);
+        }
+        catch( NoSuchAlgorithmException ignored){
+        }
+        catch( UnsupportedEncodingException ignored) {
+        }
+        return hash;
+    }
+
+    private final static char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
+    private static String bytesToHex( byte[] bytes ) {
+        char[] hexChars = new char[ bytes.length * 2 ];
+        for( int j = 0; j < bytes.length; j++ ) {
+            int v = bytes[ j ] & 0xFF;
+            hexChars[ j * 2 ] = HEX_ARRAY[ v >>> 4 ];
+            hexChars[ j * 2 + 1 ] = HEX_ARRAY[ v & 0x0F ];
+        }
+        return new String(hexChars);
     }
 }
