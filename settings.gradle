@@ -1,1 +1,1 @@
-include ':auth-lib'
+include ':auth-lib', ':auth-sample'

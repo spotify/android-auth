@@ -56,6 +56,7 @@ public class AuthenticationRequest implements Parcelable {
     private final String mRedirectUri;
     private final String mState;
     private final String[] mScopes;
+    private final boolean mShowDialog;
     private final Map<String, String> mCustomParams;
 
     /**
@@ -71,6 +72,7 @@ public class AuthenticationRequest implements Parcelable {
 
         private String mState;
         private String[] mScopes;
+        private boolean mShowDialog;
         private final Map<String, String> mCustomParams = new HashMap<>();
 
         public Builder(String clientId, AuthenticationResponse.Type responseType, String redirectUri) {
@@ -99,6 +101,11 @@ public class AuthenticationRequest implements Parcelable {
             return this;
         }
 
+        public Builder setShowDialog(boolean showDialog) {
+            mShowDialog = showDialog;
+            return this;
+        }
+
         public Builder setCustomParam(String key, String value) {
             if (key == null || key.isEmpty()) {
                 throw new IllegalArgumentException("Custom parameter key can't be null or empty");
@@ -112,7 +119,7 @@ public class AuthenticationRequest implements Parcelable {
 
         public AuthenticationRequest build() {
             return new AuthenticationRequest(mClientId, mResponseType, mRedirectUri,
-                    mState, mScopes, mCustomParams);
+                    mState, mScopes, mShowDialog, mCustomParams);
         }
     }
 
@@ -122,7 +129,7 @@ public class AuthenticationRequest implements Parcelable {
         mRedirectUri = source.readString();
         mState = source.readString();
         mScopes = source.createStringArray();
-
+        mShowDialog = source.readByte() == 1;
         mCustomParams = new HashMap<>();
         Bundle bundle = source.readBundle(getClass().getClassLoader());
         for (String key : bundle.keySet()) {
@@ -159,6 +166,7 @@ public class AuthenticationRequest implements Parcelable {
                                   String redirectUri,
                                   String state,
                                   String[] scopes,
+                                  boolean showDialog,
                                   Map<String, String> customParams) {
 
         mClientId = clientId;
@@ -166,7 +174,9 @@ public class AuthenticationRequest implements Parcelable {
         mRedirectUri = redirectUri;
         mState = state;
         mScopes = scopes;
+        mShowDialog = showDialog;
         mCustomParams = customParams;
+
     }
 
     public Uri toUri() {
@@ -177,7 +187,7 @@ public class AuthenticationRequest implements Parcelable {
                 .appendQueryParameter(QueryParams.CLIENT_ID, mClientId)
                 .appendQueryParameter(QueryParams.RESPONSE_TYPE, mResponseType)
                 .appendQueryParameter(QueryParams.REDIRECT_URI, mRedirectUri)
-                .appendQueryParameter(QueryParams.SHOW_DIALOG, "true");
+                .appendQueryParameter(QueryParams.SHOW_DIALOG, String.valueOf(mShowDialog));
 
         if (mScopes != null && mScopes.length > 0) {
             uriBuilder.appendQueryParameter(QueryParams.SCOPE, scopesToString());
@@ -217,6 +227,7 @@ public class AuthenticationRequest implements Parcelable {
         dest.writeString(mRedirectUri);
         dest.writeString(mState);
         dest.writeStringArray(mScopes);
+        dest.writeByte((byte) (mShowDialog ? 1 : 0));
 
         Bundle bundle = new Bundle();
         for (Map.Entry<String, String> entry : mCustomParams.entrySet()) {

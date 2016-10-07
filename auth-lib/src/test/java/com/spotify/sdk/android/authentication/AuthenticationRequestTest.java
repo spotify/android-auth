@@ -46,7 +46,7 @@ public class AuthenticationRequestTest {
                 .appendQueryParameter(AuthenticationRequest.QueryParams.CLIENT_ID, clientId)
                 .appendQueryParameter(AuthenticationRequest.QueryParams.RESPONSE_TYPE, responseType)
                 .appendQueryParameter(AuthenticationRequest.QueryParams.REDIRECT_URI, redirectUrl)
-                .appendQueryParameter(AuthenticationRequest.QueryParams.SHOW_DIALOG, "true");
+                .appendQueryParameter(AuthenticationRequest.QueryParams.SHOW_DIALOG, String.valueOf(false));
 
         return uriBuilder;
     }
