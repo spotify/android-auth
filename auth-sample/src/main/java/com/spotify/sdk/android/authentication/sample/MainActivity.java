@@ -1,6 +1,7 @@
 package com.spotify.sdk.android.authentication.sample;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
@@ -85,21 +86,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onRequestCodeClicked(View view) {
-        final AuthenticationRequest.Builder builder =
-                new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.CODE, REDIRECT_URI)
-                        .setShowDialog(false)
-                        .setScopes(new String[]{"user-read-email"});
-
-        AuthenticationClient.openLoginActivity(this, AUTH_CODE_REQUEST_CODE, builder.build());
+        final AuthenticationRequest request = getAuthenticationRequest(AuthenticationResponse.Type.CODE);
+        AuthenticationClient.openLoginActivity(this, AUTH_CODE_REQUEST_CODE, request);
     }
 
     public void onRequestTokenClicked(View view) {
-        final AuthenticationRequest.Builder builder =
-            new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI)
-                .setShowDialog(false)
-                .setScopes(new String[]{"user-read-email"});
+        final AuthenticationRequest request = getAuthenticationRequest(AuthenticationResponse.Type.TOKEN);
+        AuthenticationClient.openLoginActivity(this, AUTH_TOKEN_REQUEST_CODE, request);
+    }
 
-        AuthenticationClient.openLoginActivity(this, AUTH_TOKEN_REQUEST_CODE, builder.build());
+    private AuthenticationRequest getAuthenticationRequest(AuthenticationResponse.Type type) {
+        return new AuthenticationRequest.Builder(CLIENT_ID, type, getRedirectUri().toString())
+            .setShowDialog(false)
+            .setScopes(new String[]{"user-read-email"})
+            .build();
     }
 
     @Override
@@ -140,5 +140,12 @@ public class MainActivity extends AppCompatActivity {
         if (mCall != null) {
             mCall.cancel();
         }
+    }
+
+    private Uri getRedirectUri() {
+        return new Uri.Builder()
+                .scheme(getString(R.string.com_spotify_sdk_redirect_scheme))
+                .authority(getString(R.string.com_spotify_sdk_redirect_host))
+                .build();
     }
 }

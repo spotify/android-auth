@@ -24,26 +24,27 @@
 <manifest package="com.spotify.sdk.android.authentication"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application>
         <activity
-            android:name="com.spotify.sdk.android.authentication.WebAuthResultActivity"
+            android:exported="true"
+            android:name="com.spotify.sdk.android.authentication.AuthCallbackActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
 
+                <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
 
-                <!--TODO(dima) how to remove it? -->
                 <data
-                    android:host="callback"
-                    android:scheme="testschema"/>
+                    android:scheme="@string/com_spotify_sdk_redirect_scheme"
+                    android:host="@string/com_spotify_sdk_redirect_host"/>
             </intent-filter>
         </activity>
 
         <activity
+            android:launchMode="singleInstance"
             android:name="com.spotify.sdk.android.authentication.LoginActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar">
         </activity>

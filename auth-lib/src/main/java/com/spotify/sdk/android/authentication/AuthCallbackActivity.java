@@ -25,7 +25,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-public class WebAuthResultActivity extends Activity {
+public class AuthCallbackActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

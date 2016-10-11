@@ -1,13 +1,13 @@
-Spotify Authentication Library
-------------------------------
+# Spotify Authentication Library
 
 This library is responsible for authenticating the user and fetching the access token
-that can subsequently be used to play music or be used in requests to the Spotify Web API.
+that can subsequently be used to play music or in requests to the [Spotify Web API](https://developer.spotify.com/web-api/).
+
+# Integrating the library into your project
 
 To add this library to your project copy the `spotify-android-auth-*.aar` file from the
 [Android SDK repo](https://github.com/spotify/android-sdk) to the `libs`
-folder in your app project and add the reference to its `build.gradle` file.
-For version `1.0.0` it would be:
+folder in your app project and add the reference to its `build.gradle` file:
 
 ```
 compile 'com.spotify.sdk:spotify-android-auth-1.0.0@aar'
@@ -16,3 +16,52 @@ compile 'com.spotify.sdk:spotify-android-auth-1.0.0@aar'
 To learn more about working with authentication see the
 [Authentication Guide](https://developer.spotify.com/technologies/spotify-android-sdk/android-sdk-authentication-guide/)
 and the [API reference](https://developer.spotify.com/android-sdk-docs/authentication) on the developer site.
+
+The following entries are merged into your manifest when you add the libary:
+
+```
+<uses-permission android:name="android.permission.INTERNET"/>
+
+<activity
+    android:exported="true"
+    android:name="com.spotify.sdk.android.authentication.AuthCallbackActivity"
+    android:theme="@android:style/Theme.Translucent.NoTitleBar">
+
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+
+        <data
+            android:scheme="@string/com_spotify_sdk_redirect_scheme"
+            android:host="@string/com_spotify_sdk_redirect_host"/>
+    </intent-filter>
+</activity>
+
+<activity
+    android:launchMode="singleInstance"
+    android:name="com.spotify.sdk.android.authentication.LoginActivity"
+    android:theme="@android:style/Theme.Translucent.NoTitleBar">
+</activity>
+```
+
+You will need to add the following strings to your project to enable Chrome CustomTabs
+login flow:
+
+```
+<resources>
+    <string name="com_spotify_sdk_redirect_scheme">yourscheme</string>
+    <string name="com_spotify_sdk_redirect_host">yourhost</string>
+</resources>
+```
+
+So, if you provided `bestapp://ismyapp` as a redirect URI in [the developer console](https://developer.spotify.com/my-applications/#!/applications)
+then you set `com_spotify_sdk_redirect_scheme` to `bestapp` and `com_spotify_sdk_redirect_host` to `ismyapp`.
+
+Since Chrome CustomTabs share credentials with the Chrome instance you have installed
+you get much better experience logging users in compare to WebView flow.
+
+# Sample Code
+
+Checkout [the sample project](auth-sample).
+

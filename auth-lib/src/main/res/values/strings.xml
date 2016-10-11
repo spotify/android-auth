@@ -23,4 +23,6 @@
 
 <resources>
     <string name="com_spotify_sdk_login_progress">Loading…</string>
+    <string name="com_spotify_sdk_redirect_scheme"></string>
+    <string name="com_spotify_sdk_redirect_host"></string>
 </resources>

@@ -24,12 +24,14 @@ package com.spotify.sdk.android.authentication;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Color;
 import android.net.Uri;
 import android.support.customtabs.CustomTabsIntent;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -55,7 +57,7 @@ public class CustomTabAuthHandler implements AuthenticationHandler {
     @Override
     public boolean start(final Activity contextActivity, final AuthenticationRequest request) {
 
-        String packageName = getChromePackageName(contextActivity);
+        final String packageName = getChromePackageName(contextActivity);
         if (packageName == null) {
             return false;
         }
@@ -66,8 +68,7 @@ public class CustomTabAuthHandler implements AuthenticationHandler {
 
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
         builder.setToolbarColor(SPOTIFY_GREEN);
-
-        CustomTabsIntent customTabsIntent = builder.build();
+        final CustomTabsIntent customTabsIntent = builder.build();
         customTabsIntent.intent.setPackage(packageName);
         customTabsIntent.launchUrl(contextActivity, request.toUri());
 
@@ -119,7 +120,21 @@ public class CustomTabAuthHandler implements AuthenticationHandler {
             // We want to be sure that nobody tries to handle our intents
             // and steal some nice tokens.
             ActivityInfo ai = infos.get(0).activityInfo;
-            return WebAuthResultActivity.class.getName().equals(ai.name);
+            if (!AuthCallbackActivity.class.getName().equals(ai.name)) {
+                return false;
+            }
+
+            final IntentFilter filter = infos.get(0).filter;
+            final String dataScheme = filter.getDataScheme(0);
+            final String dataAuthority = filter.getDataAuthority(0).getHost();
+
+            if (TextUtils.isEmpty(dataScheme) && TextUtils.isEmpty(dataAuthority)) {
+                Log.w("SpotifyAuth", "Please provide valid callback URI for AuthCallbackActivity.\n" +
+                        "You need add @string/com_spotify_sdk_redirect_scheme and @string/com_spotify_sdk_redirect_host to your resources or\n" +
+                        "Add complete definition of AuthCallbackActivity");
+                return false;
+            }
         }
+        return true;
     }
 }
