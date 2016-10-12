@@ -25,6 +25,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +42,8 @@ public class AuthenticationRequest implements Parcelable {
     static final String ACCOUNTS_AUTHORITY = "accounts.spotify.com";
     static final String ACCOUNTS_PATH = "authorize";
     static final String SCOPES_SEPARATOR = " ";
+    static final String SPOTIFY_SDK = "spotify-sdk";
+    static final String ANDROID_SDK = "android-sdk";
 
     static final class QueryParams {
         public static final String CLIENT_ID = "client_id";
@@ -49,6 +52,10 @@ public class AuthenticationRequest implements Parcelable {
         public static final String STATE = "state";
         public static final String SCOPE = "scope";
         public static final String SHOW_DIALOG = "show_dialog";
+        public static final String UTM_SOURCE = "utm_source";
+        public static final String UTM_MEDIUM = "utm_medium";
+        public static final String UTM_CAMPAIGN = "utm_campaign";
+
     }
 
     private final String mClientId;
@@ -58,6 +65,7 @@ public class AuthenticationRequest implements Parcelable {
     private final String[] mScopes;
     private final boolean mShowDialog;
     private final Map<String, String> mCustomParams;
+    private final String mCampaign;
 
     /**
      * Use this builder to create an {@link com.spotify.sdk.android.authentication.AuthenticationRequest}
@@ -73,6 +81,7 @@ public class AuthenticationRequest implements Parcelable {
         private String mState;
         private String[] mScopes;
         private boolean mShowDialog;
+        private String mCampaign;
         private final Map<String, String> mCustomParams = new HashMap<>();
 
         public Builder(String clientId, AuthenticationResponse.Type responseType, String redirectUri) {
@@ -117,9 +126,14 @@ public class AuthenticationRequest implements Parcelable {
             return this;
         }
 
+        public Builder setCampaign(String campaign) {
+            mCampaign = campaign;
+            return this;
+        }
+
         public AuthenticationRequest build() {
             return new AuthenticationRequest(mClientId, mResponseType, mRedirectUri,
-                    mState, mScopes, mShowDialog, mCustomParams);
+                    mState, mScopes, mShowDialog, mCustomParams, mCampaign);
         }
     }
 
@@ -131,6 +145,7 @@ public class AuthenticationRequest implements Parcelable {
         mScopes = source.createStringArray();
         mShowDialog = source.readByte() == 1;
         mCustomParams = new HashMap<>();
+        mCampaign = source.readString();
         Bundle bundle = source.readBundle(getClass().getClassLoader());
         for (String key : bundle.keySet()) {
             mCustomParams.put(key, bundle.getString(key));
@@ -161,13 +176,16 @@ public class AuthenticationRequest implements Parcelable {
         return mCustomParams.get(key);
     }
 
+    public String getCampaign() { return TextUtils.isEmpty(mCampaign) ? ANDROID_SDK : mCampaign; }
+
     private AuthenticationRequest(String clientId,
                                   AuthenticationResponse.Type responseType,
                                   String redirectUri,
                                   String state,
                                   String[] scopes,
                                   boolean showDialog,
-                                  Map<String, String> customParams) {
+                                  Map<String, String> customParams,
+                                  String campaign) {
 
         mClientId = clientId;
         mResponseType = responseType.toString();
@@ -176,7 +194,7 @@ public class AuthenticationRequest implements Parcelable {
         mScopes = scopes;
         mShowDialog = showDialog;
         mCustomParams = customParams;
-
+        mCampaign = campaign;
     }
 
     public Uri toUri() {
@@ -187,7 +205,10 @@ public class AuthenticationRequest implements Parcelable {
                 .appendQueryParameter(QueryParams.CLIENT_ID, mClientId)
                 .appendQueryParameter(QueryParams.RESPONSE_TYPE, mResponseType)
                 .appendQueryParameter(QueryParams.REDIRECT_URI, mRedirectUri)
-                .appendQueryParameter(QueryParams.SHOW_DIALOG, String.valueOf(mShowDialog));
+                .appendQueryParameter(QueryParams.SHOW_DIALOG, String.valueOf(mShowDialog))
+                .appendQueryParameter(QueryParams.UTM_SOURCE, SPOTIFY_SDK)
+                .appendQueryParameter(QueryParams.UTM_MEDIUM, ANDROID_SDK)
+                .appendQueryParameter(QueryParams.UTM_CAMPAIGN, getCampaign());
 
         if (mScopes != null && mScopes.length > 0) {
             uriBuilder.appendQueryParameter(QueryParams.SCOPE, scopesToString());
@@ -228,6 +249,7 @@ public class AuthenticationRequest implements Parcelable {
         dest.writeString(mState);
         dest.writeStringArray(mScopes);
         dest.writeByte((byte) (mShowDialog ? 1 : 0));
+        dest.writeString(mCampaign);
 
         Bundle bundle = new Bundle();
         for (Map.Entry<String, String> entry : mCustomParams.entrySet()) {

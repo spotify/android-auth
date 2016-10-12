@@ -95,11 +95,13 @@ public class MainActivity extends AppCompatActivity {
         AuthenticationClient.openLoginActivity(this, AUTH_TOKEN_REQUEST_CODE, request);
     }
 
+
     private AuthenticationRequest getAuthenticationRequest(AuthenticationResponse.Type type) {
         return new AuthenticationRequest.Builder(CLIENT_ID, type, getRedirectUri().toString())
-            .setShowDialog(false)
-            .setScopes(new String[]{"user-read-email"})
-            .build();
+                .setShowDialog(false)
+                .setScopes(new String[]{"user-read-email"})
+                .setCampaign("your-campaign-token")
+                .build();
     }
 
     @Override

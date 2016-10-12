@@ -38,7 +38,9 @@ public class AuthenticationRequestTest {
     private String mRedirectUri = "redirect:uri";
     private String mClientId = "12345567";
 
-    private Uri.Builder getBaseAuthUri(String clientId, String responseType, String redirectUrl) {
+    private String mDefaultCampaign = AuthenticationRequest.ANDROID_SDK;
+
+    private Uri.Builder getBaseAuthUri(String clientId, String responseType, String redirectUrl, String campaign) {
         Uri.Builder uriBuilder = new Uri.Builder();
         uriBuilder.scheme(AuthenticationRequest.ACCOUNTS_SCHEME)
                 .authority(AuthenticationRequest.ACCOUNTS_AUTHORITY)
@@ -46,7 +48,10 @@ public class AuthenticationRequestTest {
                 .appendQueryParameter(AuthenticationRequest.QueryParams.CLIENT_ID, clientId)
                 .appendQueryParameter(AuthenticationRequest.QueryParams.RESPONSE_TYPE, responseType)
                 .appendQueryParameter(AuthenticationRequest.QueryParams.REDIRECT_URI, redirectUrl)
-                .appendQueryParameter(AuthenticationRequest.QueryParams.SHOW_DIALOG, String.valueOf(false));
+                .appendQueryParameter(AuthenticationRequest.QueryParams.SHOW_DIALOG, String.valueOf(false))
+                .appendQueryParameter(AuthenticationRequest.QueryParams.UTM_SOURCE, AuthenticationRequest.SPOTIFY_SDK)
+                .appendQueryParameter(AuthenticationRequest.QueryParams.UTM_MEDIUM, mDefaultCampaign)
+                .appendQueryParameter(AuthenticationRequest.QueryParams.UTM_CAMPAIGN, campaign);
 
         return uriBuilder;
     }
@@ -77,7 +82,7 @@ public class AuthenticationRequestTest {
 
         AuthenticationRequest authenticationRequest = new AuthenticationRequest.Builder(mClientId, mResponseType, mRedirectUri).build();
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri);
+        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
         Uri uri = uriBuilder.build();
 
         assertEquals(uri, authenticationRequest.toUri());
@@ -98,7 +103,7 @@ public class AuthenticationRequestTest {
         assertEquals(expectedScopes[0], scopes[0]);
         assertEquals(expectedScopes[1], scopes[1]);
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri);
+        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
         uriBuilder.appendQueryParameter(AuthenticationRequest.QueryParams.SCOPE, "scope1 scope2");
         Uri uri = uriBuilder.build();
 
@@ -112,7 +117,7 @@ public class AuthenticationRequestTest {
                 .setScopes(null)
                 .build();
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri);
+        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
         Uri uri = uriBuilder.build();
 
         assertEquals(uri, authenticationRequest.toUri());
@@ -124,7 +129,7 @@ public class AuthenticationRequestTest {
                 .setScopes(new String[]{})
                 .build();
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri);
+        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
         Uri uri = uriBuilder.build();
 
         assertEquals(uri, authenticationRequest.toUri());
@@ -140,7 +145,7 @@ public class AuthenticationRequestTest {
 
         assertEquals(authenticationRequest.getState(), testState);
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri);
+        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
         uriBuilder.appendQueryParameter(AuthenticationRequest.QueryParams.STATE, testState);
         Uri uri = uriBuilder.build();
 
@@ -149,12 +154,42 @@ public class AuthenticationRequestTest {
     }
 
     @Test
+    public void shouldSetCampaign() {
+        String testCampaign = "test_campaign";
+
+        AuthenticationRequest authenticationRequest = new AuthenticationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+                .setCampaign(testCampaign)
+                .build();
+
+        assertEquals(authenticationRequest.getCampaign(), testCampaign);
+
+        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, testCampaign);
+        Uri uri = uriBuilder.build();
+
+        assertEquals(uri, authenticationRequest.toUri());
+    }
+
+    @Test
+    public void shouldUseDefaultCampaign() {
+
+        AuthenticationRequest authenticationRequest = new AuthenticationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+                .build();
+
+        assertEquals(authenticationRequest.getCampaign(), mDefaultCampaign);
+
+        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
+        Uri uri = uriBuilder.build();
+
+        assertEquals(uri, authenticationRequest.toUri());
+    }
+
+    @Test
     public void shouldNotSetNullState() {
         AuthenticationRequest authenticationRequest = new AuthenticationRequest.Builder(mClientId, mResponseType, mRedirectUri)
                 .setState(null)
                 .build();
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri);
+        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
         Uri uri = uriBuilder.build();
 
         assertEquals(uri, authenticationRequest.toUri());
@@ -172,7 +207,7 @@ public class AuthenticationRequestTest {
                 .setCustomParam(customKey2, customValue2)
                 .build();
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri);
+        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
         uriBuilder.appendQueryParameter(customKey1, customValue1);
         uriBuilder.appendQueryParameter(customKey2, customValue2);
         Uri uri = uriBuilder.build();
