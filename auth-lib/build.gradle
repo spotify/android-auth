@@ -67,7 +67,7 @@ task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
     options.links("http://docs.oracle.com/javase/7/docs/api/");
-    destinationDir = file("../docs/javadoc/")
+    destinationDir = file("../docs/")
     failOnError false
 }
 
