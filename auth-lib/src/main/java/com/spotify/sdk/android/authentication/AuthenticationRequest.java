@@ -55,7 +55,6 @@ public class AuthenticationRequest implements Parcelable {
         public static final String UTM_SOURCE = "utm_source";
         public static final String UTM_MEDIUM = "utm_medium";
         public static final String UTM_CAMPAIGN = "utm_campaign";
-
     }
 
     private final String mClientId;

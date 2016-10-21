@@ -22,7 +22,12 @@
 package com.spotify.sdk.android.authentication;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -192,6 +197,27 @@ import java.util.List;
  */
 public class AuthenticationClient {
 
+    static final String MARKET_VIEW_PATH = "market://";
+    static final String MARKET_SCHEME = "market";
+    static final String MARKET_PATH = "details";
+
+    static final String PLAY_STORE_SCHEME = "https";
+    static final String PLAY_STORE_AUTHORITY = "play.google.com";
+    static final String PLAY_STORE_PATH = "store/apps/details";
+
+    static final String SPOTIFY_ID = "com.spotify.music";
+    static final String SPOTIFY_SDK = "spotify-sdk";
+    static final String ANDROID_SDK = "android-sdk";
+    static final String DEFAULT_CAMPAIGN = "android-sdk";
+
+    static final class QueryParams {
+        public static final String ID = "id";
+        public static final String REFERRER = "referrer";
+        public static final String UTM_SOURCE = "utm_source";
+        public static final String UTM_MEDIUM = "utm_medium";
+        public static final String UTM_CAMPAIGN = "utm_campaign";
+    }
+
     /**
      * The activity that receives and processes the result of authentication flow
      * and returns it to the context activity that invoked the flow.
@@ -316,6 +342,59 @@ public class AuthenticationClient {
                     .setType(AuthenticationResponse.Type.EMPTY)
                     .build();
         }
+    }
+
+    /**
+     * Opens Spotify in the Play Store or browser.
+     *
+     * @param contextActivity The activity that should start the intent to open the download page.
+     */
+    public static void openDownloadSpotifyActivity(Activity contextActivity) {
+        openDownloadSpotifyActivity(contextActivity, DEFAULT_CAMPAIGN);
+    }
+
+    /**
+     * Opens Spotify in the Play Store or browser.
+     *
+     * @param contextActivity The activity that should start the intent to open the download page.
+     * @param campaign A Spotify-provided campaign ID. <code>null</code> if not provided.
+     */
+    public static void openDownloadSpotifyActivity(Activity contextActivity, String campaign) {
+
+        Uri.Builder uriBuilder = new Uri.Builder();
+
+        if (isAvailable(contextActivity, new Intent(Intent.ACTION_VIEW, Uri.parse(MARKET_VIEW_PATH)))) {
+            uriBuilder.scheme(MARKET_SCHEME)
+                    .appendPath(MARKET_PATH);
+        } else {
+            uriBuilder.scheme(PLAY_STORE_SCHEME)
+                    .authority(PLAY_STORE_AUTHORITY)
+                    .appendEncodedPath(PLAY_STORE_PATH);
+        }
+
+        uriBuilder.appendQueryParameter(QueryParams.ID, SPOTIFY_ID);
+
+        Uri.Builder referrerBuilder = new Uri.Builder();
+        referrerBuilder.appendQueryParameter(QueryParams.UTM_SOURCE, SPOTIFY_SDK)
+                .appendQueryParameter(QueryParams.UTM_MEDIUM, ANDROID_SDK);
+
+        if (TextUtils.isEmpty(campaign)) {
+            referrerBuilder.appendQueryParameter(QueryParams.UTM_CAMPAIGN, DEFAULT_CAMPAIGN);
+        } else {
+            referrerBuilder.appendQueryParameter(QueryParams.UTM_CAMPAIGN, campaign);
+        }
+
+        uriBuilder.appendQueryParameter(QueryParams.REFERRER, referrerBuilder.build().getEncodedQuery());
+
+        contextActivity.startActivity(new Intent(Intent.ACTION_VIEW, uriBuilder.build()));
+    }
+
+    public static boolean isAvailable(Context ctx, Intent intent) {
+        final PackageManager mgr = ctx.getPackageManager();
+        List<ResolveInfo> list =
+                mgr.queryIntentActivities(intent,
+                        PackageManager.MATCH_DEFAULT_ONLY);
+        return list.size() > 0;
     }
 
     public AuthenticationClient(Activity activity) {
