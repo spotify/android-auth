@@ -1,5 +1,7 @@
 # Spotify Authentication Library
 
+[![Build Status](https://travis-ci.org/spotify/android-auth.svg?branch=master)](https://travis-ci.org/spotify/android-auth)
+
 This library is responsible for authenticating the user and fetching the access token
 that can subsequently be used to play music or in requests to the [Spotify Web API](https://developer.spotify.com/web-api/).
 
