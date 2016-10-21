@@ -116,10 +116,6 @@ public class MainActivity extends AppCompatActivity {
         AuthenticationClient.openLoginActivity(this, AUTH_TOKEN_REQUEST_CODE, request);
     }
 
-    public void onDownloadSpotifyClicked(View view) {
-        AuthenticationClient.openDownloadSpotifyActivity(this, "your-campaign-id");
-    }
-
     private AuthenticationRequest getAuthenticationRequest(AuthenticationResponse.Type type) {
         return new AuthenticationRequest.Builder(CLIENT_ID, type, getRedirectUri().toString())
                 .setShowDialog(false)
