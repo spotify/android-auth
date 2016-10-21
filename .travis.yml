@@ -1,0 +1,21 @@
+language: android
+
+jdk:
+  - oraclejdk8
+
+android:
+  components:
+    - platform-tools
+    - tools
+    - build-tools-24.0.2
+    - android-24
+    - add-on
+    - extra  
+
+  licenses: 
+    - android-sdk-preview-license-52d11cd2
+    - android-sdk-license-.+
+    - google-gdk-license-.+
+      
+script:
+  - ./gradlew build check
