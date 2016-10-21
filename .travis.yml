@@ -18,7 +18,7 @@ android:
     - 'google-gdk-license-.+'
       
 script:
-  - ./gradlew build check
+  - ./gradlew auth-lib:build auth-lib:check
 
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
