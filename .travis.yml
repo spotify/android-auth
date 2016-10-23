@@ -9,20 +9,18 @@ android:
     - tools
     - build-tools-24.0.2
     - android-24
-    - add-on
-    - extra  
+    - extra-android-m2repository
 
   licenses: 
     - 'android-sdk-preview-license-52d11cd2'
-    - 'android-sdk-license-c81a61d9'
     - 'android-sdk-license-.+'
     - 'google-gdk-license-.+'
       
 before_script:
-  - android update sdk --no-ui --filter build-tools-24.0.2,android-24,extra-android-m2repository
+  - yes | android update sdk --no-ui --filter build-tools-24.0.2,android-24,extra-android-m2repository
 
 script:
-  - ./gradlew auth-lib:build auth-lib:check
+  - ./gradlew build 
 
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
