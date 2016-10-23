@@ -1,3 +1,9 @@
-<issue id="InvalidPackage" severity="error">
-    <ignore regexp="okio.*jar" />
-</issue>
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="InvalidPackage" severity="error">
+        <ignore regexp="okio.*jar"/>
+    </issue>
+    <issue id="GradleDependency" severity="ignore"/>
+    <issue id="AllowBackup" severity="ignore"/>
+    <issue id="GoogleAppIndexingWarning" severity="ignore"/>
+</lint>
