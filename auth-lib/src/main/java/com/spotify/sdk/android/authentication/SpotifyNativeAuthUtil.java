@@ -21,6 +21,7 @@
 
 package com.spotify.sdk.android.authentication;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -142,6 +143,7 @@ public class SpotifyNativeAuthUtil {
         return intent;
     }
 
+    @SuppressLint("PackageManagerGetSignatures")
     private boolean validateSignature(String spotifyPackageName) {
         try {
             final PackageInfo packageInfo = mContextActivity.getPackageManager().getPackageInfo(spotifyPackageName, PackageManager.GET_SIGNATURES);
