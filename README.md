@@ -14,7 +14,7 @@ Run `./gradlew build` and grab an artifact from `auth-lib/build/outputs/aar/`.
 To add this library to your project copy the `spotify-android-auth-*.aar` to the `libs`
 folder in your app project and add the reference to its `build.gradle` file:
 
-```
+```gradle
 compile 'com.spotify.sdk:spotify-android-auth-1.0.0@aar'
 ```
 
@@ -24,7 +24,7 @@ and the [API reference](https://developer.spotify.com/android-sdk-docs/authentic
 
 The following entries are merged into your manifest when you add the libary:
 
-```
+```xml
 <uses-permission android:name="android.permission.INTERNET"/>
 
 <activity
@@ -53,7 +53,7 @@ The following entries are merged into your manifest when you add the libary:
 You will need to add the following strings to your project to enable Chrome CustomTabs
 login flow:
 
-```
+```xml
 <resources>
     <string name="com_spotify_sdk_redirect_scheme">yourscheme</string>
     <string name="com_spotify_sdk_redirect_host">yourhost</string>
