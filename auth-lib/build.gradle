@@ -20,6 +20,12 @@
  */
 
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+
+/* Maven properties */
+group = 'com.spotify.sdk'
+version = '1.0.0'
+project.archivesBaseName = 'spotify-android-auth'
 
 android {
     compileSdkVersion 24
