@@ -58,6 +58,4 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.1.1'
     compile 'com.android.support:design:25.1.1'
     compile 'com.squareup.okhttp3:okhttp:3.4.1'
-
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta5'
 }
