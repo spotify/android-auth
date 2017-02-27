@@ -44,7 +44,6 @@
         </activity>
 
         <activity
-            android:launchMode="singleInstance"
             android:name="com.spotify.sdk.android.authentication.LoginActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar">
         </activity>
