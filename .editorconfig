@@ -1,0 +1,25 @@
+# EditorConfig helps developers define and maintain consistent
+# coding styles between different editors and IDEs
+# editorconfig.org
+#
+# Install IntelliJ plugin: https://github.com/editorconfig/editorconfig-jetbrains#readme
+
+root = true
+
+[*]
+
+indent_style = space
+indent_size = 4
+continuation_indent_size = 8
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.xml]
+continuation_indent_size = 4
+
+[*.{cpp,h,hpp}]
+indent_style = space
+indent_size = 2
+continuation_indent_size = 4
