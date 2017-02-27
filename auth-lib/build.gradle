@@ -20,12 +20,10 @@
  */
 
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
 
-/* Maven properties */
-group = 'com.spotify.sdk'
-version = '1.0.0'
-project.archivesBaseName = 'spotify-android-auth'
+project.group = 'com.spotify.android'
+project.archivesBaseName = 'auth'
+project.version = '1.0.0-alpha'
 
 android {
     compileSdkVersion 25
@@ -48,14 +46,6 @@ android {
         }
     }
 
-    libraryVariants.all { v ->
-        v.outputs.each { o ->
-            if (o.outputFile != null && o.outputFile.name.endsWith('.aar')) {
-                o.outputFile = new File(o.outputFile.parent, "spotify-android-auth-${v.mergedFlavor.versionName}.aar")
-            }
-        }
-    }
-
     lintOptions {
         lintConfig file("${project.rootDir}/config/lint.xml")
         quiet false
@@ -72,14 +62,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:1.9.5'
     testCompile 'org.robolectric:robolectric:3.1.2'
-}
-
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    options.links("http://docs.oracle.com/javase/7/docs/api/");
-    destinationDir = file("../docs/")
-    failOnError false
 }
 
 /*
@@ -121,4 +103,82 @@ task findbugs(type: FindBugs) {
     }
 
     classpath = files()
+}
+
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    options.links("http://docs.oracle.com/javase/7/docs/api/");
+    destinationDir = file("../docs/")
+    failOnError false
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+install {
+    repositories {
+        mavenInstaller {
+            pom {
+                project {
+                    name project.group + ':' + project.archivesBaseName
+                    description 'Spotify authentication and authorization for Android'
+                    url 'https://github.com/spotify/android-auth'
+
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+
+                    scm {
+                        connection 'scm:git:https://github.com/spotify/android-auth.git'
+                        developerConnection 'scm:git:git@github.com:spotify/android-auth.git'
+                        url 'https://github.com/spotify/android-auth'
+                    }
+
+                    developers {
+                        developer {
+                            id 'erikg'
+                            name 'Erik Ghonyan'
+                            email 'erikg@spotify.com'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+
+    configurations = ['archives']
+
+    pkg {
+        repo = 'maven'
+        name = 'android-auth'
+        userOrg = 'spotify'
+
+        version {
+            name = project.version
+        }
+    }
 }
