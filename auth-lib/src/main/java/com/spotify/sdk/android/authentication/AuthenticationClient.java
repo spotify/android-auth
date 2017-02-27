@@ -295,7 +295,9 @@ public class AuthenticationClient {
      * @throws IllegalArgumentException if any of the arguments is null
      */
     public static Intent createLoginActivityIntent(Activity contextActivity, AuthenticationRequest request) {
-        return LoginActivity.getAuthIntent(contextActivity, request);
+        Intent intent = LoginActivity.getAuthIntent(contextActivity, request);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        return intent;
     }
 
     /**
