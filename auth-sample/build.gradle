@@ -53,7 +53,7 @@ android {
 }
 
 dependencies {
-    compile project(':auth-lib')
+    compile 'com.spotify.android:auth:1.0.0-alpha'
 
     compile 'com.android.support:appcompat-v7:25.1.1'
     compile 'com.android.support:design:25.1.1'
