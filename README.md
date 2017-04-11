@@ -5,17 +5,12 @@
 This library is responsible for authenticating the user and fetching the access token
 that can subsequently be used to play music or in requests to the [Spotify Web API](https://developer.spotify.com/web-api/).
 
-# Building
-
-Run `./gradlew build` and grab an artifact from `auth-lib/build/outputs/aar/`.
-
 # Integrating the library into your project
 
-To add this library to your project copy the `spotify-android-auth-*.aar` to the `libs`
-folder in your app project and add the reference to its `build.gradle` file:
+To add this library to your project add the reference to its `build.gradle` file:
 
 ```gradle
-compile 'com.spotify.sdk:spotify-android-auth-1.0.0@aar'
+compile 'com.spotify.android:auth:1.0.0-alpha'
 ```
 
 To learn more about working with authentication see the
@@ -44,7 +39,6 @@ The following entries are merged into your manifest when you add the libary:
 </activity>
 
 <activity
-    android:launchMode="singleInstance"
     android:name="com.spotify.sdk.android.authentication.LoginActivity"
     android:theme="@android:style/Theme.Translucent.NoTitleBar">
 </activity>
