@@ -30,7 +30,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowActivity;
-import org.robolectric.util.ActivityController;
+import org.robolectric.android.controller.ActivityController;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -46,7 +46,7 @@ public class LoginActivityTest {
         Activity context = buildActivity(Activity.class).create().get();
         Intent intent = new Intent(context, LoginActivity.class);
 
-        Activity activity = buildActivity(LoginActivity.class).withIntent(intent).create().get();
+        Activity activity = buildActivity(LoginActivity.class, intent).create().get();
 
         assertTrue(activity.isFinishing());
         assertEquals(Activity.RESULT_CANCELED, shadowOf(activity).getResultCode());
@@ -73,8 +73,7 @@ public class LoginActivityTest {
         Intent intent = new Intent(context, LoginActivity.class);
         intent.putExtra(LoginActivity.EXTRA_AUTH_REQUEST, bundle);
 
-        ActivityController<LoginActivity> loginActivityActivityController = buildActivity(LoginActivity.class)
-                .withIntent(intent);
+        ActivityController<LoginActivity> loginActivityActivityController = buildActivity(LoginActivity.class, intent);
 
         final LoginActivity loginActivity = loginActivityActivityController.get();
 
