@@ -54,6 +54,12 @@ android {
         textOutput 'stdout'
         xmlReport false
     }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -61,7 +67,7 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:1.9.5'
-    testCompile 'org.robolectric:robolectric:3.1.2'
+    testCompile 'org.robolectric:robolectric:3.5.1'
 }
 
 /*
