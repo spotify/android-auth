@@ -23,7 +23,7 @@ apply plugin: 'com.android.library'
 
 project.group = 'com.spotify.android'
 project.archivesBaseName = 'auth'
-project.version = '1.0.0-alpha'
+project.version = '1.0.1'
 
 android {
     compileSdkVersion 27
@@ -33,7 +33,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 27
         versionCode 1
-        versionName '1.0.0'
+        versionName project.version
     }
 
     buildTypes {
