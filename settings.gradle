@@ -1,1 +1,1 @@
-include ':auth-lib', ':auth-sample'
+include ':auth-lib', ':auth-sample', ':auth-sample-kotlin'
