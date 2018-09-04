@@ -22,13 +22,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion "27.0.2"
+    compileSdkVersion 28
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         applicationId "com.spotify.sdk.android.authentication.sample"
         minSdkVersion 15
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
 
@@ -53,9 +53,9 @@ android {
 }
 
 dependencies {
-    compile 'com.spotify.android:auth:1.1.0'
+    implementation 'com.spotify.android:auth:1.1.0'
 
-    compile 'com.android.support:appcompat-v7:27.0.2'
-    compile 'com.android.support:design:27.0.2'
-    compile 'com.squareup.okhttp3:okhttp:3.4.1'
+    implementation 'androidx.appcompat:appcompat:1.0.0-rc02'
+    implementation 'com.google.android.material:material:1.0.0-rc01'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
 }
