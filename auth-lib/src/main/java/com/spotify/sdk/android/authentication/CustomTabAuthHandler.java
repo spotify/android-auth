@@ -30,7 +30,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Color;
 import android.net.Uri;
-import android.support.customtabs.CustomTabsIntent;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -38,6 +37,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import androidx.browser.customtabs.CustomTabsIntent;
 
 public class CustomTabAuthHandler implements AuthenticationHandler {
 
