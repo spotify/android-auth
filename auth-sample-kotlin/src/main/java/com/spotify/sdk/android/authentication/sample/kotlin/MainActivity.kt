@@ -51,10 +51,12 @@ class MainActivity : AppCompatActivity() {
     private var mAccessCode: String? = null
     private var mCall: Call? = null
 
-    private val redirectUri: Uri = Uri.Builder()
-            .scheme(getString(R.string.com_spotify_sdk_redirect_scheme))
-            .authority(getString(R.string.com_spotify_sdk_redirect_host))
-            .build()
+    private val redirectUri: Uri by lazy {
+        Uri.Builder()
+                .scheme(getString(R.string.com_spotify_sdk_redirect_scheme))
+                .authority(getString(R.string.com_spotify_sdk_redirect_host))
+                .build()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,7 +86,6 @@ class MainActivity : AppCompatActivity() {
         cancelCall()
 
         mCall = mOkHttpClient.newCall(request)
-
         mCall?.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 setResponse("Failed to fetch data: $e")
