@@ -17,7 +17,7 @@ To learn more about working with authentication see the
 [Authentication Guide](https://developer.spotify.com/technologies/spotify-android-sdk/android-sdk-authentication-guide/)
 and the [API reference](https://developer.spotify.com/android-sdk-docs/authentication) on the developer site.
 
-The following entries are merged into your manifest when you add the libary:
+The following entries are merged into your manifest when you add the library:
 
 ```xml
 <uses-permission android:name="android.permission.INTERNET"/>
