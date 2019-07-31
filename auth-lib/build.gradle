@@ -63,7 +63,7 @@ android {
 }
 
 dependencies {
-    api 'com.android.support:customtabs:27.0.2'
+    implementation 'com.android.support:customtabs:27.0.2'
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-core:2.12.0'
