@@ -248,4 +248,13 @@ class LoginDialog extends Dialog {
         LinearLayout layout = (LinearLayout) findViewById(R.id.com_spotify_sdk_login_webview_container);
         layout.setLayoutParams(new FrameLayout.LayoutParams(dialogWidth, dialogHeight, Gravity.CENTER));
     }
+
+    static void clearCookies(Context context) {
+        WebViewUtils.clearFacebookCookies(context);
+
+        WebViewUtils.clearCookiesForDomain(context, "spotify.com");
+        WebViewUtils.clearCookiesForDomain(context, ".spotify.com");
+        WebViewUtils.clearCookiesForDomain(context, "https://spotify.com");
+        WebViewUtils.clearCookiesForDomain(context, "https://.spotify.com");
+    }
 }
