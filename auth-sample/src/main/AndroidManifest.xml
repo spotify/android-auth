@@ -29,7 +29,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name="com.spotify.sdk.android.auth.sample.MainActivity"
             android:configChanges="keyboardHidden|keyboard|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
