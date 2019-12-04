@@ -25,7 +25,7 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.spotify.sdk.android.authentication.sample.MainActivity">
+    tools:context="com.spotify.sdk.android.auth.sample.MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
