@@ -58,6 +58,7 @@ public class SpotifyNativeAuthUtil {
 
     static final String KEY_CLIENT_ID = "CLIENT_ID";
     static final String KEY_REQUESTED_SCOPES = "SCOPES";
+    static final String KEY_STATE = "STATE";
     static final String KEY_REDIRECT_URI = "REDIRECT_URI";
     static final String KEY_RESPONSE_TYPE = "RESPONSE_TYPE";
     static final String KEY_ACCESS_TOKEN = "ACCESS_TOKEN";
@@ -105,6 +106,7 @@ public class SpotifyNativeAuthUtil {
         intent.putExtra(KEY_REDIRECT_URI, mRequest.getRedirectUri());
         intent.putExtra(KEY_RESPONSE_TYPE, mRequest.getResponseType());
         intent.putExtra(KEY_REQUESTED_SCOPES, mRequest.getScopes());
+        intent.putExtra(KEY_STATE, mRequest.getState());
 
         try {
             mContextActivity.startActivityForResult(intent, LoginActivity.REQUEST_CODE);

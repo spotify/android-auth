@@ -41,9 +41,6 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt')
         }
-        debug {
-            testCoverageEnabled true
-        }
     }
 
     lintOptions {

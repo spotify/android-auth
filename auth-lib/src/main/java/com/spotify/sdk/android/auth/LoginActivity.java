@@ -172,10 +172,9 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
                     response.setType(AuthorizationResponse.Type.ERROR);
                     response.setError("Missing response data");
                 } else {
-
                     String responseType = data.getString(SpotifyNativeAuthUtil.KEY_RESPONSE_TYPE, "unknown");
                     Log.d(TAG, "Response: " + responseType);
-
+                    response.setState(data.getString(SpotifyNativeAuthUtil.KEY_STATE, null));
                     switch (responseType) {
                         case SpotifyNativeAuthUtil.RESPONSE_TYPE_TOKEN:
                             String token = data.getString(SpotifyNativeAuthUtil.KEY_ACCESS_TOKEN);
