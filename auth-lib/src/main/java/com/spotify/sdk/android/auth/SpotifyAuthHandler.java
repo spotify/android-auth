@@ -22,24 +22,19 @@
 package com.spotify.sdk.android.auth;
 
 import android.app.Activity;
-import android.util.Log;
 
 class SpotifyAuthHandler implements AuthorizationHandler {
-
-    private static String TAG = SpotifyAuthHandler.class.getSimpleName();
 
     private SpotifyNativeAuthUtil mSpotifyNativeAuthUtil;
 
     @Override
     public boolean start(Activity contextActivity, AuthorizationRequest request) {
-        Log.d(TAG, "start");
         mSpotifyNativeAuthUtil = new SpotifyNativeAuthUtil(contextActivity, request);
         return mSpotifyNativeAuthUtil.startAuthActivity();
     }
 
     @Override
     public void stop() {
-        Log.d(TAG, "stop");
         if (mSpotifyNativeAuthUtil != null) {
             mSpotifyNativeAuthUtil.stopAuthActivity();
         }
