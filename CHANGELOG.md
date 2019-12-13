@@ -1,9 +1,14 @@
 Change Log
 ==========
 
-## Version 1.1.1
+## Version 1.2.0
 
-_2018-02-28_
+2019-12-05
+
+* Breaking changes: Rename classes from AuthenticationClassName to AuthorizationClassName
+* Pass state parameter in AuthorizationResponse
+
+2019-08-12
 
 * Add  method to clear Spotify and Facebook cookies to AuthenticationClient
 * Upgrade buildToolsVersion to 27.0.3
