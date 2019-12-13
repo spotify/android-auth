@@ -24,15 +24,16 @@ package com.spotify.sdk.android.auth.sample;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
-import com.spotify.sdk.android.authentication.AuthenticationClient;
-import com.spotify.sdk.android.authentication.AuthenticationRequest;
-import com.spotify.sdk.android.authentication.AuthenticationResponse;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
+import com.google.android.material.snackbar.Snackbar;
+import com.spotify.sdk.android.auth.AuthorizationClient;
+import com.spotify.sdk.android.auth.AuthorizationRequest;
+import com.spotify.sdk.android.auth.AuthorizationResponse;
 import com.spotify.sdk.android.authentication.sample.R;
 
 import org.json.JSONException;
@@ -64,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().setTitle(String.format(
-                Locale.US, "Spotify Auth Sample %s", com.spotify.sdk.android.authentication.BuildConfig.VERSION_NAME));
+                Locale.US, "Spotify Auth Sample %s", com.spotify.sdk.android.auth.BuildConfig.VERSION_NAME));
     }
 
     @Override
@@ -83,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
         final Request request = new Request.Builder()
                 .url("https://api.spotify.com/v1/me")
-                .addHeader("Authorization","Bearer " + mAccessToken)
+                .addHeader("Authorization", "Bearer " + mAccessToken)
                 .build();
 
         cancelCall();
@@ -108,17 +109,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onRequestCodeClicked(View view) {
-        final AuthenticationRequest request = getAuthenticationRequest(AuthenticationResponse.Type.CODE);
-        AuthenticationClient.openLoginActivity(this, AUTH_CODE_REQUEST_CODE, request);
+        final AuthorizationRequest request = getAuthenticationRequest(AuthorizationResponse.Type.CODE);
+        AuthorizationClient.openLoginActivity(this, AUTH_CODE_REQUEST_CODE, request);
     }
 
     public void onRequestTokenClicked(View view) {
-        final AuthenticationRequest request = getAuthenticationRequest(AuthenticationResponse.Type.TOKEN);
-        AuthenticationClient.openLoginActivity(this, AUTH_TOKEN_REQUEST_CODE, request);
+        final AuthorizationRequest request = getAuthenticationRequest(AuthorizationResponse.Type.TOKEN);
+        AuthorizationClient.openLoginActivity(this, AUTH_TOKEN_REQUEST_CODE, request);
     }
 
-    private AuthenticationRequest getAuthenticationRequest(AuthenticationResponse.Type type) {
-        return new AuthenticationRequest.Builder(CLIENT_ID, type, getRedirectUri().toString())
+    private AuthorizationRequest getAuthenticationRequest(AuthorizationResponse.Type type) {
+        return new AuthorizationRequest.Builder(CLIENT_ID, type, getRedirectUri().toString())
                 .setShowDialog(false)
                 .setScopes(new String[]{"user-read-email"})
                 .setCampaign("your-campaign-token")
@@ -128,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        final AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, data);
+        final AuthorizationResponse response = AuthorizationClient.getResponse(resultCode, data);
 
         if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
             mAccessToken = response.getAccessToken();
@@ -143,19 +144,19 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                final TextView responseView = (TextView) findViewById(R.id.response_text_view);
+                final TextView responseView = findViewById(R.id.response_text_view);
                 responseView.setText(text);
             }
         });
     }
 
     private void updateTokenView() {
-        final TextView tokenView = (TextView) findViewById(R.id.token_text_view);
+        final TextView tokenView = findViewById(R.id.token_text_view);
         tokenView.setText(getString(R.string.token, mAccessToken));
     }
 
     private void updateCodeView() {
-        final TextView codeView = (TextView) findViewById(R.id.code_text_view);
+        final TextView codeView = findViewById(R.id.code_text_view);
         codeView.setText(getString(R.string.code, mAccessCode));
     }
 
