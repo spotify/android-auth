@@ -47,13 +47,15 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import java.util.Locale;
+
 class LoginDialog extends Dialog {
 
     private static final String TAG = LoginDialog.class.getName();
 
     /**
      * RegEx describing which uris should be opened in the WebView.
-     * When uri that is not whitelisted is received it will be opened in a browser instead.
+     * When uri that is not whitelisted is received, the activity will finish.
      */
     private static final String WEBVIEW_URIS = "^(.+\\.facebook\\.com)|(accounts\\.spotify\\.com)$";
 
@@ -153,16 +155,21 @@ class LoginDialog extends Dialog {
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                Uri uri = Uri.parse(url);
-                if (url.startsWith(redirectUri)) {
-                    sendComplete(uri);
+                final String caseSafeRequestRedirectUri = redirectUri.toLowerCase(Locale.ENGLISH);
+                final String caseSafeResponseRedirectUri = url.toLowerCase(Locale.ENGLISH);
+                Uri responseUri = Uri.parse(url);
+                if (caseSafeResponseRedirectUri.startsWith(caseSafeRequestRedirectUri)) {
+                    sendComplete(responseUri);
                     return true;
-                } else if (uri.getAuthority().matches(WEBVIEW_URIS)) {
+                } else if (responseUri.getAuthority().matches(WEBVIEW_URIS)) {
                     return false;
                 }
-
-                Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uri);
-                getContext().startActivity(launchBrowser);
+                final String errorMessage =
+                        String.format(
+                                "Can't redirect due to mismatch. \nRequest redirect-uri: %s\nResponse redirect-uri: %s",
+                                redirectUri, responseUri);
+                Log.e(TAG, errorMessage);
+                sendError(new RuntimeException(errorMessage));
                 return true;
             }
 
