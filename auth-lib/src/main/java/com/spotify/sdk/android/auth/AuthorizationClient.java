@@ -414,7 +414,6 @@ public class AuthorizationClient {
         mLoginActivity = activity;
 
         mAuthorizationHandlers.add(new SpotifyAuthHandler());
-        mAuthorizationHandlers.add(new CustomTabAuthHandler());
         mAuthorizationHandlers.add(new WebViewAuthHandler());
     }
 

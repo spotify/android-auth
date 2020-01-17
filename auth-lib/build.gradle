@@ -23,7 +23,7 @@ apply plugin: 'com.android.library'
 
 project.group = 'com.spotify.android'
 project.archivesBaseName = 'auth'
-project.version = '1.2.1'
+project.version = '1.2.2'
 
 android {
     compileSdkVersion 28
@@ -60,7 +60,6 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.browser:browser:1.2.0'
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-core:2.21.0'
