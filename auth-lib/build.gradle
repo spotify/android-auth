@@ -60,7 +60,6 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.browser:browser:1.2.0'
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-core:2.21.0'
