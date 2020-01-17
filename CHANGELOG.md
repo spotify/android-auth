@@ -1,9 +1,12 @@
 Change Log
 ==========
+## Version 1.2.2
+* Remove custom-tabs handling due to issues
+
+## Version 1.2.1
+* Fixes an issue that produced a redirect error when the redirect uri contains CAPS.
 
 ## Version 1.2.0
-
-2019-12-05
 
 * Breaking changes: Rename classes from AuthenticationClassName to AuthorizationClassName
 * Pass state parameter in AuthorizationResponse
