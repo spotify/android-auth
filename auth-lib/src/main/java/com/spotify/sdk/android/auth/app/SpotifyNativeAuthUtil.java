@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.spotify.sdk.android.auth;
+package com.spotify.sdk.android.auth.app;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -30,45 +30,27 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 
+import com.spotify.sdk.android.auth.AuthorizationRequest;
+import com.spotify.sdk.android.auth.LoginActivity;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_VERSION;
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_CLIENT_ID;
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_REDIRECT_URI;
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_REQUESTED_SCOPES;
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_RESPONSE_TYPE;
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_STATE;
+
 public class SpotifyNativeAuthUtil {
 
     /*
-     * This is used to pass information about the protocol version
-     * to the AuthorizationActivity.
-     * DO NOT CHANGE THIS.
-     */
-    private static final String EXTRA_VERSION = "VERSION";
-
-    /*
-     * Constants below have their counterparts in Spotify app where
-     * they're used to parse messages received from SDK. 
-     * If anything changes in the structure of those messages this version
-     * should be bumped and new protocol version should be implemented on the other side. 
+     * The version of the auth protocol. More info about this protocol in
+     * {@link com.spotify.sdk.android.auth.IntentExtras}.
      */
     private static final int PROTOCOL_VERSION = 1;
-
-    // PROTOCOL BEGIN
-
-    static final String EXTRA_REPLY = "REPLY";
-    static final String EXTRA_ERROR = "ERROR";
-
-    static final String KEY_CLIENT_ID = "CLIENT_ID";
-    static final String KEY_REQUESTED_SCOPES = "SCOPES";
-    static final String KEY_STATE = "STATE";
-    static final String KEY_REDIRECT_URI = "REDIRECT_URI";
-    static final String KEY_RESPONSE_TYPE = "RESPONSE_TYPE";
-    static final String KEY_ACCESS_TOKEN = "ACCESS_TOKEN";
-    static final String KEY_AUTHORIZATION_CODE = "AUTHORIZATION_CODE";
-    static final String KEY_EXPIRES_IN = "EXPIRES_IN";
-
-    static final String RESPONSE_TYPE_TOKEN = "token";
-    static final String RESPONSE_TYPE_CODE = "code";
-
-    // PROTOCOL END
 
     private static final String SPOTIFY_AUTH_ACTIVITY_ACTION = "com.spotify.sso.action.START_AUTH_FLOW";
     private static final String SPOTIFY_PACKAGE_NAME = "com.spotify.music";
@@ -100,7 +82,7 @@ public class SpotifyNativeAuthUtil {
         if (intent == null) {
             return false;
         }
-        intent.putExtra(EXTRA_VERSION, PROTOCOL_VERSION);
+        intent.putExtra(KEY_VERSION, PROTOCOL_VERSION);
 
         intent.putExtra(KEY_CLIENT_ID, mRequest.getClientId());
         intent.putExtra(KEY_REDIRECT_URI, mRequest.getRedirectUri());

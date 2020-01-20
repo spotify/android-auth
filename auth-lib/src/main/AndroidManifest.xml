@@ -27,21 +27,6 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application>
-        <activity
-            android:exported="true"
-            android:name="com.spotify.sdk.android.auth.AuthCallbackActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar">
-            <intent-filter>
-
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data
-                    android:scheme="@string/com_spotify_sdk_redirect_scheme"
-                    android:host="@string/com_spotify_sdk_redirect_host"/>
-            </intent-filter>
-        </activity>
 
         <activity
             android:name="com.spotify.sdk.android.auth.LoginActivity"

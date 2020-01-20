@@ -19,29 +19,44 @@
  * under the License.
  */
 
-package com.spotify.sdk.android.auth;
+package com.spotify.sdk.android.auth.webview;
 
 import android.app.Activity;
+import android.util.Log;
 
-class SpotifyAuthHandler implements AuthorizationHandler {
+import com.spotify.sdk.android.auth.AuthorizationHandler;
+import com.spotify.sdk.android.auth.AuthorizationRequest;
 
-    private SpotifyNativeAuthUtil mSpotifyNativeAuthUtil;
+public class WebViewAuthHandler implements AuthorizationHandler {
+
+    private static String TAG = WebViewAuthHandler.class.getSimpleName();
+
+    private LoginDialog mLoginDialog;
+    private OnCompleteListener mListener;
 
     @Override
     public boolean start(Activity contextActivity, AuthorizationRequest request) {
-        mSpotifyNativeAuthUtil = new SpotifyNativeAuthUtil(contextActivity, request);
-        return mSpotifyNativeAuthUtil.startAuthActivity();
+        Log.d(TAG, "start");
+        mLoginDialog = new LoginDialog(contextActivity, request);
+        mLoginDialog.setOnCompleteListener(mListener);
+        mLoginDialog.show();
+        return true;
     }
 
     @Override
     public void stop() {
-        if (mSpotifyNativeAuthUtil != null) {
-            mSpotifyNativeAuthUtil.stopAuthActivity();
+        Log.d(TAG, "stop");
+        if (mLoginDialog != null) {
+            mLoginDialog.close();
+            mLoginDialog = null;
         }
     }
 
     @Override
     public void setOnCompleteListener(OnCompleteListener listener) {
-        // no-op
+        mListener = listener;
+        if (mLoginDialog != null) {
+            mLoginDialog.setOnCompleteListener(listener);
+        }
     }
 }
