@@ -300,7 +300,7 @@ public class AuthorizationClient {
      */
     public static Intent createLoginActivityIntent(Activity contextActivity, AuthorizationRequest request) {
         Intent intent = LoginActivity.getAuthIntent(contextActivity, request);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         return intent;
     }
 
