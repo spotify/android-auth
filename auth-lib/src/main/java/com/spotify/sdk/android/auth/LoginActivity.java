@@ -222,6 +222,7 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
 
         // Put response into a bundle to work around classloader problems on Samsung devices
         // https://stackoverflow.com/questions/28589509/android-e-parcel-class-not-found-when-unmarshalling-only-on-samsung-tab3
+        Log.i(TAG, String.format("Spotify auth finishing. The response is in EXTRA with key '%s'", RESPONSE_KEY));
         Bundle bundle = new Bundle();
         bundle.putParcelable(RESPONSE_KEY, response);
 
