@@ -81,14 +81,6 @@ public class AuthorizationResponse implements Parcelable {
         }
     }
 
-    static final class QueryParams {
-        public static final String ERROR = "error";
-        public static final String CODE = "code";
-        public static final String STATE = "state";
-        public static final String ACCESS_TOKEN = "access_token";
-        public static final String EXPIRES_IN = "expires_in";
-    }
-
     private final Type mType;
     private final String mCode;
     private final String mAccessToken;
@@ -110,37 +102,37 @@ public class AuthorizationResponse implements Parcelable {
         private String mError;
         private int mExpiresIn;
 
-        public Builder setType(Type type) {
+        Builder setType(Type type) {
             mType = type;
             return this;
         }
 
-        public Builder setCode(String code) {
+        Builder setCode(String code) {
             mCode = code;
             return this;
         }
 
-        public Builder setAccessToken(String accessToken) {
+        Builder setAccessToken(String accessToken) {
             mAccessToken = accessToken;
             return this;
         }
 
-        public Builder setState(String state) {
+        Builder setState(String state) {
             mState = state;
             return this;
         }
 
-        public Builder setError(String error) {
+        Builder setError(String error) {
             mError = error;
             return this;
         }
 
-        public Builder setExpiresIn(int expiresIn) {
+        Builder setExpiresIn(int expiresIn) {
             mExpiresIn = expiresIn;
             return this;
         }
 
-        public AuthorizationResponse build() {
+        AuthorizationResponse build() {
             return new AuthorizationResponse(mType, mCode, mAccessToken, mState, mError, mExpiresIn);
         }
     }
@@ -182,18 +174,18 @@ public class AuthorizationResponse implements Parcelable {
             return builder.build();
         }
 
-        String possibleError = uri.getQueryParameter(AuthorizationResponse.QueryParams.ERROR);
+        String possibleError = uri.getQueryParameter(AccountsQueryParameters.ERROR);
         if (possibleError != null) {
-            String state = uri.getQueryParameter(AuthorizationResponse.QueryParams.STATE);
+            String state = uri.getQueryParameter(AccountsQueryParameters.STATE);
             builder.setError(possibleError);
             builder.setState(state);
             builder.setType(Type.ERROR);
             return builder.build();
         }
 
-        String possibleCode = uri.getQueryParameter(AuthorizationResponse.QueryParams.CODE);
+        String possibleCode = uri.getQueryParameter(AccountsQueryParameters.CODE);
         if (possibleCode != null) {
-            String state = uri.getQueryParameter(AuthorizationResponse.QueryParams.STATE);
+            String state = uri.getQueryParameter(AccountsQueryParameters.STATE);
             builder.setCode(possibleCode);
             builder.setState(state);
             builder.setType(Type.CODE);
@@ -209,13 +201,13 @@ public class AuthorizationResponse implements Parcelable {
             for (String part : parts) {
                 String[] partSplit = part.split("=");
                 if (partSplit.length == 2) {
-                    if (partSplit[0].startsWith(QueryParams.ACCESS_TOKEN)) {
+                    if (partSplit[0].startsWith(AccountsQueryParameters.ACCESS_TOKEN)) {
                         accessToken = Uri.decode(partSplit[1]);
                     }
-                    if (partSplit[0].startsWith(QueryParams.STATE)) {
+                    if (partSplit[0].startsWith(AccountsQueryParameters.STATE)) {
                         state = Uri.decode(partSplit[1]);
                     }
-                    if (partSplit[0].startsWith(QueryParams.EXPIRES_IN)) {
+                    if (partSplit[0].startsWith(AccountsQueryParameters.EXPIRES_IN)) {
                         expiresIn = Uri.decode(partSplit[1]);
                     }
                 }

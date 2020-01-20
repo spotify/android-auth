@@ -29,6 +29,10 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import com.spotify.sdk.android.auth.app.SpotifyAuthHandler;
+import com.spotify.sdk.android.auth.webview.LoginDialog;
+import com.spotify.sdk.android.auth.webview.WebViewAuthHandler;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -210,7 +214,7 @@ public class AuthorizationClient {
     static final String ANDROID_SDK = "android-sdk";
     static final String DEFAULT_CAMPAIGN = "android-sdk";
 
-    static final class QueryParams {
+    static final class PlayStoreParams {
         public static final String ID = "id";
         public static final String REFERRER = "referrer";
         public static final String UTM_SOURCE = "utm_source";
@@ -385,19 +389,19 @@ public class AuthorizationClient {
                     .appendEncodedPath(PLAY_STORE_PATH);
         }
 
-        uriBuilder.appendQueryParameter(QueryParams.ID, SPOTIFY_ID);
+        uriBuilder.appendQueryParameter(PlayStoreParams.ID, SPOTIFY_ID);
 
         Uri.Builder referrerBuilder = new Uri.Builder();
-        referrerBuilder.appendQueryParameter(QueryParams.UTM_SOURCE, SPOTIFY_SDK)
-                .appendQueryParameter(QueryParams.UTM_MEDIUM, ANDROID_SDK);
+        referrerBuilder.appendQueryParameter(PlayStoreParams.UTM_SOURCE, SPOTIFY_SDK)
+                .appendQueryParameter(PlayStoreParams.UTM_MEDIUM, ANDROID_SDK);
 
         if (TextUtils.isEmpty(campaign)) {
-            referrerBuilder.appendQueryParameter(QueryParams.UTM_CAMPAIGN, DEFAULT_CAMPAIGN);
+            referrerBuilder.appendQueryParameter(PlayStoreParams.UTM_CAMPAIGN, DEFAULT_CAMPAIGN);
         } else {
-            referrerBuilder.appendQueryParameter(QueryParams.UTM_CAMPAIGN, campaign);
+            referrerBuilder.appendQueryParameter(PlayStoreParams.UTM_CAMPAIGN, campaign);
         }
 
-        uriBuilder.appendQueryParameter(QueryParams.REFERRER, referrerBuilder.build().getEncodedQuery());
+        uriBuilder.appendQueryParameter(PlayStoreParams.REFERRER, referrerBuilder.build().getEncodedQuery());
 
         contextActivity.startActivity(new Intent(Intent.ACTION_VIEW, uriBuilder.build()));
     }

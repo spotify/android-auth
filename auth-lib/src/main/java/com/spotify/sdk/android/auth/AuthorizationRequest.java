@@ -45,18 +45,6 @@ public class AuthorizationRequest implements Parcelable {
     static final String SPOTIFY_SDK = "spotify-sdk";
     static final String ANDROID_SDK = "android-sdk";
 
-    static final class QueryParams {
-        public static final String CLIENT_ID = "client_id";
-        public static final String RESPONSE_TYPE = "response_type";
-        public static final String REDIRECT_URI = "redirect_uri";
-        public static final String STATE = "state";
-        public static final String SCOPE = "scope";
-        public static final String SHOW_DIALOG = "show_dialog";
-        public static final String UTM_SOURCE = "utm_source";
-        public static final String UTM_MEDIUM = "utm_medium";
-        public static final String UTM_CAMPAIGN = "utm_campaign";
-    }
-
     private final String mClientId;
     private final String mResponseType;
     private final String mRedirectUri;
@@ -201,20 +189,20 @@ public class AuthorizationRequest implements Parcelable {
         uriBuilder.scheme(ACCOUNTS_SCHEME)
                 .authority(ACCOUNTS_AUTHORITY)
                 .appendPath(ACCOUNTS_PATH)
-                .appendQueryParameter(QueryParams.CLIENT_ID, mClientId)
-                .appendQueryParameter(QueryParams.RESPONSE_TYPE, mResponseType)
-                .appendQueryParameter(QueryParams.REDIRECT_URI, mRedirectUri)
-                .appendQueryParameter(QueryParams.SHOW_DIALOG, String.valueOf(mShowDialog))
-                .appendQueryParameter(QueryParams.UTM_SOURCE, SPOTIFY_SDK)
-                .appendQueryParameter(QueryParams.UTM_MEDIUM, ANDROID_SDK)
-                .appendQueryParameter(QueryParams.UTM_CAMPAIGN, getCampaign());
+                .appendQueryParameter(AccountsQueryParameters.CLIENT_ID, mClientId)
+                .appendQueryParameter(AccountsQueryParameters.RESPONSE_TYPE, mResponseType)
+                .appendQueryParameter(AccountsQueryParameters.REDIRECT_URI, mRedirectUri)
+                .appendQueryParameter(AccountsQueryParameters.SHOW_DIALOG, String.valueOf(mShowDialog))
+                .appendQueryParameter(AccountsQueryParameters.UTM_SOURCE, SPOTIFY_SDK)
+                .appendQueryParameter(AccountsQueryParameters.UTM_MEDIUM, ANDROID_SDK)
+                .appendQueryParameter(AccountsQueryParameters.UTM_CAMPAIGN, getCampaign());
 
         if (mScopes != null && mScopes.length > 0) {
-            uriBuilder.appendQueryParameter(QueryParams.SCOPE, scopesToString());
+            uriBuilder.appendQueryParameter(AccountsQueryParameters.SCOPE, scopesToString());
         }
 
         if (mState != null) {
-            uriBuilder.appendQueryParameter(QueryParams.STATE, mState);
+            uriBuilder.appendQueryParameter(AccountsQueryParameters.STATE, mState);
         }
 
         if (mCustomParams.size() > 0) {

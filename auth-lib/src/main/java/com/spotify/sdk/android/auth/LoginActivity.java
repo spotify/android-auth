@@ -27,12 +27,24 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_ACCESS_TOKEN;
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_AUTHORIZATION_CODE;
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_EXPIRES_IN;
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_RESPONSE_TYPE;
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_STATE;
+
 /**
  * The activity that manages the login flow.
  * It should not be started directly. Instead use
  * {@link AuthorizationClient#openLoginActivity(android.app.Activity, int, AuthorizationRequest)}
  */
 public class LoginActivity extends Activity implements AuthorizationClient.AuthorizationClientListener {
+
+    static final String EXTRA_REPLY = "REPLY";
+    static final String EXTRA_ERROR = "ERROR";
+
+    static final String RESPONSE_TYPE_TOKEN = "token";
+    static final String RESPONSE_TYPE_CODE = "code";
 
     private static final String TAG = LoginActivity.class.getName();
     private static final String NO_CALLER_ERROR = "Can't use LoginActivity with a null caller. " +
@@ -158,7 +170,7 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
                 if (intent == null) {
                     errorMessage = "Invalid message format";
                 } else {
-                    errorMessage = intent.getStringExtra(SpotifyNativeAuthUtil.EXTRA_ERROR);
+                    errorMessage = intent.getStringExtra(EXTRA_ERROR);
                 }
                 if (errorMessage == null) {
                     errorMessage = "Unknown error";
@@ -166,26 +178,26 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
                 response.setError(errorMessage);
 
             } else if (resultCode == RESULT_OK) {
-                Bundle data = intent.getParcelableExtra(SpotifyNativeAuthUtil.EXTRA_REPLY);
+                Bundle data = intent.getParcelableExtra(EXTRA_REPLY);
 
                 if (data == null) {
                     response.setType(AuthorizationResponse.Type.ERROR);
                     response.setError("Missing response data");
                 } else {
-                    String responseType = data.getString(SpotifyNativeAuthUtil.KEY_RESPONSE_TYPE, "unknown");
+                    String responseType = data.getString(KEY_RESPONSE_TYPE, "unknown");
                     Log.d(TAG, "Response: " + responseType);
-                    response.setState(data.getString(SpotifyNativeAuthUtil.KEY_STATE, null));
+                    response.setState(data.getString(KEY_STATE, null));
                     switch (responseType) {
-                        case SpotifyNativeAuthUtil.RESPONSE_TYPE_TOKEN:
-                            String token = data.getString(SpotifyNativeAuthUtil.KEY_ACCESS_TOKEN);
-                            int expiresIn = data.getInt(SpotifyNativeAuthUtil.KEY_EXPIRES_IN);
+                        case RESPONSE_TYPE_TOKEN:
+                            String token = data.getString(KEY_ACCESS_TOKEN);
+                            int expiresIn = data.getInt(KEY_EXPIRES_IN);
 
                             response.setType(AuthorizationResponse.Type.TOKEN);
                             response.setAccessToken(token);
                             response.setExpiresIn(expiresIn);
                             break;
-                        case SpotifyNativeAuthUtil.RESPONSE_TYPE_CODE:
-                            String code = data.getString(SpotifyNativeAuthUtil.KEY_AUTHORIZATION_CODE);
+                        case RESPONSE_TYPE_CODE:
+                            String code = data.getString(KEY_AUTHORIZATION_CODE);
                             response.setType(AuthorizationResponse.Type.CODE);
                             response.setCode(code);
                             break;

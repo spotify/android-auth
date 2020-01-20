@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.spotify.sdk.android.auth;
+package com.spotify.sdk.android.auth.webview;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -28,7 +28,6 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -47,9 +46,15 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import com.spotify.sdk.android.auth.AccountsQueryParameters;
+import com.spotify.sdk.android.auth.AuthorizationHandler;
+import com.spotify.sdk.android.auth.AuthorizationRequest;
+import com.spotify.sdk.android.auth.AuthorizationResponse;
+import com.spotify.sdk.android.auth.R;
+
 import java.util.Locale;
 
-class LoginDialog extends Dialog {
+public class LoginDialog extends Dialog {
 
     private static final String TAG = LoginDialog.class.getName();
 
@@ -122,12 +127,10 @@ class LoginDialog extends Dialog {
             Log.e(TAG, "Missing INTERNET permission");
         }
 
-        final WebView webView = (WebView) findViewById(R.id.com_spotify_sdk_login_webview);
-        final LinearLayout mWebViewContainer =
-                (LinearLayout) findViewById(R.id.com_spotify_sdk_login_webview_container);
+        final WebView webView = findViewById(R.id.com_spotify_sdk_login_webview);
+        final LinearLayout mWebViewContainer = findViewById(R.id.com_spotify_sdk_login_webview_container);
 
-        final String redirectUri =
-                uri.getQueryParameter(AuthorizationRequest.QueryParams.REDIRECT_URI);
+        final String redirectUri = uri.getQueryParameter(AccountsQueryParameters.REDIRECT_URI);
 
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -256,7 +259,7 @@ class LoginDialog extends Dialog {
         layout.setLayoutParams(new FrameLayout.LayoutParams(dialogWidth, dialogHeight, Gravity.CENTER));
     }
 
-    static void clearCookies(Context context) {
+    public static void clearCookies(Context context) {
         WebViewUtils.clearFacebookCookies(context);
 
         WebViewUtils.clearCookiesForDomain(context, "spotify.com");

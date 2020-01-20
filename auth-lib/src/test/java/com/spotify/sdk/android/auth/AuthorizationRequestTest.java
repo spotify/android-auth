@@ -45,13 +45,13 @@ public class AuthorizationRequestTest {
         uriBuilder.scheme(AuthorizationRequest.ACCOUNTS_SCHEME)
                 .authority(AuthorizationRequest.ACCOUNTS_AUTHORITY)
                 .appendPath(AuthorizationRequest.ACCOUNTS_PATH)
-                .appendQueryParameter(AuthorizationRequest.QueryParams.CLIENT_ID, clientId)
-                .appendQueryParameter(AuthorizationRequest.QueryParams.RESPONSE_TYPE, responseType)
-                .appendQueryParameter(AuthorizationRequest.QueryParams.REDIRECT_URI, redirectUrl)
-                .appendQueryParameter(AuthorizationRequest.QueryParams.SHOW_DIALOG, String.valueOf(false))
-                .appendQueryParameter(AuthorizationRequest.QueryParams.UTM_SOURCE, AuthorizationRequest.SPOTIFY_SDK)
-                .appendQueryParameter(AuthorizationRequest.QueryParams.UTM_MEDIUM, mDefaultCampaign)
-                .appendQueryParameter(AuthorizationRequest.QueryParams.UTM_CAMPAIGN, campaign);
+                .appendQueryParameter(AccountsQueryParameters.CLIENT_ID, clientId)
+                .appendQueryParameter(AccountsQueryParameters.RESPONSE_TYPE, responseType)
+                .appendQueryParameter(AccountsQueryParameters.REDIRECT_URI, redirectUrl)
+                .appendQueryParameter(AccountsQueryParameters.SHOW_DIALOG, String.valueOf(false))
+                .appendQueryParameter(AccountsQueryParameters.UTM_SOURCE, AuthorizationRequest.SPOTIFY_SDK)
+                .appendQueryParameter(AccountsQueryParameters.UTM_MEDIUM, mDefaultCampaign)
+                .appendQueryParameter(AccountsQueryParameters.UTM_CAMPAIGN, campaign);
 
         return uriBuilder;
     }
@@ -104,7 +104,7 @@ public class AuthorizationRequestTest {
         assertEquals(expectedScopes[1], scopes[1]);
 
         Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
-        uriBuilder.appendQueryParameter(AuthorizationRequest.QueryParams.SCOPE, "scope1 scope2");
+        uriBuilder.appendQueryParameter(AccountsQueryParameters.SCOPE, "scope1 scope2");
         Uri uri = uriBuilder.build();
 
         assertEquals(uri, authorizationRequest.toUri());
@@ -146,7 +146,7 @@ public class AuthorizationRequestTest {
         assertEquals(authorizationRequest.getState(), testState);
 
         Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
-        uriBuilder.appendQueryParameter(AuthorizationRequest.QueryParams.STATE, testState);
+        uriBuilder.appendQueryParameter(AccountsQueryParameters.STATE, testState);
         Uri uri = uriBuilder.build();
 
         assertEquals(uri, authorizationRequest.toUri());
