@@ -97,13 +97,6 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        Uri data = intent.getData();
-        mAuthorizationClient.complete(AuthorizationResponse.fromUri(data));
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.com_spotify_sdk_login_activity);
