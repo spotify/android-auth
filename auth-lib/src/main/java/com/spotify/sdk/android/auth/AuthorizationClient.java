@@ -27,7 +27,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
-import android.nfc.Tag;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -489,6 +488,8 @@ public class AuthorizationClient {
         if (mAuthorizationClientListener != null) {
             mAuthorizationClientListener.onClientComplete(response);
             mAuthorizationClientListener = null;
+        } else {
+            Log.w(TAG, "Can't deliver the Spotify Auth response. The listener is null");
         }
     }
 
