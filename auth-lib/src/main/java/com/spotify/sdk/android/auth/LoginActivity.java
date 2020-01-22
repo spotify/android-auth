@@ -110,7 +110,7 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
             setResult(Activity.RESULT_CANCELED);
             finish();
         } else {
-            Log.d(TAG, request.toUri().toString());
+            Log.d(TAG, String.format("Spotify Auth starting with the request [%s]", request.toUri().toString()));
             mAuthorizationClient.authorize(request);
         }
     }
@@ -195,7 +195,7 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
 
         // Put response into a bundle to work around classloader problems on Samsung devices
         // https://stackoverflow.com/questions/28589509/android-e-parcel-class-not-found-when-unmarshalling-only-on-samsung-tab3
-        Log.i(TAG, String.format("Spotify auth finishing. The response is in EXTRA with key '%s'", RESPONSE_KEY));
+        Log.i(TAG, String.format("Spotify auth completing. The response is in EXTRA with key '%s'", RESPONSE_KEY));
         Bundle bundle = new Bundle();
         bundle.putParcelable(RESPONSE_KEY, response);
 
@@ -206,7 +206,8 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
 
     @Override
     public void onClientCancelled() {
+        // Called only when LoginActivity is destroyed and no other result is set.
+        Log.w(TAG, "Spotify Auth cancelled due to LoginActivity being finished");
         setResult(Activity.RESULT_CANCELED);
-        finish();
     }
 }
