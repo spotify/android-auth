@@ -51,7 +51,7 @@ import okhttp3.Response;
 public class MainActivity extends AppCompatActivity {
 
     public static final String CLIENT_ID = "089d841ccc194c10a77afad9e1c11d54";
-    public static final String REDIRECT_URI = "testschema://callback";
+    public static final String REDIRECT_URI = "spotify-sdk://auth";
     public static final int AUTH_TOKEN_REQUEST_CODE = 0x10;
     public static final int AUTH_CODE_REQUEST_CODE = 0x11;
 
@@ -118,6 +118,10 @@ public class MainActivity extends AppCompatActivity {
         AuthorizationClient.openLoginActivity(this, AUTH_TOKEN_REQUEST_CODE, request);
     }
 
+    public void onClearCredentialsClicked(View view) {
+        AuthorizationClient.clearCookies(this);
+    }
+
     private AuthorizationRequest getAuthenticationRequest(AuthorizationResponse.Type type) {
         return new AuthorizationRequest.Builder(CLIENT_ID, type, getRedirectUri().toString())
                 .setShowDialog(false)
@@ -167,9 +171,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Uri getRedirectUri() {
-        return new Uri.Builder()
-                .scheme(getString(R.string.com_spotify_sdk_redirect_scheme))
-                .authority(getString(R.string.com_spotify_sdk_redirect_host))
-                .build();
+        return Uri.parse(REDIRECT_URI);
     }
 }

@@ -28,6 +28,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.spotify.sdk.android.auth.app.SpotifyAuthHandler;
 import com.spotify.sdk.android.auth.webview.LoginDialog;
@@ -200,6 +201,7 @@ import java.util.List;
  * @see <a href="https://developer.spotify.com/web-api/authorization-guide">Web API Authorization guide</a>
  */
 public class AuthorizationClient {
+    private static final String TAG = "Spotify Auth Client";
 
     static final String MARKET_VIEW_PATH = "market://";
     static final String MARKET_SCHEME = "market";
@@ -300,7 +302,7 @@ public class AuthorizationClient {
      */
     public static Intent createLoginActivityIntent(Activity contextActivity, AuthorizationRequest request) {
         Intent intent = LoginActivity.getAuthIntent(contextActivity, request);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         return intent;
     }
 
@@ -486,6 +488,8 @@ public class AuthorizationClient {
         if (mAuthorizationClientListener != null) {
             mAuthorizationClientListener.onClientComplete(response);
             mAuthorizationClientListener = null;
+        } else {
+            Log.w(TAG, "Can't deliver the Spotify Auth response. The listener is null");
         }
     }
 
@@ -493,11 +497,13 @@ public class AuthorizationClient {
         authHandler.setOnCompleteListener(new AuthorizationHandler.OnCompleteListener() {
             @Override
             public void onComplete(AuthorizationResponse response) {
+                Log.i(TAG, String.format("Spotify auth response:%s", response.getType().name()));
                 sendComplete(authHandler, response);
             }
 
             @Override
             public void onCancel() {
+                Log.i(TAG, "Spotify auth response: User cancelled");
                 AuthorizationResponse response = new AuthorizationResponse.Builder()
                         .setType(AuthorizationResponse.Type.EMPTY)
                         .build();
@@ -507,6 +513,7 @@ public class AuthorizationClient {
 
             @Override
             public void onError(Throwable error) {
+                Log.e(TAG, "Spotify auth Error", error);
                 AuthorizationResponse response = new AuthorizationResponse.Builder()
                         .setType(AuthorizationResponse.Type.ERROR)
                         .setError(error.getMessage())

@@ -61,6 +61,7 @@ public class SpotifyNativeAuthUtil {
             ""
     };
     private static final String[] SPOTIFY_SIGNATURE_HASH = new String[] {
+            "25a9b2d2745c098361edaa3b87936dc29a28e7f1",
             "80abdd17dcc4cb3a33815d354355bf87c9378624",
             "88df4d670ed5e01fc7b3eff13b63258628ff5a00",
             "d834ae340d1e854c5f4092722f9788216d9221e5",
@@ -135,11 +136,11 @@ public class SpotifyNativeAuthUtil {
                 return false;
             }
 
-            for (Signature signature : packageInfo.signatures) {
-                final String signatureString = signature.toCharsString();
+            for (Signature actualApkSignature : packageInfo.signatures) {
+                final String signatureString = actualApkSignature.toCharsString();
                 final String sha1Signature = sha1Hash(signatureString);
-                for (String s : SPOTIFY_SIGNATURE_HASH) {
-                    if (s.equals(sha1Signature)) {
+                for (String knownSpotifyHash : SPOTIFY_SIGNATURE_HASH) {
+                    if (knownSpotifyHash.equals(sha1Signature)) {
                         return true;
                     }
                 }

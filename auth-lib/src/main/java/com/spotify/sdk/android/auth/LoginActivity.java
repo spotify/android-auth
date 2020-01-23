@@ -23,7 +23,6 @@ package com.spotify.sdk.android.auth;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -59,12 +58,10 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
     public static final String RESPONSE_KEY = "response";
 
     private AuthorizationClient mAuthorizationClient = new AuthorizationClient(this);
-    private AuthorizationRequest mRequest;
 
     public static final int REQUEST_CODE = 1138;
 
     private static final int RESULT_ERROR = -2;
-    private boolean mBackgrounded;
 
 
     public static Intent getAuthIntent(Activity contextActivity, AuthorizationRequest request) {
@@ -97,31 +94,24 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        Uri data = intent.getData();
-        mAuthorizationClient.complete(AuthorizationResponse.fromUri(data));
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.com_spotify_sdk_login_activity);
 
-        mRequest = getRequestFromIntent();
+        final AuthorizationRequest request = getRequestFromIntent();
 
         mAuthorizationClient.setOnCompleteListener(this);
 
         if (getCallingActivity() == null) {
             Log.e(TAG, NO_CALLER_ERROR);
             finish();
-        } else if (mRequest == null) {
+        } else if (request == null) {
             Log.e(TAG, NO_REQUEST_ERROR);
             setResult(Activity.RESULT_CANCELED);
             finish();
         } else {
-            Log.d(TAG, mRequest.toUri().toString());
-            mAuthorizationClient.authorize(mRequest);
+            Log.d(TAG, String.format("Spotify Auth starting with the request [%s]", request.toUri().toString()));
+            mAuthorizationClient.authorize(request);
         }
     }
 
@@ -131,23 +121,6 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
             return null;
         }
         return requestBundle.getParcelable(REQUEST_KEY);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // User got back to the activity from the auth flow
-        if (mBackgrounded) {
-            mBackgrounded = false;
-            onClientCancelled();
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        // Activity is not in foreground anymore, auth flow took over
-        mBackgrounded = true;
     }
 
     @Override
@@ -222,6 +195,7 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
 
         // Put response into a bundle to work around classloader problems on Samsung devices
         // https://stackoverflow.com/questions/28589509/android-e-parcel-class-not-found-when-unmarshalling-only-on-samsung-tab3
+        Log.i(TAG, String.format("Spotify auth completing. The response is in EXTRA with key '%s'", RESPONSE_KEY));
         Bundle bundle = new Bundle();
         bundle.putParcelable(RESPONSE_KEY, response);
 
@@ -232,7 +206,8 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
 
     @Override
     public void onClientCancelled() {
+        // Called only when LoginActivity is destroyed and no other result is set.
+        Log.w(TAG, "Spotify Auth cancelled due to LoginActivity being finished");
         setResult(Activity.RESULT_CANCELED);
-        finish();
     }
 }

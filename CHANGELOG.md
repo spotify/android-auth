@@ -1,5 +1,8 @@
 Change Log
 ==========
+## Version 1.2.3
+* Fixed a few issues with the webview based redirect
+
 ## Version 1.2.2
 * Remove custom-tabs handling due to issues
 
