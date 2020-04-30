@@ -109,7 +109,7 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
             Log.e(TAG, NO_REQUEST_ERROR);
             setResult(Activity.RESULT_CANCELED);
             finish();
-        } else {
+        } else if (savedInstanceState == null) {
             Log.d(TAG, String.format("Spotify Auth starting with the request [%s]", request.toUri().toString()));
             mAuthorizationClient.authorize(request);
         }
