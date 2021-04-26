@@ -81,8 +81,8 @@ task checkstyle(type: Checkstyle) {
     classpath = files()
 }
 
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
@@ -92,7 +92,8 @@ task sourcesJar(type: Jar) {
 task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    options.links("http://docs.oracle.com/javase/7/docs/api/");
+    classpath += files("build/generated/source/r/release")
+    options.links("http://docs.oracle.com/javase/7/docs/api/")
     destinationDir = file("../docs/")
     failOnError false
 }
@@ -107,54 +108,86 @@ artifacts {
     archives sourcesJar
 }
 
-install {
-    repositories {
-        mavenInstaller {
-            pom {
-                project {
-                    name project.group + ':' + project.archivesBaseName
-                    description 'Spotify authorization library for Android'
-                    url 'https://github.com/spotify/android-auth'
+signing {
+    sign configurations.archives
+}
 
-                    licenses {
-                        license {
-                            name 'The Apache Software License, Version 2.0'
-                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        }
-                    }
+project.ext["signing.keyId"] = ''
+project.ext["signing.password"] = ''
+project.ext["signing.secretKeyRingFile"] = ''
+project.ext["ossrhUsername"] = ''
+project.ext["ossrhPassword"] = ''
 
-                    scm {
-                        connection 'scm:git:https://github.com/spotify/android-auth.git'
-                        developerConnection 'scm:git:git@github.com:spotify/android-auth.git'
-                        url 'https://github.com/spotify/android-auth'
-                    }
-
-                    developers {
-                        developer {
-                            id 'erikg'
-                            name 'Erik Ghonyan'
-                            email 'erikg@spotify.com'
-                        }
-                    }
-                }
-            }
+def getSigningVariables() {
+    // Try to fetch the values from local.properties, otherwise look in the environment variables
+    // More info here: https://central.sonatype.org/publish/requirements/gpg/
+    File secretPropsFile = project.rootProject.file('local.properties')
+    if (secretPropsFile.exists()) {
+        Properties p = new Properties()
+        new FileInputStream(secretPropsFile).withCloseable { is ->
+            p.load(is)
         }
+        p.each { name, value ->
+            project.ext[name] = value
+        }
+    } else {
+        project.ext["signing.keyId"] = System.getenv('SIGNING_KEY_ID')
+        project.ext["signing.password"] = System.getenv('SIGNING_PASSWORD')
+        project.ext["signing.secretKeyRingFile"] = System.getenv('SIGNING_SECRET_KEY_RING_FILE')
+        project.ext["ossrhUsername"] = System.getenv('OSSRH_USERNAME')
+        project.ext["ossrhPassword"] = System.getenv('OSSRH_PASSWORD')
     }
 }
 
-bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_KEY')
+/*
+    Deployment to OSSRH repository
+    1. run: ./gradlew uploadArchives
+    2. login to https://s01.oss.sonatype.org/ (you need to have access to auth lib OSSRH repository)
+    3. if everything looks correctly, close and then release the staging repository.
+    More info here: https://central.sonatype.org/publish/release/
+ */
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            getSigningVariables()
 
-    configurations = ['archives']
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-    pkg {
-        repo = 'maven'
-        name = 'android-auth'
-        userOrg = 'spotify'
+            repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: project.ext["ossrhUsername"], password: project.ext["ossrhPassword"])
+            }
 
-        version {
-            name = project.version
+            snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: project.ext["ossrhUsername"], password: project.ext["ossrhPassword"])
+            }
+
+            pom.project {
+                name project.group + ':' + project.archivesBaseName
+                packaging 'aar'
+                description 'Spotify authorization library for Android'
+                url 'https://github.com/spotify/android-auth'
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                scm {
+                    connection 'scm:git:https://github.com/spotify/android-auth.git'
+                    developerConnection 'scm:git:git@github.com:spotify/android-auth.git'
+                    url 'https://github.com/spotify/android-auth'
+                }
+
+                developers {
+                    developer {
+                        id 'erikg'
+                        name 'Erik Ghonyan'
+                        email 'erikg@spotify.com'
+                    }
+                }
+            }
         }
     }
 }

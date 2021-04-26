@@ -21,6 +21,7 @@
 
 buildscript {
     repositories {
+        mavenCentral()
         jcenter()
         google()
     }
@@ -29,13 +30,9 @@ buildscript {
     }
 }
 
-plugins {
-    id "com.jfrog.bintray" version "1.7.3"
-    id "com.github.dcendents.android-maven" version "1.4.1"
-}
-
 allprojects {
     repositories {
+        mavenCentral()
         jcenter()
         google()
     }

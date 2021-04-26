@@ -13,6 +13,14 @@ To add this library to your project add the reference to its `build.gradle` file
 implementation "com.spotify.android:auth:1.2.3"
 ```
 
+Since April 2021 we're publishing library on MavenCentral instead of JCenter. Therefore to be able to get the library dependency, you should add MavenCentral into repositories block:
+```gradle
+repositories {
+        mavenCentral()
+        ...
+    }
+```
+
 To learn more about working with authentication see the
 [Authentication Guide](https://developer.spotify.com/technologies/spotify-android-sdk/android-sdk-authentication-guide/)
 and the [API reference](https://developer.spotify.com/android-sdk-docs/authentication) on the developer site.
