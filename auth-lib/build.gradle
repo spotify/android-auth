@@ -108,13 +108,12 @@ artifacts {
     archives sourcesJar
 }
 
-signing {
-    sign configurations.archives
+if (signingEnabled == "true") {
+    signing {
+        sign configurations.archives
+    }
 }
 
-project.ext["signing.keyId"] = ''
-project.ext["signing.password"] = ''
-project.ext["signing.secretKeyRingFile"] = ''
 project.ext["ossrhUsername"] = ''
 project.ext["ossrhPassword"] = ''
 
@@ -131,9 +130,6 @@ def getSigningVariables() {
             project.ext[name] = value
         }
     } else {
-        project.ext["signing.keyId"] = System.getenv('SIGNING_KEY_ID')
-        project.ext["signing.password"] = System.getenv('SIGNING_PASSWORD')
-        project.ext["signing.secretKeyRingFile"] = System.getenv('SIGNING_SECRET_KEY_RING_FILE')
         project.ext["ossrhUsername"] = System.getenv('OSSRH_USERNAME')
         project.ext["ossrhPassword"] = System.getenv('OSSRH_PASSWORD')
     }
@@ -141,7 +137,7 @@ def getSigningVariables() {
 
 /*
     Deployment to OSSRH repository
-    1. run: ./gradlew uploadArchives
+    1. run: ./gradlew uploadArchives -PsigningEnabled=true
     2. login to https://s01.oss.sonatype.org/ (you need to have access to auth lib OSSRH repository)
     3. if everything looks correctly, close and then release the staging repository.
     More info here: https://central.sonatype.org/publish/release/
