@@ -1,5 +1,7 @@
 # Spotify Authentication Library
 
+[![Maven Central](https://img.shields.io/maven-central/v/com.spotify.android/auth.svg)](https://search.maven.org/search?q=g:com.spotify.android)
+
 # This repository is now a part of [spotify/android-sdk](https://github.com/spotify/android-sdk). Please post new issues there!
 
 This library is responsible for authenticating the user and fetching the access token
@@ -10,7 +12,7 @@ that can subsequently be used to play music or in requests to the [Spotify Web A
 To add this library to your project add the reference to its `build.gradle` file:
 
 ```gradle
-implementation "com.spotify.android:auth:1.2.3"
+implementation "com.spotify.android:auth:<version>"
 ```
 
 Since April 2021 we're publishing library on MavenCentral instead of JCenter. Therefore to be able to get the library dependency, you should add MavenCentral into repositories block:
