@@ -62,7 +62,7 @@ public class LoginDialog extends Dialog {
      * RegEx describing which uris should be opened in the WebView.
      * When uri that is not whitelisted is received, the activity will finish.
      */
-    private static final String WEBVIEW_URIS = "^(.+\\.facebook\\.com)|(accounts\\.spotify\\.com)$";
+    private static final String WEBVIEW_URIS = "^(.+\\.facebook\\.com)|(accounts\\.spotify\\.com)|(.+\\.apple\\.com)$";
 
     private static final int DEFAULT_THEME = android.R.style.Theme_Translucent_NoTitleBar;
 
