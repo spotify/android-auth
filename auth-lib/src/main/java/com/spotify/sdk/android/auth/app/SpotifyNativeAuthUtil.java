@@ -70,8 +70,8 @@ public class SpotifyNativeAuthUtil {
     };
 
 
-    private Activity mContextActivity;
-    private AuthorizationRequest mRequest;
+    private final Activity mContextActivity;
+    private final AuthorizationRequest mRequest;
 
     public SpotifyNativeAuthUtil(Activity contextActivity, AuthorizationRequest request) {
         mContextActivity = contextActivity;

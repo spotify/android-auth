@@ -26,6 +26,13 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
+    <queries>
+        <intent>
+            <action android:name="com.spotify.sso.action.START_AUTH_FLOW" />
+            <data android:mimeType="text/plain" />
+        </intent>
+    </queries>
+
     <application>
 
         <activity
