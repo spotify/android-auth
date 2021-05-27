@@ -34,6 +34,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
+import com.spotify.sdk.android.auth.BuildConfig;
 import com.spotify.sdk.android.authentication.sample.R;
 
 import org.json.JSONException;
@@ -65,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().setTitle(String.format(
-                Locale.US, "Spotify Auth Sample %s", com.spotify.sdk.android.auth.BuildConfig.VERSION_NAME));
+                Locale.US, "Spotify Auth Sample %s", BuildConfig.LIB_VERSION_NAME));
     }
 
     @Override
