@@ -27,6 +27,11 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <queries>
+        <package android:name="com.spotify.music" />
+        <package android:name="com.spotify.music.debug" />
+        <package android:name="com.spotify.music.canary" />
+        <package android:name="com.spotify.music.partners" />
+
         <intent>
             <action android:name="com.spotify.sso.action.START_AUTH_FLOW" />
             <data android:mimeType="text/plain" />
