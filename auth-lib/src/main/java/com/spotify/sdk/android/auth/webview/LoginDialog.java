@@ -21,48 +21,50 @@
 
 package com.spotify.sdk.android.auth.webview;
 
+import static androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION;
+
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-import com.spotify.sdk.android.auth.AccountsQueryParameters;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.browser.customtabs.CustomTabsCallback;
+import androidx.browser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsServiceConnection;
+import androidx.browser.customtabs.CustomTabsSession;
+
 import com.spotify.sdk.android.auth.AuthorizationHandler;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
-import com.spotify.sdk.android.auth.AuthorizationResponse;
 import com.spotify.sdk.android.auth.R;
 
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LoginDialog extends Dialog {
 
     private static final String TAG = LoginDialog.class.getName();
 
-    /**
-     * RegEx describing which uris should be opened in the WebView.
-     * When uri that is not whitelisted is received, the activity will finish.
-     */
-    private static final String WEBVIEW_URIS = "^(.+\\.facebook\\.com)|(accounts\\.spotify\\.com)|(.+\\.apple\\.com)$";
+    public static final int CUSTOM_TAB_HIDDEN = 6;
 
     private static final int DEFAULT_THEME = android.R.style.Theme_Translucent_NoTitleBar;
 
@@ -75,19 +77,25 @@ public class LoginDialog extends Dialog {
     private static final int MAX_HEIGHT_DP = 640;
 
     private final Uri mUri;
+    private final String mRedirectUri;
     private AuthorizationHandler.OnCompleteListener mListener;
     private ProgressDialog mProgressDialog;
     private boolean mAttached;
     private boolean mResultDelivered;
+    private CustomTabsClient mCustomTabsClient;
+    private CustomTabsSession mTabsSession;
+    private CustomTabsServiceConnection mTabConnection;
 
     public LoginDialog(Activity contextActivity, AuthorizationRequest request) {
         super(contextActivity, DEFAULT_THEME);
         mUri = request.toUri();
+        mRedirectUri = request.getRedirectUri();
     }
 
     public LoginDialog(Activity contextActivity, int theme, AuthorizationRequest request) {
         super(contextActivity, theme);
         mUri = request.toUri();
+        mRedirectUri = request.getRedirectUri();
     }
 
     public void setOnCompleteListener(AuthorizationHandler.OnCompleteListener listener) {
@@ -103,103 +111,106 @@ public class LoginDialog extends Dialog {
         mProgressDialog = new ProgressDialog(getContext());
         mProgressDialog.setMessage(getContext().getString(R.string.com_spotify_sdk_login_progress));
         mProgressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        mProgressDialog.setOnCancelListener(new OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialogInterface) {
-                dismiss();
-            }
-        });
+        mProgressDialog.setOnCancelListener(dialogInterface -> dismiss());
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-        getWindow().setBackgroundDrawableResource(android.R.drawable.screen_background_dark_transparent);
 
         setContentView(R.layout.com_spotify_sdk_login_dialog);
 
         setLayoutSize();
 
-        createWebView(mUri);
+        final String packageSupportingCustomTabs = getPackageNameSupportingCustomTabs(mUri);
+        // CustomTabs seems to have problem with redirecting back the app after auth when URI has http/https scheme
+        if (TextUtils.isEmpty(packageSupportingCustomTabs) || mRedirectUri.startsWith("http") || mRedirectUri.startsWith("https")) {
+            Log.d(TAG, "No package supporting CustomTabs found, launching browser fallback.");
+            launchAuthInBrowserFallback();
+        } else {
+            Log.d(TAG, "Launching auth in CustomTabs supporting package:" + packageSupportingCustomTabs);
+            launchAuthInCustomTabs(packageSupportingCustomTabs);
+        }
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
-    private void createWebView(Uri uri) {
-        if (!internetPermissionGranted()) {
+    private String getPackageNameSupportingCustomTabs(Uri uri) {
+        PackageManager pm = getContext().getPackageManager();
+        Intent activityIntent = new Intent(Intent.ACTION_VIEW, uri).addCategory(Intent.CATEGORY_BROWSABLE);
+        // Check for default handler
+        ResolveInfo defaultViewHandlerInfo = pm.resolveActivity(activityIntent, 0);
+        String defaultViewHandlerPackageName = null;
+        if (defaultViewHandlerInfo != null) {
+            defaultViewHandlerPackageName = defaultViewHandlerInfo.activityInfo.packageName;
+        }
+        Log.d(TAG, "Found default package name for handling VIEW intents: " + defaultViewHandlerPackageName);
+
+        // Get all apps that can handle the intent
+        List<ResolveInfo> resolvedActivityList = pm.queryIntentActivities(activityIntent, 0);
+        ArrayList<String> packagesSupportingCustomTabs = new ArrayList<>();
+        for (ResolveInfo info : resolvedActivityList) {
+            Intent serviceIntent = new Intent();
+            serviceIntent.setAction(ACTION_CUSTOM_TABS_CONNECTION);
+            serviceIntent.setPackage(info.activityInfo.packageName);
+            // Check if this package also resolves the Custom Tabs service.
+            if (pm.resolveService(serviceIntent, 0) != null) {
+                Log.d(TAG, "Adding " + info.activityInfo.packageName + " to supported packages");
+                packagesSupportingCustomTabs.add(info.activityInfo.packageName);
+            }
+        }
+
+        String packageNameToUse = null;
+        if (packagesSupportingCustomTabs.size() == 1) {
+            packageNameToUse = packagesSupportingCustomTabs.get(0);
+        } else if (packagesSupportingCustomTabs.size() > 1) {
+            if (!TextUtils.isEmpty(defaultViewHandlerPackageName)
+                    && packagesSupportingCustomTabs.contains(defaultViewHandlerPackageName)) {
+                packageNameToUse = defaultViewHandlerPackageName;
+            } else {
+                packageNameToUse = packagesSupportingCustomTabs.get(0);
+            }
+        }
+        return packageNameToUse;
+    }
+
+    private void launchAuthInBrowserFallback() {
+        if (internetPermissionNotGranted()) {
+            Log.e(TAG, "Missing INTERNET permission");
+        }
+        getContext().startActivity(new Intent(Intent.ACTION_VIEW, mUri));
+    }
+
+    private void launchAuthInCustomTabs(String packageName) {
+        if (internetPermissionNotGranted()) {
             Log.e(TAG, "Missing INTERNET permission");
         }
 
-        final WebView webView = findViewById(R.id.com_spotify_sdk_login_webview);
-        final LinearLayout mWebViewContainer = findViewById(R.id.com_spotify_sdk_login_webview_container);
-
-        final String redirectUri = uri.getQueryParameter(AccountsQueryParameters.REDIRECT_URI);
-
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setSaveFormData(false);
-        webSettings.setSavePassword(false);
-
-        webView.setWebViewClient(new WebViewClient() {
+        mTabConnection = new CustomTabsServiceConnection() {
             @Override
-            public void onPageFinished(WebView view, String url) {
-                if (mAttached) {
-                    mProgressDialog.dismiss();
-                }
-                webView.setVisibility(View.VISIBLE);
-                mWebViewContainer.setVisibility(View.VISIBLE);
-                super.onPageFinished(view, url);
+            public void onCustomTabsServiceConnected(@NonNull ComponentName name, @NonNull CustomTabsClient client) {
+                mCustomTabsClient = client;
+                mCustomTabsClient.warmup(0L);
+                mTabsSession = mCustomTabsClient.newSession(new AuthCustomTabsCallback());
+                CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().setSession(mTabsSession).build();
+                customTabsIntent.launchUrl(getContext(), mUri);
             }
 
             @Override
-            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                super.onPageStarted(view, url, favicon);
-                if (mAttached) {
-                    mProgressDialog.show();
-                }
+            public void onServiceDisconnected(ComponentName name) {
+                mCustomTabsClient = null;
+                mTabsSession = null;
+                if (mTabConnection != null) mTabConnection.onServiceDisconnected(name);
             }
-
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                final String caseSafeRequestRedirectUri = redirectUri.toLowerCase(Locale.ENGLISH);
-                final String caseSafeResponseRedirectUri = url.toLowerCase(Locale.ENGLISH);
-                Uri responseUri = Uri.parse(url);
-                if (caseSafeResponseRedirectUri.startsWith(caseSafeRequestRedirectUri)) {
-                    sendComplete(responseUri);
-                    return true;
-                } else if (responseUri.getAuthority().matches(WEBVIEW_URIS)) {
-                    return false;
-                }
-                final String errorMessage =
-                        String.format(
-                                "Can't redirect due to mismatch. \nRequest redirect-uri: %s\nResponse redirect-uri: %s",
-                                redirectUri, responseUri);
-                Log.e(TAG, errorMessage);
-                sendError(new RuntimeException(errorMessage));
-                return true;
-            }
-
-            @Override
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                super.onReceivedError(view, errorCode, description, failingUrl);
-                sendError(new Error(String.format("%s, code: %s, failing url: %s", description, errorCode, failingUrl)));
-            }
-        });
-
-        webView.loadUrl(uri.toString());
+        };
+        CustomTabsClient.bindCustomTabsService(getContext(), packageName, mTabConnection);
     }
 
-    private void sendComplete(Uri responseUri) {
-        mResultDelivered = true;
-        if (mListener != null) {
-            mListener.onComplete(AuthorizationResponse.fromUri(responseUri));
-        }
-        close();
-    }
-
-    private void sendError(Throwable error) {
-        mResultDelivered = true;
-        if (mListener != null) {
-            mListener.onError(error);
-        }
-        close();
+    /**
+     * Unbinds from the Custom Tabs Service.
+     */
+    public void unbindCustomTabsService() {
+        if (mTabConnection == null) return;
+        getContext().unbindService(mTabConnection);
+        mCustomTabsClient = null;
+        mTabsSession = null;
+        mTabConnection = null;
     }
 
     @Override
@@ -221,6 +232,7 @@ public class LoginDialog extends Dialog {
         }
         mResultDelivered = true;
         mProgressDialog.dismiss();
+        unbindCustomTabsService();
         super.onStop();
     }
 
@@ -230,10 +242,10 @@ public class LoginDialog extends Dialog {
         }
     }
 
-    private boolean internetPermissionGranted() {
+    private boolean internetPermissionNotGranted() {
         PackageManager pm = getContext().getPackageManager();
         String packageName = getContext().getPackageName();
-        return pm.checkPermission(Manifest.permission.INTERNET, packageName) == PackageManager.PERMISSION_GRANTED;
+        return pm.checkPermission(Manifest.permission.INTERNET, packageName) != PackageManager.PERMISSION_GRANTED;
     }
 
     private void setLayoutSize() {
@@ -255,7 +267,7 @@ public class LoginDialog extends Dialog {
             dialogHeight = (int) (MAX_HEIGHT_DP * metrics.density);
         }
 
-        LinearLayout layout = (LinearLayout) findViewById(R.id.com_spotify_sdk_login_webview_container);
+        LinearLayout layout = findViewById(R.id.com_spotify_sdk_login_webview_container);
         layout.setLayoutParams(new FrameLayout.LayoutParams(dialogWidth, dialogHeight, Gravity.CENTER));
     }
 
@@ -266,5 +278,15 @@ public class LoginDialog extends Dialog {
         WebViewUtils.clearCookiesForDomain(context, ".spotify.com");
         WebViewUtils.clearCookiesForDomain(context, "https://spotify.com");
         WebViewUtils.clearCookiesForDomain(context, "https://.spotify.com");
+    }
+
+    class AuthCustomTabsCallback extends CustomTabsCallback {
+        @Override
+        public void onNavigationEvent(int navigationEvent, @Nullable Bundle extras) {
+            super.onNavigationEvent(navigationEvent, extras);
+            if (navigationEvent == CUSTOM_TAB_HIDDEN) {
+                close();
+            }
+        }
     }
 }
