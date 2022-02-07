@@ -23,6 +23,7 @@ package com.spotify.sdk.android.auth;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -57,12 +58,18 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
     public static final String REQUEST_KEY = "request";
     public static final String RESPONSE_KEY = "response";
 
-    private AuthorizationClient mAuthorizationClient = new AuthorizationClient(this);
+    private final AuthorizationClient mAuthorizationClient = new AuthorizationClient(this);
 
     public static final int REQUEST_CODE = 1138;
 
     private static final int RESULT_ERROR = -2;
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        final Uri responseUri = intent.getData();
+        mAuthorizationClient.complete(AuthorizationResponse.fromUri(responseUri));
+    }
 
     public static Intent getAuthIntent(Activity contextActivity, AuthorizationRequest request) {
         if (contextActivity == null || request == null) {

@@ -36,13 +36,26 @@
             <action android:name="com.spotify.sso.action.START_AUTH_FLOW" />
             <data android:mimeType="text/plain" />
         </intent>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
     </queries>
 
     <application>
 
         <activity
             android:name="com.spotify.sdk.android.auth.LoginActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:launchMode="singleTop"
+            android:exported="true">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:host="${redirectHostName}"
+                    android:scheme="${redirectSchemeName}"/>
+            </intent-filter>
         </activity>
 
     </application>
