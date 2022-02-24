@@ -269,15 +269,6 @@ public class LoginDialog extends Dialog {
         layout.setLayoutParams(new FrameLayout.LayoutParams(dialogWidth, dialogHeight, Gravity.CENTER));
     }
 
-    public static void clearCookies(Context context) {
-        WebViewUtils.clearFacebookCookies(context);
-
-        WebViewUtils.clearCookiesForDomain(context, "spotify.com");
-        WebViewUtils.clearCookiesForDomain(context, ".spotify.com");
-        WebViewUtils.clearCookiesForDomain(context, "https://spotify.com");
-        WebViewUtils.clearCookiesForDomain(context, "https://.spotify.com");
-    }
-
     class AuthCustomTabsCallback extends CustomTabsCallback {
         @Override
         public void onNavigationEvent(int navigationEvent, @Nullable Bundle extras) {

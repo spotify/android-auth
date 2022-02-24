@@ -32,7 +32,6 @@ import android.util.Log;
 
 import com.spotify.sdk.android.auth.app.SpotifyAuthHandler;
 import com.spotify.sdk.android.auth.browser.BrowserAuthHandler;
-import com.spotify.sdk.android.auth.browser.LoginDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -332,17 +331,6 @@ public class AuthorizationClient {
      */
     public static void stopLoginActivity(Activity contextActivity, int requestCode) {
         contextActivity.finishActivity(requestCode);
-    }
-
-    /**
-     * Helper method to clear any Spotify and Facebook cookies from the WebView browser.
-     * <p>
-     * Calling this method will not affect the validity of the obtained access tokens and current Player session.
-     *
-     * @param context Android context.
-     */
-    public static void clearCookies(Context context) {
-        LoginDialog.clearCookies(context);
     }
 
     /**
