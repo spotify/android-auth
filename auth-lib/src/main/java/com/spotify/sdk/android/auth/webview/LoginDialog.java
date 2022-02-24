@@ -87,9 +87,7 @@ public class LoginDialog extends Dialog {
     private CustomTabsServiceConnection mTabConnection;
 
     public LoginDialog(Activity contextActivity, AuthorizationRequest request) {
-        super(contextActivity, DEFAULT_THEME);
-        mUri = request.toUri();
-        mRedirectUri = request.getRedirectUri();
+        this(contextActivity, DEFAULT_THEME, request);
     }
 
     public LoginDialog(Activity contextActivity, int theme, AuthorizationRequest request) {

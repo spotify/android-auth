@@ -27,9 +27,9 @@ import android.util.Log;
 import com.spotify.sdk.android.auth.AuthorizationHandler;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 
-public class WebViewAuthHandler implements AuthorizationHandler {
+public class BrowserAuthHandler implements AuthorizationHandler {
 
-    private static String TAG = WebViewAuthHandler.class.getSimpleName();
+    private static final String TAG = BrowserAuthHandler.class.getSimpleName();
 
     private LoginDialog mLoginDialog;
     private OnCompleteListener mListener;
