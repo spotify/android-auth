@@ -60,6 +60,11 @@ android {
             includeAndroidResources = true
         }
     }
+
+    def manifestPlaceholdersForTests = [redirectSchemeName: "spotify-sdk", redirectHostName: "auth"]
+    unitTestVariants.all {
+        it.mergedFlavor.manifestPlaceholders += manifestPlaceholdersForTests
+    }
 }
 
 dependencies {
@@ -67,7 +72,7 @@ dependencies {
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-core:2.21.0'
-    testImplementation 'org.robolectric:robolectric:4.3.1'
+    testImplementation 'org.robolectric:robolectric:4.7.3'
 }
 
 /*
@@ -97,7 +102,7 @@ task javadoc(type: Javadoc) {
     dependsOn 'generateReleaseRFile'
     source = android.sourceSets.main.java.srcDirs
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    classpath += files("build/generated/source/r/release")
+    classpath += files("build/generated/source/r/debug")
     options.links("http://docs.oracle.com/javase/7/docs/api/")
     destinationDir = file("../docs/")
     failOnError false
@@ -150,7 +155,7 @@ def getSigningVariables() {
     Deployment to OSSRH repository
     1. run: ./gradlew :auth-lib:assembleRelease and then ./gradlew :auth-lib:publishReleasePublicationToMavenRepository
     2. login to https://s01.oss.sonatype.org/ (you need to have access to auth lib OSSRH repository)
-    3. if everything looks correctly, close and then release the staging repository.
+    3. if everything looks correctly, close and then debug the staging repository.
     More info here: https://central.sonatype.org/publish/release/
  */
 afterEvaluate {
