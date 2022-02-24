@@ -78,16 +78,6 @@
                 android:layout_gravity="center_vertical"
                 android:onClick="onGetUserProfileClicked"
                 android:text="@string/btn_get_profile" />
-
-            <Button
-                android:id="@+id/btn_clear"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
-                android:layout_gravity="center_vertical"
-                android:onClick="onClearCredentialsClicked"
-                android:text="@string/btn_clear_credentials" />
         </LinearLayout>
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
