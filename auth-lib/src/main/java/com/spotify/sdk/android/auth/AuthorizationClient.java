@@ -31,8 +31,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.spotify.sdk.android.auth.app.SpotifyAuthHandler;
-import com.spotify.sdk.android.auth.webview.BrowserAuthHandler;
-import com.spotify.sdk.android.auth.webview.LoginDialog;
+import com.spotify.sdk.android.auth.browser.BrowserAuthHandler;
+import com.spotify.sdk.android.auth.browser.LoginDialog;
 
 import java.util.ArrayList;
 import java.util.List;

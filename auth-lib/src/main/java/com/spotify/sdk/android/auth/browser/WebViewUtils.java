@@ -1,4 +1,4 @@
-package com.spotify.sdk.android.auth.webview;
+package com.spotify.sdk.android.auth.browser;
 
 import android.content.Context;
 import android.webkit.CookieManager;
