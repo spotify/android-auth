@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.spotify.sdk.android.auth.webview;
+package com.spotify.sdk.android.auth.browser;
 
 import android.app.Activity;
 import android.util.Log;
