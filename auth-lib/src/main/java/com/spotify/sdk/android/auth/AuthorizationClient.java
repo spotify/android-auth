@@ -31,8 +31,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.spotify.sdk.android.auth.app.SpotifyAuthHandler;
+import com.spotify.sdk.android.auth.webview.BrowserAuthHandler;
 import com.spotify.sdk.android.auth.webview.LoginDialog;
-import com.spotify.sdk.android.auth.webview.WebViewAuthHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -420,7 +420,7 @@ public class AuthorizationClient {
         mLoginActivity = activity;
 
         mAuthorizationHandlers.add(new SpotifyAuthHandler());
-        mAuthorizationHandlers.add(new WebViewAuthHandler());
+        mAuthorizationHandlers.add(new BrowserAuthHandler());
     }
 
     /**
