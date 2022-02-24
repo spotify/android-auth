@@ -119,10 +119,6 @@ public class MainActivity extends AppCompatActivity {
         AuthorizationClient.openLoginActivity(this, AUTH_TOKEN_REQUEST_CODE, request);
     }
 
-    public void onClearCredentialsClicked(View view) {
-        AuthorizationClient.clearCookies(this);
-    }
-
     private AuthorizationRequest getAuthenticationRequest(AuthorizationResponse.Type type) {
         return new AuthorizationRequest.Builder(CLIENT_ID, type, getRedirectUri().toString())
                 .setShowDialog(false)
