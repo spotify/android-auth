@@ -7,10 +7,11 @@
 This library is responsible for authenticating the user and fetching the authorization code/access token
 that can subsequently be used to play music or in requests to the [Spotify Web API](https://developer.spotify.com/web-api/).
 
-> ** Breaking changes in Spotify Auth library version 2.0.0 **
->
-> In this version we replaced use of WebView with [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/) since Google and Facebook Login no longer support WebViews for authenticating users.
-> As part of this change the library API does not contain AuthorizationClient#clearCookies method anymore. Custom Tabs use the cookies fom the browser.
+# Breaking changes in Spotify Auth library version 2.0.0
+
+In this version we replaced use of WebView with [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/) since Google and Facebook Login no longer support WebViews for authenticating users.
+
+As part of this change the library API does not contain `AuthorizationClient#clearCookies` method anymore. Custom Tabs use the cookies fom the browser.
 
 # Integrating the library into your project
 
