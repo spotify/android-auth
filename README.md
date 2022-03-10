@@ -7,20 +7,35 @@
 This library is responsible for authenticating the user and fetching the authorization code/access token
 that can subsequently be used to play music or in requests to the [Spotify Web API](https://developer.spotify.com/web-api/).
 
+> ** Breaking changes in Spotify Auth library version 2.0.0 **
+>
+> In this version we replaced use of WebView with [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/) since Google and Facebook Login no longer support WebViews for authenticating users.
+> As part of this change the library API does not contain AuthorizationClient#clearCookies method anymore. Custom Tabs use the cookies fom the browser.
+
 # Integrating the library into your project
 
-To add this library to your project add the reference to its `build.gradle` file:
+To add this library to your project add following dependency to your app `build.gradle` file:
 
 ```gradle
 implementation "com.spotify.android:auth:<version>"
 ```
 
-Since April 2021 we'll be publishing the library on MavenCentral instead of JCenter. Therefore to be able to get the library dependency, you should add MavenCentral into repositories block:
+Since April 2021 we're publishing the library on MavenCentral instead of JCenter. Therefore to be able to get the library dependency, you should add MavenCentral into repositories block:
 ```gradle
 repositories {
     mavenCentral()
     ...
 }
+```
+
+Since Spotify Auth library version 2.0.0 you also need to provide the scheme and host of the redirect URI that your app is using for authorizing in your app `build.gradle` file.
+Below is an example of how this looks for [the auth sample project](auth-sample) using `spotify-sdk://auth` redirect URI:
+
+```gradle
+    defaultConfig {
+        manifestPlaceholders = [redirectSchemeName: "spotify-sdk", redirectHostName: "auth"]
+        ...
+    }
 ```
 
 To learn more see the [Authentication Guide](https://developer.spotify.com/technologies/spotify-android-sdk/android-sdk-authentication-guide/)
