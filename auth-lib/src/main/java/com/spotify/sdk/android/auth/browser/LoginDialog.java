@@ -28,22 +28,14 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
-import android.view.Gravity;
-import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -67,14 +59,6 @@ public class LoginDialog extends Dialog {
     public static final int CUSTOM_TAB_HIDDEN = 6;
 
     private static final int DEFAULT_THEME = android.R.style.Theme_Translucent_NoTitleBar;
-
-    /**
-     * The maximum width and height of the login dialog in density independent pixels.
-     * This value is expressed in pixels because the maximum size
-     * should look approximately the same independent from device's screen size and density.
-     */
-    private static final int MAX_WIDTH_DP = 400;
-    private static final int MAX_HEIGHT_DP = 640;
 
     private final Uri mUri;
     private final String mRedirectUri;
@@ -110,13 +94,7 @@ public class LoginDialog extends Dialog {
         mProgressDialog.setMessage(getContext().getString(R.string.com_spotify_sdk_login_progress));
         mProgressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         mProgressDialog.setOnCancelListener(dialogInterface -> dismiss());
-
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-
         setContentView(R.layout.com_spotify_sdk_login_dialog);
-
-        setLayoutSize();
 
         final String packageSupportingCustomTabs = getPackageNameSupportingCustomTabs(mUri);
         // CustomTabs seems to have problem with redirecting back the app after auth when URI has http/https scheme
@@ -244,29 +222,6 @@ public class LoginDialog extends Dialog {
         PackageManager pm = getContext().getPackageManager();
         String packageName = getContext().getPackageName();
         return pm.checkPermission(Manifest.permission.INTERNET, packageName) != PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void setLayoutSize() {
-        WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        DisplayMetrics metrics = new DisplayMetrics();
-        display.getMetrics(metrics);
-
-        int dialogWidth = ViewGroup.LayoutParams.MATCH_PARENT;
-        int dialogHeight = ViewGroup.LayoutParams.MATCH_PARENT;
-
-        // If width or height measured in dp exceeds accepted range,
-        // use max values and convert them back to pixels before setting the size.
-        if (metrics.widthPixels / metrics.density > MAX_WIDTH_DP) {
-            dialogWidth = (int) (MAX_WIDTH_DP * metrics.density);
-        }
-
-        if (metrics.heightPixels / metrics.density > MAX_HEIGHT_DP) {
-            dialogHeight = (int) (MAX_HEIGHT_DP * metrics.density);
-        }
-
-        LinearLayout layout = findViewById(R.id.com_spotify_sdk_login_webview_container);
-        layout.setLayoutParams(new FrameLayout.LayoutParams(dialogWidth, dialogHeight, Gravity.CENTER));
     }
 
     class AuthCustomTabsCallback extends CustomTabsCallback {

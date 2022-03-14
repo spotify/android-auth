@@ -20,17 +20,7 @@
     under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/com_spotify_sdk_login_webview_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:drawable/dialog_frame"
-    android:visibility="invisible">
-
-    <WebView
-        android:id="@+id/com_spotify_sdk_login_webview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible"
-        android:focusable="true"/>
-
-</LinearLayout>
+    android:visibility="invisible"/>

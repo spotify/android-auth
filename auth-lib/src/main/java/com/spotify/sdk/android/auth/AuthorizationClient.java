@@ -42,10 +42,10 @@ import java.util.List;
  * <p>
  * This client provides two versions of authorization:
  * <ol>
- * <li><h3>Single Sign-On using Spotify Android application with a fallback to <a href="https://accounts.spotify.com">Spotify Accounts Service</a> in a WebView</h3>
+ * <li><h3>Single Sign-On using Spotify Android application with a fallback to <a href="https://accounts.spotify.com">Spotify Accounts Service</a> in a <a href="https://developer.chrome.com/docs/android/custom-tabs/">Custom Tab</a></h3>
  *
  * <p>SDK will try to fetch the authorization code/access token using the Spotify Android client.
- * If Spotify is not installed on the device, SDK will fallback to the WebView based authorization
+ * If Spotify is not installed on the device, SDK will fallback to the Custom Tabs based authorization
  * and open <a href="https://accounts.spotify.com">Spotify Accounts Service</a> in a dialog.
  * After authorization flow is completed, result is returned to the activity
  * that invoked the {@code AuthorizationClient}.</p>
@@ -57,11 +57,11 @@ import java.util.List;
  * a list of scopes and can choose to approve or reject them.</p>
  *
  * <p>If Spotify is not installed on the device, SDK will open a dialog and load Spotify Accounts Service
- * into a WebView. User will have to enter their username and password to login to Spotify.
+ * into a Custom Tab. User will have to enter their username and password to login to Spotify.
  * They will also need to approve any scopes the the SDK application requests and that they
  * haven't approved before.</p>
  *
- * <p>In both cases (SSO and WebView fallback) the result of the authorization flow will be returned
+ * <p>In both cases (SSO and Custom Tab fallback) the result of the authorization flow will be returned
  * in the {@code onActivityResult} method of the activity that initiated it.</p>
  *
  * <p>
@@ -423,7 +423,7 @@ public class AuthorizationClient {
     /**
      * Performs authorization.
      * First it will try to bind spotify auth service, if this is not possible
-     * it will fallback to showing accounts page in the webview.
+     * it will fallback to showing accounts page in a Custom Tab.
      *
      * @param request Authorization request
      */
