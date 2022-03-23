@@ -66,7 +66,6 @@ public class LoginDialog extends Dialog {
     private ProgressDialog mProgressDialog;
     private boolean mAttached;
     private boolean mResultDelivered;
-    private CustomTabsClient mCustomTabsClient;
     private CustomTabsSession mTabsSession;
     private CustomTabsServiceConnection mTabConnection;
 
@@ -161,19 +160,14 @@ public class LoginDialog extends Dialog {
         mTabConnection = new CustomTabsServiceConnection() {
             @Override
             public void onCustomTabsServiceConnected(@NonNull ComponentName name, @NonNull CustomTabsClient client) {
-                mCustomTabsClient = client;
-                mCustomTabsClient.warmup(0L);
-                mTabsSession = mCustomTabsClient.newSession(new AuthCustomTabsCallback());
+                client.warmup(0L);
+                mTabsSession = client.newSession(new AuthCustomTabsCallback());
                 CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().setSession(mTabsSession).build();
                 customTabsIntent.launchUrl(getContext(), mUri);
             }
 
             @Override
-            public void onServiceDisconnected(ComponentName name) {
-                mCustomTabsClient = null;
-                mTabsSession = null;
-                if (mTabConnection != null) mTabConnection.onServiceDisconnected(name);
-            }
+            public void onServiceDisconnected(ComponentName name) {}
         };
         CustomTabsClient.bindCustomTabsService(getContext(), packageName, mTabConnection);
     }
@@ -184,7 +178,6 @@ public class LoginDialog extends Dialog {
     public void unbindCustomTabsService() {
         if (mTabConnection == null) return;
         getContext().unbindService(mTabConnection);
-        mCustomTabsClient = null;
         mTabsSession = null;
         mTabConnection = null;
     }
