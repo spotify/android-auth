@@ -3,6 +3,7 @@ Change Log
 ## Version 2.0.2
 * Fixed StackOverflowError at com.spotify.sdk.android.auth.browser.LoginDialog.onServiceDisconnected
 * Fixed NullPointerException when creating CustomTabsIntent in LoginDialog
+* Set LoginActivity launch mode to singleTask to avoid launching CustomTabs in a separate task
 
 ## Version 2.0.1
 * Removed unused code related to WebView
