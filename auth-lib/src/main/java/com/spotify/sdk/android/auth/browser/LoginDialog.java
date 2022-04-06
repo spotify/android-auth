@@ -162,8 +162,14 @@ public class LoginDialog extends Dialog {
             public void onCustomTabsServiceConnected(@NonNull ComponentName name, @NonNull CustomTabsClient client) {
                 client.warmup(0L);
                 mTabsSession = client.newSession(new AuthCustomTabsCallback());
-                CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().setSession(mTabsSession).build();
-                customTabsIntent.launchUrl(getContext(), mUri);
+                if (mTabsSession != null) {
+                    CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().setSession(mTabsSession).build();
+                    customTabsIntent.launchUrl(getContext(), mUri);
+                } else {
+                    unbindCustomTabsService();
+                    Log.i(TAG, "Auth using CustomTabs aborted, reason: CustomTabsSession is null. Launching auth in browser instead.");
+                    launchAuthInBrowserFallback();
+                }
             }
 
             @Override
