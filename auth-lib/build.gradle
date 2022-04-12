@@ -155,7 +155,7 @@ def getSigningVariables() {
     Deployment to OSSRH repository
     1. run: ./gradlew :auth-lib:assembleRelease and then ./gradlew :auth-lib:publishReleasePublicationToMavenRepository
     2. login to https://s01.oss.sonatype.org/ (you need to have access to auth lib OSSRH repository)
-    3. if everything looks correctly, close and then debug the staging repository.
+    3. if everything looks correctly, close and then release the staging repository.
     More info here: https://central.sonatype.org/publish/release/
  */
 afterEvaluate {
