@@ -31,7 +31,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.spotify.sdk.android.auth.app.SpotifyAuthHandler;
-import com.spotify.sdk.android.auth.browser.BrowserAuthHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -408,7 +407,7 @@ public class AuthorizationClient {
         mLoginActivity = activity;
 
         mAuthorizationHandlers.add(new SpotifyAuthHandler());
-        mAuthorizationHandlers.add(new BrowserAuthHandler());
+        mAuthorizationHandlers.add(new FallbackHandlerProvider().provideFallback());
     }
 
     /**
