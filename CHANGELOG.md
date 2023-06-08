@@ -1,5 +1,8 @@
 Change Log
 ==========
+## Version 2.1.0
+* Introduce a new library called auth-store that default to the play store instead of CustomTabsIntent
+
 ## Version 2.0.2
 * Fixed StackOverflowError at com.spotify.sdk.android.auth.browser.LoginDialog.onServiceDisconnected
 * Fixed NullPointerException when creating CustomTabsIntent in LoginDialog

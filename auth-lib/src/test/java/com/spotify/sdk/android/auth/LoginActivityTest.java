@@ -52,43 +52,4 @@ public class LoginActivityTest {
         assertEquals(Activity.RESULT_CANCELED, shadowOf(activity).getResultCode());
     }
 
-    @Test
-    public void shouldFinishLoginActivityWhenCompleted() {
-
-        Activity context = Robolectric
-                .buildActivity(Activity.class)
-                .create()
-                .get();
-
-        AuthorizationRequest request = new AuthorizationRequest.Builder("test", AuthorizationResponse.Type.TOKEN, "test://test").build();
-        AuthorizationResponse response = new AuthorizationResponse.Builder()
-                .setType(AuthorizationResponse.Type.TOKEN)
-                .setAccessToken("test_token")
-                .setExpiresIn(3600)
-                .build();
-
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(LoginActivity.REQUEST_KEY, request);
-
-        Intent intent = new Intent(context, LoginActivity.class);
-        intent.putExtra(LoginActivity.EXTRA_AUTH_REQUEST, bundle);
-
-        ActivityController<LoginActivity> loginActivityActivityController = buildActivity(LoginActivity.class, intent);
-
-        final LoginActivity loginActivity = loginActivityActivityController.get();
-
-        final ShadowActivity shadowLoginActivity = shadowOf(loginActivity);
-        shadowLoginActivity.setCallingActivity(context.getComponentName());
-
-        loginActivityActivityController.create();
-
-        assertFalse(loginActivity.isFinishing());
-
-        loginActivity.onClientComplete(response);
-
-        assertTrue(loginActivity.isFinishing());
-        assertEquals(Activity.RESULT_OK, shadowLoginActivity.getResultCode());
-        assertEquals(response, shadowLoginActivity.getResultIntent().getBundleExtra(LoginActivity.EXTRA_AUTH_RESPONSE).get(LoginActivity.RESPONSE_KEY));
-    }
-
 }

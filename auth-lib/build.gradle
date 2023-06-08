@@ -23,7 +23,7 @@ apply plugin: 'com.android.library'
 
 project.group = 'com.spotify.android'
 project.archivesBaseName = 'auth'
-project.version = '2.0.2'
+project.version = '2.1.0'
 
 android {
     compileSdkVersion 31
@@ -43,6 +43,27 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt')
+        }
+    }
+
+    flavorDimensions "auth"
+    productFlavors {
+        store {
+            dimension "auth"
+            versionNameSuffix "-store"
+        }
+        auth {
+            getIsDefault().set(true)
+            dimension "auth"
+        }
+    }
+
+    libraryVariants.all { libraryVariant ->
+        libraryVariant.outputs.all { output ->
+            // Rename auth-auth-[buildtype].aar to auth-[buildtype].aar
+            if (libraryVariant.name.startsWith("auth")) {
+                outputFileName = "auth-${libraryVariant.buildType.name}.aar"
+            }
         }
     }
 
@@ -98,14 +119,31 @@ task sourcesJar(type: Jar) {
     archiveClassifier.set('sources')
 }
 
+android.libraryVariants.all { variant ->
+    if (variant.name.endsWith("Release")) {
+        task("generate${variant.name.capitalize()}Javadoc", type: Javadoc) {
+            dependsOn "generate${variant.flavorName.capitalize()}ReleaseRFile"
+            description "Generates Javadoc for $variant.name."
+            source = variant.javaCompile.source
+
+            classpath += variant.javaCompileProvider.get().classpath
+            classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+            classpath += files("build/generated/source/r/debug")
+            options.links("http://docs.oracle.com/javase/7/docs/api/")
+            def path = "../docs/"
+            if (variant.flavorName != "auth") {
+                path = "../docs-${variant.flavorName}/"
+            }
+            destinationDir = file(path)
+            failOnError false
+        }
+    }
+}
+
 task javadoc(type: Javadoc) {
-    dependsOn 'generateReleaseRFile'
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    classpath += files("build/generated/source/r/debug")
-    options.links("http://docs.oracle.com/javase/7/docs/api/")
-    destinationDir = file("../docs/")
-    failOnError false
+    android.libraryVariants.all { variant ->
+        dependsOn "generate${variant.flavorName.capitalize()}ReleaseJavadoc"
+    }
 }
 
 afterEvaluate {
@@ -175,42 +213,65 @@ afterEvaluate {
         }
 
         publications {
-            release(MavenPublication) {
-                from components.release
-                artifact javadocJar
-                artifact sourcesJar
-
-                groupId = project.group
+            authRelease(MavenPublication) {
+                from components.authRelease
+                with configurePublication()
                 artifactId = project.archivesBaseName
-                version = project.version
 
                 pom {
                     name = project.group + ':' + project.archivesBaseName
-                    packaging = 'aar'
                     description = 'Spotify authorization library for Android'
-                    url = 'https://github.com/spotify/android-auth'
-
-                    licenses {
-                        license {
-                            name = 'The Apache Software License, Version 2.0'
-                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        }
-                    }
-
-                    scm {
-                        connection = 'scm:git:https://github.com/spotify/android-auth.git'
-                        developerConnection = 'scm:git:git@github.com:spotify/android-auth.git'
-                        url = 'https://github.com/spotify/android-auth'
-                    }
-
-                    developers {
-                        developer {
-                            id = 'erikg'
-                            name = 'Erik Ghonyan'
-                            email = 'erikg@spotify.com'
-                        }
-                    }
+                    with configurePom()
                 }
+            }
+            storeRelease(MavenPublication) {
+                from components.storeRelease
+                String suffix = "-store"
+                with configurePublication()
+                artifactId = project.archivesBaseName + suffix
+
+                pom {
+                    name = project.group + ':' + project.archivesBaseName + suffix
+                    description = 'Spotify authorization library for Android with Play Store fallback'
+                    with configurePom()
+                }
+            }
+        }
+    }
+}
+
+def configurePublication() {
+    return {
+        artifact javadocJar
+        artifact sourcesJar
+        groupId = project.group
+        version = project.version
+    }
+}
+
+def configurePom() {
+    return {
+        packaging = 'aar'
+        url = 'https://github.com/spotify/android-auth'
+
+        licenses {
+            license {
+                name = 'The Apache Software License, Version 2.0'
+                url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            }
+        }
+
+        scm {
+            connection = 'scm:git:https://github.com/spotify/android-auth.git'
+            developerConnection = 'scm:git:git@github.com:spotify/android-auth.git'
+            url = 'https://github.com/spotify/android-auth'
+        }
+
+        developers {
+            developer {
+                id = 'erikg'
+                name = 'Erik Ghonyan'
+                email = 'erikg@spotify.com'
             }
         }
     }
