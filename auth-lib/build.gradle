@@ -114,54 +114,6 @@ task checkstyle(type: Checkstyle) {
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    archiveClassifier.set('sources')
-}
-
-android.libraryVariants.all { variant ->
-    if (variant.name.endsWith("Release")) {
-        task("generate${variant.name.capitalize()}Javadoc", type: Javadoc) {
-            dependsOn "generate${variant.flavorName.capitalize()}ReleaseRFile"
-            description "Generates Javadoc for $variant.name."
-            source = variant.javaCompile.source
-
-            classpath += variant.javaCompileProvider.get().classpath
-            classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-            classpath += files("build/generated/source/r/debug")
-            options.links("http://docs.oracle.com/javase/7/docs/api/")
-            def path = "../docs/"
-            if (variant.flavorName != "auth") {
-                path = "../docs-${variant.flavorName}/"
-            }
-            destinationDir = file(path)
-            failOnError false
-        }
-    }
-}
-
-task javadoc(type: Javadoc) {
-    android.libraryVariants.all { variant ->
-        dependsOn "generate${variant.flavorName.capitalize()}ReleaseJavadoc"
-    }
-}
-
-afterEvaluate {
-    javadoc.classpath += files(android.libraryVariants.collect { variant ->
-        variant.javaCompileProvider.get().classpath.files
-    })
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    archiveClassifier.set('javadoc')
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives javadocJar
-    archives sourcesJar
-}
-
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 signing {
@@ -212,40 +164,64 @@ afterEvaluate {
             }
         }
 
-        publications {
-            authRelease(MavenPublication) {
-                from components.authRelease
-                with configurePublication()
-                artifactId = project.archivesBaseName
+        android.libraryVariants.all { variant ->
+            if (variant.buildType.name == "debug") return
 
-                pom {
-                    name = project.group + ':' + project.archivesBaseName
-                    description = 'Spotify authorization library for Android'
-                    with configurePom()
-                }
+            def flavored = variant.flavorName != "auth"
+
+            def javaDocDir = "../docs/"
+            if (flavored) {
+                javaDocDir = "../docs-${variant.flavorName}/"
             }
-            storeRelease(MavenPublication) {
-                from components.storeRelease
-                String suffix = "-store"
-                with configurePublication()
-                artifactId = project.archivesBaseName + suffix
 
-                pom {
-                    name = project.group + ':' + project.archivesBaseName + suffix
-                    description = 'Spotify authorization library for Android with Play Store fallback'
-                    with configurePom()
+            def sourceDirs = variant.sourceSets.collect {
+                it.javaDirectories + it.resourcesDirectories
+            }
+
+            def javadoc = task("${variant.name}Javadoc", type: Javadoc) {
+                description "Generates Javadoc for ${variant.name}."
+                source = variant.javaCompile.source
+                destinationDir = file(javaDocDir)
+                classpath += variant.javaCompileProvider.get().classpath
+                classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+                classpath += files("build/generated/source/r/debug")
+                options.links("http://docs.oracle.com/javase/7/docs/api/")
+                options.links("http://d.android.com/reference/");
+                failOnError false
+            }
+
+            def javadocJar = task("${variant.name}JavadocJar", type: Jar, dependsOn: javadoc) {
+                archiveClassifier.set('javadoc')
+                from javadoc.destinationDir
+            }
+
+            def sourcesJar = task("${variant.name}SourcesJar", type: Jar) {
+                from sourceDirs
+                archiveClassifier.set('sources')
+            }
+
+            publications {
+                "${variant.flavorName}Release"(MavenPublication) {
+                    from components."${variant.flavorName}Release"
+                    String suffix = "${flavored ? "-" + variant.flavorName : ""}"
+                    artifact javadocJar
+                    artifact sourcesJar
+                    groupId = project.group
+                    version = project.version
+                    artifactId = project.archivesBaseName + suffix
+
+                    pom {
+                        name = project.group + ':' + project.archivesBaseName + suffix
+                        def descriptionSuffix = ""
+                        if (variant.flavorName == "store") {
+                            " with the Play Store Fallback"
+                        }
+                        description = 'Spotify authorization library for Android' + descriptionSuffix
+                        with configurePom()
+                    }
                 }
             }
         }
-    }
-}
-
-def configurePublication() {
-    return {
-        artifact javadocJar
-        artifact sourcesJar
-        groupId = project.group
-        version = project.version
     }
 }
 
