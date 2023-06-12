@@ -27,6 +27,9 @@ import android.util.Log;
 import com.spotify.sdk.android.auth.AuthorizationHandler;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 
+/**
+ * An AuthorizationHandler that opens the Spotify web auth page in a Custom Tab
+ */
 public class BrowserAuthHandler implements AuthorizationHandler {
 
     private static final String TAG = BrowserAuthHandler.class.getSimpleName();
