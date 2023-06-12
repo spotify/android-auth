@@ -31,7 +31,7 @@ import com.spotify.sdk.android.auth.AuthorizationHandler;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 
 /**
- * An AuthorizationHandler that opens the play store to download the main spotify application
+ * An AuthorizationHandler that opens the play store to download the main Spotify application
  */
 public class PlayStoreHandler implements AuthorizationHandler {
 
