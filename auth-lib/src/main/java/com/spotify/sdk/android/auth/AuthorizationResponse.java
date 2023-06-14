@@ -41,21 +41,21 @@ public class AuthorizationResponse implements Parcelable {
         /**
          * The response is a code reply.
          *
-         * @see <a href="https://developer.spotify.com/web-api/authorization-guide/#authorization-code-flow">Authorization code flow</a>
+         * @see <a href="https://developer.spotify.com/documentation/web-api/tutorials/code-flow">Authorization code flow</a>
          */
         CODE("code"),
 
         /**
          * The response is an implicit grant with access token.
          *
-         * @see <a href="https://developer.spotify.com/web-api/authorization-guide/#implicit-grant-flow">Implicit grant flow</a>
+         * @see <a href="https://developer.spotify.com/documentation/web-api/tutorials/implicit-flow">Implicit grant flow</a>
          */
         TOKEN("token"),
 
         /**
          * The response is an error response.
          *
-         * @see <a href="https://developer.spotify.com/web-api/authorization-guide">Web API Authorization guide</a>
+         * @see <a href="https://developer.spotify.com/documentation/web-api/concepts/authorization">Web API Authorization guide</a>
          */
         ERROR("error"),
 
