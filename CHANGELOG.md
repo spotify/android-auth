@@ -2,6 +2,7 @@ Change Log
 ==========
 ## Version 2.1.0
 * Introduce a new flavour store to generate a library called auth-store that default to the play store instead of CustomTabsIntent
+* Expose method to check if the Spotify application is installed
 
 ## Version 2.0.2
 * Fixed StackOverflowError at com.spotify.sdk.android.auth.browser.LoginDialog.onServiceDisconnected
