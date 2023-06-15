@@ -32,7 +32,11 @@ public class SpotifyAuthHandler implements AuthorizationHandler {
 
     @Override
     public boolean start(Activity contextActivity, AuthorizationRequest request) {
-        mSpotifyNativeAuthUtil = new SpotifyNativeAuthUtil(contextActivity, request);
+        mSpotifyNativeAuthUtil = new SpotifyNativeAuthUtil(
+                contextActivity,
+                request,
+                new Sha1HashUtil()
+        );
         return mSpotifyNativeAuthUtil.startAuthActivity();
     }
 

@@ -21,28 +21,29 @@
 
 package com.spotify.sdk.android.auth.app;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
-import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
-
-import com.spotify.sdk.android.auth.AuthorizationRequest;
-import com.spotify.sdk.android.auth.LoginActivity;
-
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
-import static com.spotify.sdk.android.auth.IntentExtras.KEY_VERSION;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_CLIENT_ID;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_REDIRECT_URI;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_REQUESTED_SCOPES;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_RESPONSE_TYPE;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_STATE;
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_VERSION;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
+import com.spotify.sdk.android.auth.AuthorizationRequest;
+import com.spotify.sdk.android.auth.LoginActivity;
 
 public class SpotifyNativeAuthUtil {
 
@@ -60,7 +61,8 @@ public class SpotifyNativeAuthUtil {
             ".partners",
             ""
     };
-    private static final String[] SPOTIFY_SIGNATURE_HASH = new String[] {
+    @VisibleForTesting
+    static final String[] SPOTIFY_SIGNATURE_HASH = new String[]{
             "25a9b2d2745c098361edaa3b87936dc29a28e7f1",
             "80abdd17dcc4cb3a33815d354355bf87c9378624",
             "88df4d670ed5e01fc7b3eff13b63258628ff5a00",
@@ -72,14 +74,19 @@ public class SpotifyNativeAuthUtil {
 
     private final Activity mContextActivity;
     private final AuthorizationRequest mRequest;
+    @NonNull
+    private final Sha1HashUtil mSha1HashUtil;
 
-    public SpotifyNativeAuthUtil(Activity contextActivity, AuthorizationRequest request) {
+    public SpotifyNativeAuthUtil(Activity contextActivity,
+                                 AuthorizationRequest request,
+                                 @NonNull Sha1HashUtil sha1HashUtil) {
         mContextActivity = contextActivity;
         mRequest = request;
+        mSha1HashUtil = sha1HashUtil;
     }
 
     public boolean startAuthActivity() {
-        Intent intent = createAuthActivityIntent();
+        Intent intent = createAuthActivityIntent(mContextActivity, mSha1HashUtil);
         if (intent == null) {
             return false;
         }
@@ -99,10 +106,23 @@ public class SpotifyNativeAuthUtil {
         return true;
     }
 
-    private Intent createAuthActivityIntent() {
+    /**
+     * Creates an intent that will launch the auth flow on the currently installed Spotify application
+     *
+     * @return The auth Intent or null if the Spotify application couldn't be found
+     */
+    @Nullable
+    public static Intent createAuthActivityIntent(@NonNull Context context) {
+        return createAuthActivityIntent(context, new Sha1HashUtil());
+    }
+
+    @VisibleForTesting
+    static Intent createAuthActivityIntent(@NonNull Context context, @NonNull Sha1HashUtil sha1HashUtil) {
         Intent intent = null;
         for (String suffix : SPOTIFY_PACKAGE_SUFFIXES) {
-            intent = tryResolveActivity(SPOTIFY_PACKAGE_NAME + suffix);
+            intent = tryResolveActivity(context,
+                    SPOTIFY_PACKAGE_NAME + suffix,
+                    sha1HashUtil);
             if (intent != null) {
                 break;
             }
@@ -110,18 +130,35 @@ public class SpotifyNativeAuthUtil {
         return intent;
     }
 
-    private Intent tryResolveActivity(String packageName) {
+    /**
+     * Check if a version of the Spotify main application is installed
+     *
+     * @param context The context of the caller, used to check if the app is installed
+     * @return True if a Spotify app is installed, false otherwise
+     */
+    public static boolean isSpotifyInstalled(@NonNull Context context) {
+        return isSpotifyInstalled(context, new Sha1HashUtil());
+    }
 
+    @VisibleForTesting
+    static boolean isSpotifyInstalled(@NonNull Context context, @NonNull Sha1HashUtil sha1HashUtil) {
+        return createAuthActivityIntent(context, sha1HashUtil) != null;
+    }
+
+    @Nullable
+    private static Intent tryResolveActivity(@NonNull Context context,
+                                             @NonNull String packageName,
+                                             @NonNull Sha1HashUtil sha1HashUtil) {
         Intent intent = new Intent(SPOTIFY_AUTH_ACTIVITY_ACTION);
         intent.setPackage(packageName);
 
-        ComponentName componentName = intent.resolveActivity(mContextActivity.getPackageManager());
+        ComponentName componentName = intent.resolveActivity(context.getPackageManager());
 
         if (componentName == null) {
             return null;
         }
 
-        if (!validateSignature(componentName.getPackageName())) {
+        if (!validateSignature(context, componentName.getPackageName(), sha1HashUtil)) {
             return null;
         }
 
@@ -129,16 +166,18 @@ public class SpotifyNativeAuthUtil {
     }
 
     @SuppressLint("PackageManagerGetSignatures")
-    private boolean validateSignature(String spotifyPackageName) {
+    private static boolean validateSignature(@NonNull Context context,
+                                             String spotifyPackageName,
+                                             @NonNull Sha1HashUtil sha1HashUtil) {
         try {
-            final PackageInfo packageInfo = mContextActivity.getPackageManager().getPackageInfo(spotifyPackageName, PackageManager.GET_SIGNATURES);
+            final PackageInfo packageInfo = context.getPackageManager().getPackageInfo(spotifyPackageName, PackageManager.GET_SIGNATURES);
             if (packageInfo.signatures == null) {
                 return false;
             }
 
             for (Signature actualApkSignature : packageInfo.signatures) {
                 final String signatureString = actualApkSignature.toCharsString();
-                final String sha1Signature = sha1Hash(signatureString);
+                final String sha1Signature = sha1HashUtil.sha1Hash(signatureString);
                 for (String knownSpotifyHash : SPOTIFY_SIGNATURE_HASH) {
                     if (knownSpotifyHash.equals(sha1Signature)) {
                         return true;
@@ -152,32 +191,5 @@ public class SpotifyNativeAuthUtil {
 
     public void stopAuthActivity() {
         mContextActivity.finishActivity(LoginActivity.REQUEST_CODE);
-    }
-
-    private static String sha1Hash(String toHash) {
-        String hash = null;
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-1");
-            byte[] bytes = toHash.getBytes("UTF-8");
-            digest.update(bytes, 0, bytes.length);
-            bytes = digest.digest();
-
-            hash = bytesToHex(bytes);
-        } catch (NoSuchAlgorithmException ignored) {
-        } catch (UnsupportedEncodingException ignored) {
-        }
-        return hash;
-    }
-
-    private final static char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
-
-    private static String bytesToHex(byte[] bytes) {
-        char[] hexChars = new char[bytes.length * 2];
-        for (int j = 0; j < bytes.length; j++) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
-        }
-        return new String(hexChars);
     }
 }
