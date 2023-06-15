@@ -53,6 +53,13 @@ The following entries are merged into your manifest when you add the library:
 </activity>
 ```
 
+# Flavors
+
+Since Spotify Auth library version 2.1.0, two versions of the library are provided that differs in
+their behaviour if the Spotify application cannot be used to login:
+* `auth` - Opens the web browser to login to Spotify
+* `store` - Redirects to the Android Play store to download the Spotify application
+
 # Sample Code
 
 Checkout [the sample project](auth-sample).
