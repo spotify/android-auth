@@ -141,7 +141,9 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <h2 class="title">B</h2>
 <dl>
 <dt><a href="com/spotify/sdk/android/auth/browser/BrowserAuthHandler.html" title="class in com.spotify.sdk.android.auth.browser"><span class="typeNameLink">BrowserAuthHandler</span></a> - Class in <a href="com/spotify/sdk/android/auth/browser/package-summary.html">com.spotify.sdk.android.auth.browser</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">An AuthorizationHandler that opens the Spotify web auth page in a Custom Tab</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/spotify/sdk/android/auth/browser/BrowserAuthHandler.html#%3Cinit%3E()">BrowserAuthHandler()</a></span> - Constructor for class com.spotify.sdk.android.auth.browser.<a href="com/spotify/sdk/android/auth/browser/BrowserAuthHandler.html" title="class in com.spotify.sdk.android.auth.browser">BrowserAuthHandler</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/spotify/sdk/android/auth/AuthorizationRequest.Builder.html#build()">build()</a></span> - Method in class com.spotify.sdk.android.auth.<a href="com/spotify/sdk/android/auth/AuthorizationRequest.Builder.html" title="class in com.spotify.sdk.android.auth">AuthorizationRequest.Builder</a></dt>
@@ -177,6 +179,12 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dt><a href="com/spotify/sdk/android/auth/app/package-summary.html">com.spotify.sdk.android.auth.app</a> - package com.spotify.sdk.android.auth.app</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/spotify/sdk/android/auth/browser/package-summary.html">com.spotify.sdk.android.auth.browser</a> - package com.spotify.sdk.android.auth.browser</dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/spotify/sdk/android/auth/app/SpotifyNativeAuthUtil.html#createAuthActivityIntent(android.content.Context)">createAuthActivityIntent(Context)</a></span> - Static method in class com.spotify.sdk.android.auth.app.<a href="com/spotify/sdk/android/auth/app/SpotifyNativeAuthUtil.html" title="class in com.spotify.sdk.android.auth.app">SpotifyNativeAuthUtil</a></dt>
+<dd>
+<div class="block">Creates an intent that will launch the auth flow on the currently installed Spotify application</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/spotify/sdk/android/auth/app/SpotifyNativeAuthUtil.html#createAuthActivityIntent(android.content.Context,com.spotify.sdk.android.auth.app.Sha1HashUtil)">createAuthActivityIntent(Context, Sha1HashUtil)</a></span> - Static method in class com.spotify.sdk.android.auth.app.<a href="com/spotify/sdk/android/auth/app/SpotifyNativeAuthUtil.html" title="class in com.spotify.sdk.android.auth.app">SpotifyNativeAuthUtil</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/spotify/sdk/android/auth/AuthorizationClient.html#createLoginActivityIntent(android.app.Activity,com.spotify.sdk.android.auth.AuthorizationRequest)">createLoginActivityIntent(Activity, AuthorizationRequest)</a></span> - Static method in class com.spotify.sdk.android.auth.<a href="com/spotify/sdk/android/auth/AuthorizationClient.html" title="class in com.spotify.sdk.android.auth">AuthorizationClient</a></dt>
 <dd>
@@ -284,6 +292,12 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dt><a href="com/spotify/sdk/android/auth/IntentExtras.html" title="interface in com.spotify.sdk.android.auth"><span class="typeNameLink">IntentExtras</span></a> - Interface in <a href="com/spotify/sdk/android/auth/package-summary.html">com.spotify.sdk.android.auth</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/spotify/sdk/android/auth/AuthorizationClient.html#isAvailable(android.content.Context,android.content.Intent)">isAvailable(Context, Intent)</a></span> - Static method in class com.spotify.sdk.android.auth.<a href="com/spotify/sdk/android/auth/AuthorizationClient.html" title="class in com.spotify.sdk.android.auth">AuthorizationClient</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/spotify/sdk/android/auth/app/SpotifyNativeAuthUtil.html#isSpotifyInstalled(android.content.Context)">isSpotifyInstalled(Context)</a></span> - Static method in class com.spotify.sdk.android.auth.app.<a href="com/spotify/sdk/android/auth/app/SpotifyNativeAuthUtil.html" title="class in com.spotify.sdk.android.auth.app">SpotifyNativeAuthUtil</a></dt>
+<dd>
+<div class="block">Check if a version of the Spotify main application is installed</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/spotify/sdk/android/auth/app/SpotifyNativeAuthUtil.html#isSpotifyInstalled(android.content.Context,com.spotify.sdk.android.auth.app.Sha1HashUtil)">isSpotifyInstalled(Context, Sha1HashUtil)</a></span> - Static method in class com.spotify.sdk.android.auth.app.<a href="com/spotify/sdk/android/auth/app/SpotifyNativeAuthUtil.html" title="class in com.spotify.sdk.android.auth.app">SpotifyNativeAuthUtil</a></dt>
 <dd>&nbsp;</dd>
 </dl>
 <a id="I:K">
@@ -431,13 +445,15 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/spotify/sdk/android/auth/AccountsQueryParameters.html#SHOW_DIALOG">SHOW_DIALOG</a></span> - Static variable in interface com.spotify.sdk.android.auth.<a href="com/spotify/sdk/android/auth/AccountsQueryParameters.html" title="interface in com.spotify.sdk.android.auth">AccountsQueryParameters</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/spotify/sdk/android/auth/app/SpotifyNativeAuthUtil.html#SPOTIFY_SIGNATURE_HASH">SPOTIFY_SIGNATURE_HASH</a></span> - Static variable in class com.spotify.sdk.android.auth.app.<a href="com/spotify/sdk/android/auth/app/SpotifyNativeAuthUtil.html" title="class in com.spotify.sdk.android.auth.app">SpotifyNativeAuthUtil</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/spotify/sdk/android/auth/app/SpotifyAuthHandler.html" title="class in com.spotify.sdk.android.auth.app"><span class="typeNameLink">SpotifyAuthHandler</span></a> - Class in <a href="com/spotify/sdk/android/auth/app/package-summary.html">com.spotify.sdk.android.auth.app</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/spotify/sdk/android/auth/app/SpotifyAuthHandler.html#%3Cinit%3E()">SpotifyAuthHandler()</a></span> - Constructor for class com.spotify.sdk.android.auth.app.<a href="com/spotify/sdk/android/auth/app/SpotifyAuthHandler.html" title="class in com.spotify.sdk.android.auth.app">SpotifyAuthHandler</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/spotify/sdk/android/auth/app/SpotifyNativeAuthUtil.html" title="class in com.spotify.sdk.android.auth.app"><span class="typeNameLink">SpotifyNativeAuthUtil</span></a> - Class in <a href="com/spotify/sdk/android/auth/app/package-summary.html">com.spotify.sdk.android.auth.app</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="com/spotify/sdk/android/auth/app/SpotifyNativeAuthUtil.html#%3Cinit%3E(android.app.Activity,com.spotify.sdk.android.auth.AuthorizationRequest)">SpotifyNativeAuthUtil(Activity, AuthorizationRequest)</a></span> - Constructor for class com.spotify.sdk.android.auth.app.<a href="com/spotify/sdk/android/auth/app/SpotifyNativeAuthUtil.html" title="class in com.spotify.sdk.android.auth.app">SpotifyNativeAuthUtil</a></dt>
+<dt><span class="memberNameLink"><a href="com/spotify/sdk/android/auth/app/SpotifyNativeAuthUtil.html#%3Cinit%3E(android.app.Activity,com.spotify.sdk.android.auth.AuthorizationRequest,com.spotify.sdk.android.auth.app.Sha1HashUtil)">SpotifyNativeAuthUtil(Activity, AuthorizationRequest, Sha1HashUtil)</a></span> - Constructor for class com.spotify.sdk.android.auth.app.<a href="com/spotify/sdk/android/auth/app/SpotifyNativeAuthUtil.html" title="class in com.spotify.sdk.android.auth.app">SpotifyNativeAuthUtil</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/spotify/sdk/android/auth/app/SpotifyAuthHandler.html#start(android.app.Activity,com.spotify.sdk.android.auth.AuthorizationRequest)">start(Activity, AuthorizationRequest)</a></span> - Method in class com.spotify.sdk.android.auth.app.<a href="com/spotify/sdk/android/auth/app/SpotifyAuthHandler.html" title="class in com.spotify.sdk.android.auth.app">SpotifyAuthHandler</a></dt>
 <dd>&nbsp;</dd>
