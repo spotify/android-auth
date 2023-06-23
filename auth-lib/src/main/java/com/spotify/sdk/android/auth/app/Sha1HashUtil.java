@@ -4,9 +4,9 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-class Sha1HashUtil {
+final class Sha1HashUtil {
 
-    public String sha1Hash(String toHash) {
+    String sha1Hash(String toHash) {
         String hash = null;
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-1");
