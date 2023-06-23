@@ -62,6 +62,7 @@ public class LoginDialog extends Dialog {
 
     private final Uri mUri;
     private final String mRedirectUri;
+    @Nullable
     private AuthorizationHandler.OnCompleteListener mListener;
     private ProgressDialog mProgressDialog;
     private boolean mAttached;
@@ -79,7 +80,7 @@ public class LoginDialog extends Dialog {
         mRedirectUri = request.getRedirectUri();
     }
 
-    public void setOnCompleteListener(AuthorizationHandler.OnCompleteListener listener) {
+    public void setOnCompleteListener(@Nullable AuthorizationHandler.OnCompleteListener listener) {
         mListener = listener;
     }
 
@@ -202,8 +203,9 @@ public class LoginDialog extends Dialog {
 
     @Override
     protected void onStop() {
-        if (!mResultDelivered && mListener != null) {
-            mListener.onCancel();
+        AuthorizationHandler.OnCompleteListener listener = mListener;
+        if (!mResultDelivered && listener != null) {
+            listener.onCancel();
         }
         mResultDelivered = true;
         mProgressDialog.dismiss();

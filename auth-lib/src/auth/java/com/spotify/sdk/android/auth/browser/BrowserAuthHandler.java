@@ -24,6 +24,8 @@ package com.spotify.sdk.android.auth.browser;
 import android.app.Activity;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.spotify.sdk.android.auth.AuthorizationHandler;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 
@@ -56,7 +58,7 @@ public class BrowserAuthHandler implements AuthorizationHandler {
     }
 
     @Override
-    public void setOnCompleteListener(OnCompleteListener listener) {
+    public void setOnCompleteListener(@Nullable OnCompleteListener listener) {
         mListener = listener;
         if (mLoginDialog != null) {
             mLoginDialog.setOnCompleteListener(listener);
