@@ -27,6 +27,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.spotify.sdk.android.auth.AuthorizationHandler;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 
@@ -38,6 +40,7 @@ public class PlayStoreHandler implements AuthorizationHandler {
     private static final String TAG = PlayStoreHandler.class.getSimpleName();
     private static final String APP_PACKAGE_NAME = "com.spotify.music";
 
+    @Nullable
     private OnCompleteListener mListener;
 
     @Override
@@ -51,9 +54,10 @@ public class PlayStoreHandler implements AuthorizationHandler {
 
         ComponentName componentName = intent.resolveActivity(contextActivity.getPackageManager());
 
+        OnCompleteListener listener = mListener;
         if (componentName == null) {
-            if (mListener != null) {
-                mListener.onError(
+            if (listener != null) {
+                listener.onError(
                     new ClassNotFoundException("Couldn't find an activity to handle a play store link")
                 );
             }
@@ -62,7 +66,9 @@ public class PlayStoreHandler implements AuthorizationHandler {
 
         contextActivity.startActivity(intent);
 
-        mListener.onCancel();
+        if (listener != null) {
+            listener.onCancel();
+        }
         return true;
     }
 
@@ -72,11 +78,11 @@ public class PlayStoreHandler implements AuthorizationHandler {
     }
 
     /**
-     * {@link OnCompleteListener#onError(ClassNotFoundException)} will be called if no play store application is installed
+     * {@link OnCompleteListener#onError(Throwable)} will be called if no play store application is installed
      * {@link OnCompleteListener#onCancel()} will be called if the play store is launched
      */
     @Override
-    public void setOnCompleteListener(OnCompleteListener listener) {
+    public void setOnCompleteListener(@Nullable OnCompleteListener listener) {
         mListener = listener;
     }
 }

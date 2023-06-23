@@ -23,6 +23,8 @@ package com.spotify.sdk.android.auth.app;
 
 import android.app.Activity;
 
+import androidx.annotation.Nullable;
+
 import com.spotify.sdk.android.auth.AuthorizationHandler;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 
@@ -48,7 +50,7 @@ public class SpotifyAuthHandler implements AuthorizationHandler {
     }
 
     @Override
-    public void setOnCompleteListener(OnCompleteListener listener) {
+    public void setOnCompleteListener(@Nullable OnCompleteListener listener) {
         // no-op
     }
 }

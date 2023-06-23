@@ -23,6 +23,8 @@ package com.spotify.sdk.android.auth;
 
 import android.app.Activity;
 
+import androidx.annotation.Nullable;
+
 public interface AuthorizationHandler {
 
     interface OnCompleteListener {
@@ -38,5 +40,5 @@ public interface AuthorizationHandler {
 
     void stop();
 
-    void setOnCompleteListener(OnCompleteListener listener);
+    void setOnCompleteListener(@Nullable OnCompleteListener listener);
 }
