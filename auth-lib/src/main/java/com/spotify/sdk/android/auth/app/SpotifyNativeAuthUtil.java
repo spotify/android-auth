@@ -37,6 +37,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -61,8 +62,8 @@ public class SpotifyNativeAuthUtil {
             ".partners",
             ""
     };
-    @VisibleForTesting
-    static final String[] SPOTIFY_SIGNATURE_HASH = new String[]{
+
+    private static final String[] SPOTIFY_SIGNATURE_HASH = new String[]{
             "25a9b2d2745c098361edaa3b87936dc29a28e7f1",
             "80abdd17dcc4cb3a33815d354355bf87c9378624",
             "88df4d670ed5e01fc7b3eff13b63258628ff5a00",
@@ -70,7 +71,6 @@ public class SpotifyNativeAuthUtil {
             "1cbedd9e7345f64649bad2b493a20d9eea955352",
             "4b3d76a2de89033ea830f476a1f815692938e33b",
     };
-
 
     private final Activity mContextActivity;
     private final AuthorizationRequest mRequest;
@@ -170,23 +170,55 @@ public class SpotifyNativeAuthUtil {
                                              String spotifyPackageName,
                                              @NonNull Sha1HashUtil sha1HashUtil) {
         try {
-            final PackageInfo packageInfo = context.getPackageManager().getPackageInfo(spotifyPackageName, PackageManager.GET_SIGNATURES);
-            if (packageInfo.signatures == null) {
-                return false;
-            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                final PackageInfo packageInfo = context.getPackageManager().getPackageInfo(
+                        spotifyPackageName,
+                        PackageManager.GET_SIGNING_CERTIFICATES);
 
-            for (Signature actualApkSignature : packageInfo.signatures) {
-                final String signatureString = actualApkSignature.toCharsString();
-                final String sha1Signature = sha1HashUtil.sha1Hash(signatureString);
-                for (String knownSpotifyHash : SPOTIFY_SIGNATURE_HASH) {
-                    if (knownSpotifyHash.equals(sha1Signature)) {
-                        return true;
-                    }
+                if (packageInfo.signingInfo == null) {
+                    return false;
                 }
+                if(packageInfo.signingInfo.hasMultipleSigners()){
+                    return validateSignatures(sha1HashUtil, packageInfo.signingInfo.getApkContentsSigners());
+                }
+                else{
+                    return validateSignatures(sha1HashUtil, packageInfo.signingInfo.getSigningCertificateHistory());
+                }
+            } else {
+                final PackageInfo packageInfo = context.getPackageManager().getPackageInfo(
+                        spotifyPackageName,
+                        PackageManager.GET_SIGNATURES);
+
+                return validateSignatures(sha1HashUtil, packageInfo.signatures);
             }
         } catch (PackageManager.NameNotFoundException ignored) {
         }
         return false;
+    }
+
+    private static boolean validateSignatures(@NonNull Sha1HashUtil sha1HashUtil,
+                                              @Nullable Signature[] apkSignatures) {
+        if (apkSignatures == null || apkSignatures.length == 0) {
+            return false;
+        }
+
+        for (Signature actualApkSignature : apkSignatures) {
+            final String signatureString = actualApkSignature.toCharsString();
+            final String sha1Signature = sha1HashUtil.sha1Hash(signatureString);
+            boolean matchesSignature = false;
+            for (String knownSpotifyHash : SPOTIFY_SIGNATURE_HASH) {
+                if (knownSpotifyHash.equalsIgnoreCase(sha1Signature)) {
+                    matchesSignature = true;
+                    break;
+                }
+            }
+
+            // Abort upon finding a non matching signature
+            if (!matchesSignature) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void stopAuthActivity() {
