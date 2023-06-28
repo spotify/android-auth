@@ -200,7 +200,7 @@ implements <a href="../AuthorizationHandler.html" title="interface in com.spotif
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setOnCompleteListener(com.spotify.sdk.android.auth.AuthorizationHandler.OnCompleteListener)">setOnCompleteListener</a></span>&#8203;(<a href="../AuthorizationHandler.OnCompleteListener.html" title="interface in com.spotify.sdk.android.auth">AuthorizationHandler.OnCompleteListener</a>&nbsp;listener)</code></th>
 <td class="colLast">
-<div class="block"><code>OnCompleteListener#onError(ClassNotFoundException)</code> will be called if no play store application is installed
+<div class="block"><a href="../AuthorizationHandler.OnCompleteListener.html#onError(java.lang.Throwable)"><code>AuthorizationHandler.OnCompleteListener.onError(Throwable)</code></a> will be called if no play store application is installed
  <a href="../AuthorizationHandler.OnCompleteListener.html#onCancel()"><code>AuthorizationHandler.OnCompleteListener.onCancel()</code></a> will be called if the play store is launched</div>
 </td>
 </tr>
@@ -291,8 +291,9 @@ implements <a href="../AuthorizationHandler.html" title="interface in com.spotif
 <ul class="blockListLast">
 <li class="blockList">
 <h4>setOnCompleteListener</h4>
-<pre class="methodSignature">public&nbsp;void&nbsp;setOnCompleteListener&#8203;(<a href="../AuthorizationHandler.OnCompleteListener.html" title="interface in com.spotify.sdk.android.auth">AuthorizationHandler.OnCompleteListener</a>&nbsp;listener)</pre>
-<div class="block"><code>OnCompleteListener#onError(ClassNotFoundException)</code> will be called if no play store application is installed
+<pre class="methodSignature">public&nbsp;void&nbsp;setOnCompleteListener&#8203;(@Nullable
+                                  <a href="../AuthorizationHandler.OnCompleteListener.html" title="interface in com.spotify.sdk.android.auth">AuthorizationHandler.OnCompleteListener</a>&nbsp;listener)</pre>
+<div class="block"><a href="../AuthorizationHandler.OnCompleteListener.html#onError(java.lang.Throwable)"><code>AuthorizationHandler.OnCompleteListener.onError(Throwable)</code></a> will be called if no play store application is installed
  <a href="../AuthorizationHandler.OnCompleteListener.html#onCancel()"><code>AuthorizationHandler.OnCompleteListener.onCancel()</code></a> will be called if the play store is launched</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
