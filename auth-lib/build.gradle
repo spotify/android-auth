@@ -215,7 +215,7 @@ afterEvaluate {
                         name = project.group + ':' + project.archivesBaseName + suffix
                         def descriptionSuffix = ""
                         if (variant.flavorName == "store") {
-                            " with the Play Store Fallback"
+                            descriptionSuffix = " with the Play Store Fallback"
                         }
                         description = 'Spotify authorization library for Android' + descriptionSuffix
                         with configurePom()
