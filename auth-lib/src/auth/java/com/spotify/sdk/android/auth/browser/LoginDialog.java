@@ -230,6 +230,7 @@ public class LoginDialog extends Dialog {
         public void onNavigationEvent(int navigationEvent, @Nullable Bundle extras) {
             super.onNavigationEvent(navigationEvent, extras);
             if (navigationEvent == CUSTOM_TAB_HIDDEN) {
+                mResultDelivered = true;
                 close();
             }
         }

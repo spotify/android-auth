@@ -47,6 +47,11 @@
             android:name="com.spotify.sdk.android.auth.LoginActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:launchMode="singleTask"
+            android:exported="false"/>
+
+        <activity
+            android:name="com.spotify.sdk.android.auth.RedirectUriReceiverActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:exported="true">
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
