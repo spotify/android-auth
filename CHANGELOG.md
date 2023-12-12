@@ -1,5 +1,8 @@
 Change Log
 ==========
+## Version 2.1.1
+* Introduced RedirectUriReceiverActivity for browser based auth flow
+
 ## Version 2.1.0
 * Introduce a new flavour store to generate a library called auth-store that default to the play store instead of CustomTabsIntent
 * Expose method to check if the Spotify application is installed
