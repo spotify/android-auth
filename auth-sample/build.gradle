@@ -22,8 +22,8 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "31.0.0"
+    compileSdk 31
+    buildToolsVersion = "31.0.0"
 
     signingConfigs {
         debug {
@@ -64,10 +64,11 @@ android {
         textOutput 'stdout'
         xmlReport false
     }
+    namespace 'com.spotify.sdk.android.authentication.sample'
 }
 
 dependencies {
-//    implementation files('../auth-lib/build/outputs/aar/auth-store.aar')
+//    implementation files('../auth-lib/build/outputs/aar/auth-release.aar')
     implementation 'com.spotify.android:auth:2.1.0'
 
     implementation 'androidx.browser:browser:1.4.0'

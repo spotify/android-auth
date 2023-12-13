@@ -26,8 +26,8 @@ project.archivesBaseName = 'auth'
 project.version = '2.1.1'
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion '31.0.0'
+    compileSdk 33
+    buildToolsVersion = '33.0.0'
 
     buildFeatures {
         buildConfig = true
@@ -35,7 +35,7 @@ android {
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 31
+        targetSdkVersion 33
         buildConfigField 'String', 'LIB_VERSION_NAME', "\"$project.version\""
     }
 
@@ -46,7 +46,7 @@ android {
         }
     }
 
-    flavorDimensions "auth"
+    flavorDimensions.add("auth")
     productFlavors {
         store {
             dimension "auth"
@@ -58,7 +58,7 @@ android {
         }
     }
 
-    libraryVariants.all { libraryVariant ->
+    libraryVariants.configureEach { libraryVariant ->
         libraryVariant.outputs.all { output ->
             // Rename auth-auth-[buildtype].aar to auth-[buildtype].aar
             if (libraryVariant.name.startsWith("auth")) {
@@ -83,18 +83,18 @@ android {
     }
 
     def manifestPlaceholdersForTests = [redirectSchemeName: "spotify-sdk", redirectHostName: "auth"]
-    unitTestVariants.all {
+    namespace 'com.spotify.sdk.android.auth'
+    unitTestVariants.configureEach {
         it.mergedFlavor.manifestPlaceholders += manifestPlaceholdersForTests
     }
 }
 
 dependencies {
-    implementation 'androidx.browser:browser:1.4.0'
+    implementation 'androidx.browser:browser:1.5.0'
 
-    testImplementation 'junit:junit:4.13.1'
+    testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:2.28.2'
-    testImplementation 'org.mockito:mockito-inline:2.28.2'
-    testImplementation 'org.robolectric:robolectric:4.7.3'
+    testImplementation 'org.robolectric:robolectric:4.11.1'
 }
 
 /*
@@ -104,7 +104,7 @@ dependencies {
 
 apply plugin: 'checkstyle'
 
-task checkstyle(type: Checkstyle) {
+tasks.register('checkstyle', Checkstyle) {
     configFile file("${project.rootDir}/config/checkstyle.xml")
     source 'src'
     include '**/*.java'
@@ -144,7 +144,9 @@ def getSigningVariables() {
 
 /*
     Deployment to OSSRH repository
-    1. run: ./gradlew :auth-lib:assembleRelease and then ./gradlew :auth-lib:publishReleasePublicationToMavenRepository
+    1. run: ./gradlew :auth-lib:assembleRelease and then ./gradlew :auth-lib:publishAuthReleasePublicationToMavenRepository
+       or ./gradlew :auth-lib:publishStoreReleasePublicationToMavenRepository depending on
+       which flavor of the auth library you want to release.
     2. login to https://s01.oss.sonatype.org/ (you need to have access to auth lib OSSRH repository)
     3. if everything looks correctly, close and then release the staging repository.
     More info here: https://central.sonatype.org/publish/release/
@@ -165,7 +167,7 @@ afterEvaluate {
             }
         }
 
-        android.libraryVariants.all { variant ->
+        android.libraryVariants.configureEach { variant ->
             if (variant.buildType.name == "debug") return
 
             def flavored = variant.flavorName != "auth"
@@ -187,7 +189,7 @@ afterEvaluate {
                 classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
                 classpath += files("build/generated/source/r/debug")
                 options.links("http://docs.oracle.com/javase/7/docs/api/")
-                options.links("http://d.android.com/reference/");
+                options.links("http://d.android.com/reference/")
                 failOnError false
             }
 

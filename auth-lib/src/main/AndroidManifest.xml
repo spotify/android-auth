@@ -21,8 +21,7 @@
     under the License.
 -->
 
-<manifest package="com.spotify.sdk.android.auth"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
@@ -36,9 +35,6 @@
             <action android:name="com.spotify.sso.action.START_AUTH_FLOW" />
             <data android:mimeType="text/plain" />
         </intent>
-        <intent>
-            <action android:name="android.support.customtabs.action.CustomTabsService" />
-        </intent>
     </queries>
 
     <application>
@@ -48,20 +44,6 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:launchMode="singleTask"
             android:exported="false"/>
-
-        <activity
-            android:name="com.spotify.sdk.android.auth.RedirectUriReceiverActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:exported="true">
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data
-                    android:host="${redirectHostName}"
-                    android:scheme="${redirectSchemeName}"/>
-            </intent-filter>
-        </activity>
 
     </application>
 
