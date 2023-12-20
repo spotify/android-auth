@@ -85,4 +85,10 @@ public class PlayStoreHandler implements AuthorizationHandler {
     public void setOnCompleteListener(@Nullable OnCompleteListener listener) {
         mListener = listener;
     }
+
+    @Override
+    public boolean isAuthInProgress() {
+        // not supported, always return false
+        return false;
+    }
 }

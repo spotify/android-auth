@@ -21,47 +21,126 @@
 
 package com.spotify.sdk.android.auth.browser;
 
+import static com.spotify.sdk.android.auth.browser.CustomTabsSupportChecker.getPackageSupportingCustomTabs;
+
+import android.Manifest;
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.browser.customtabs.CustomTabsCallback;
+import androidx.browser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsServiceConnection;
+import androidx.browser.customtabs.CustomTabsSession;
 
 import com.spotify.sdk.android.auth.AuthorizationHandler;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 
 /**
- * An AuthorizationHandler that opens the Spotify web auth page in a Custom Tab
+ * An AuthorizationHandler that opens the Spotify web auth page in a Custom Tab or users default web browser.
  */
 public class BrowserAuthHandler implements AuthorizationHandler {
 
     private static final String TAG = BrowserAuthHandler.class.getSimpleName();
 
-    private LoginDialog mLoginDialog;
-    private OnCompleteListener mListener;
+    private CustomTabsSession mTabsSession;
+    private CustomTabsServiceConnection mTabConnection;
+    private boolean mIsAuthInProgress = false;
+    private Context mContext;
+    private Uri mUri;
 
     @Override
     public boolean start(Activity contextActivity, AuthorizationRequest request) {
         Log.d(TAG, "start");
-        mLoginDialog = new LoginDialog(contextActivity, request);
-        mLoginDialog.setOnCompleteListener(mListener);
-        mLoginDialog.show();
+        mContext = contextActivity;
+        mUri = request.toUri();
+        String packageSupportingCustomTabs = getPackageSupportingCustomTabs(mContext, request);
+        boolean shouldLaunchCustomTab = !TextUtils.isEmpty(packageSupportingCustomTabs);
+
+        if (internetPermissionNotGranted(mContext)) {
+            Log.e(TAG, "Missing INTERNET permission");
+        }
+
+        if (shouldLaunchCustomTab) {
+            Log.d(TAG, "Launching auth in a Custom Tab using package:" + packageSupportingCustomTabs);
+            mTabConnection = new CustomTabsServiceConnection() {
+                @Override
+                public void onCustomTabsServiceConnected(@NonNull ComponentName name, @NonNull CustomTabsClient client) {
+                    client.warmup(0L);
+                    mTabsSession = client.newSession(new CustomTabsCallback());
+                    if (mTabsSession != null) {
+                        CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().setSession(mTabsSession).build();
+                        customTabsIntent.launchUrl(mContext, request.toUri());
+                        mIsAuthInProgress = true;
+                    } else {
+                        unbindCustomTabsService();
+                        Log.i(TAG, "Auth using CustomTabs aborted, reason: CustomTabsSession is null.");
+                        launchAuthInBrowserFallback();
+                    }
+                }
+
+                @Override
+                public void onServiceDisconnected(ComponentName name) {
+                    Log.i(TAG, "Auth using CustomTabs aborted, reason: CustomTabsService disconnected.");
+                    mTabsSession = null;
+                    mTabConnection = null;
+                }
+            };
+            CustomTabsClient.bindCustomTabsService(mContext, packageSupportingCustomTabs, mTabConnection);
+        } else {
+            Log.d(TAG, "Launching auth inside a web browser");
+            launchAuthInBrowserFallback();
+        }
         return true;
     }
 
     @Override
     public void stop() {
         Log.d(TAG, "stop");
-        if (mLoginDialog != null) {
-            mLoginDialog.close();
-            mLoginDialog = null;
-        }
+        unbindCustomTabsService();
+        mContext = null;
+        mIsAuthInProgress = false;
     }
 
     @Override
     public void setOnCompleteListener(@Nullable OnCompleteListener listener) {
-        mListener = listener;
-        if (mLoginDialog != null) {
-            mLoginDialog.setOnCompleteListener(listener);
+        // no-op
+    }
+
+    @Override
+    public boolean isAuthInProgress() {
+        return mIsAuthInProgress;
+    }
+
+    private void launchAuthInBrowserFallback() {
+        if (internetPermissionNotGranted(mContext)) {
+            Log.e(TAG, "Missing INTERNET permission");
         }
+        mContext.startActivity(new Intent(Intent.ACTION_VIEW, mUri));
+        mIsAuthInProgress = true;
+    }
+
+    private boolean internetPermissionNotGranted(Context context) {
+        PackageManager pm = context.getPackageManager();
+        String packageName = context.getPackageName();
+        return pm.checkPermission(Manifest.permission.INTERNET, packageName) != PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * Unbinds from the Custom Tabs Service.
+     */
+    public void unbindCustomTabsService() {
+        if (mTabConnection == null) return;
+        mContext.unbindService(mTabConnection);
+        mTabsSession = null;
+        mTabConnection = null;
     }
 }

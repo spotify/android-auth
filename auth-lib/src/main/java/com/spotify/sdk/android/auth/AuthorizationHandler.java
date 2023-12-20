@@ -41,4 +41,6 @@ public interface AuthorizationHandler {
     void stop();
 
     void setOnCompleteListener(@Nullable OnCompleteListener listener);
+
+    boolean isAuthInProgress();
 }
