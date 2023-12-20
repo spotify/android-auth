@@ -1,4 +1,4 @@
-package com.spotify.sdk.android.auth;
+package com.spotify.sdk.android.auth.browser;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,11 +6,13 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 
+import com.spotify.sdk.android.auth.LoginActivity;
+
 /**
  * Activity that receives the auth response sent by the browser's Custom Tab via deeplink.
  * The sole purpose of this activity is to forward the response back to {@link LoginActivity}.
- * This activity is used only during browser based auth flow - when Spotify app is not installed
- * on the device.
+ * This activity is used only during browser based auth flow - when the Spotify app is not
+ * installed on the device.
  */
 public class RedirectUriReceiverActivity extends Activity {
 
