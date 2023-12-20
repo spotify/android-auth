@@ -1,7 +1,12 @@
 Change Log
 ==========
 ## Version 2.1.1
-* Introduced RedirectUriReceiverActivity for browser based auth flow
+* Introduced RedirectUriReceiverActivity for web based auth flow
+* Restructured web based flow, removed LoginDialog class
+* Made AuthorizationClient final
+* Bumped to Gradle 7.5, AGP 7.4.2
+* Bumped targetSdkVersion to 33
+* Bumped androidx.browser to 1.5.0 and test dependencies
 
 ## Version 2.1.0
 * Introduce a new flavour store to generate a library called auth-store that default to the play store instead of CustomTabsIntent
