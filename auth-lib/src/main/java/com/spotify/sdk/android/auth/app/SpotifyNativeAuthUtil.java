@@ -113,7 +113,7 @@ public class SpotifyNativeAuthUtil {
      */
     @Nullable
     public static Intent createAuthActivityIntent(@NonNull Context context) {
-        return createAuthActivityIntent(context, new Sha1HashUtil());
+        return createAuthActivityIntent(context, new Sha1HashUtilImpl());
     }
 
     @VisibleForTesting
@@ -137,7 +137,7 @@ public class SpotifyNativeAuthUtil {
      * @return True if a Spotify app is installed, false otherwise
      */
     public static boolean isSpotifyInstalled(@NonNull Context context) {
-        return isSpotifyInstalled(context, new Sha1HashUtil());
+        return isSpotifyInstalled(context, new Sha1HashUtilImpl());
     }
 
     @VisibleForTesting
