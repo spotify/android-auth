@@ -37,7 +37,7 @@ public class SpotifyAuthHandler implements AuthorizationHandler {
         mSpotifyNativeAuthUtil = new SpotifyNativeAuthUtil(
                 contextActivity,
                 request,
-                new Sha1HashUtil()
+                new Sha1HashUtilImpl()
         );
         return mSpotifyNativeAuthUtil.startAuthActivity();
     }
@@ -52,5 +52,11 @@ public class SpotifyAuthHandler implements AuthorizationHandler {
     @Override
     public void setOnCompleteListener(@Nullable OnCompleteListener listener) {
         // no-op
+    }
+
+    @Override
+    public boolean isAuthInProgress() {
+        // not supported, always return false
+        return false;
     }
 }

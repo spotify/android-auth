@@ -131,6 +131,15 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // onResume is called (except other cases) in the case
+        // of browser based auth flow when user pressed back/closed the Custom Tab and
+        // LoginActivity came to the foreground again.
+        mAuthorizationClient.notifyInCaseUserCanceledAuth();
+    }
+
+    @Override
     protected void onDestroy() {
         mAuthorizationClient.cancel();
         mAuthorizationClient.setOnCompleteListener(null);

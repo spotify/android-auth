@@ -42,17 +42,6 @@ Below is an example of how this looks for [the auth sample project](auth-sample)
 To learn more see the [Authentication Guide](https://developer.spotify.com/technologies/spotify-android-sdk/android-sdk-authentication-guide/)
 and the [API reference](https://spotify.github.io/android-sdk/auth-lib/docs/index.html).
 
-The following entries are merged into your manifest when you add the library:
-
-```xml
-<uses-permission android:name="android.permission.INTERNET"/>
-
-<activity
-    android:name="com.spotify.sdk.android.auth.LoginActivity"
-    android:theme="@android:style/Theme.Translucent.NoTitleBar">
-</activity>
-```
-
 # Flavors
 
 Since Spotify Auth library version 2.1.0, two versions of the library are provided that differs in

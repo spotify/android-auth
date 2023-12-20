@@ -41,7 +41,9 @@ import java.util.List;
  * <p>
  * This client provides two versions of authorization:
  * <ol>
- * <li><h3>Single Sign-On using Spotify Android application with a fallback to <a href="https://accounts.spotify.com">Spotify Accounts Service</a> in a <a href="https://developer.chrome.com/docs/android/custom-tabs/">Custom Tab</a></h3>
+ * <li><h2>Single Sign-On using Spotify Android application with a fallback to
+ * <a href="https://accounts.spotify.com">Spotify Accounts Service</a> in a browser using a
+ * <a href="https://developer.chrome.com/docs/android/custom-tabs/">Custom Tab</a></h2>
  *
  * <p>SDK will try to fetch the authorization code/access token using the Spotify Android client.
  * If Spotify is not installed on the device, SDK will fallback to the Custom Tabs based authorization
@@ -56,22 +58,16 @@ import java.util.List;
  * a list of scopes and can choose to approve or reject them.</p>
  *
  * <p>If Spotify is not installed on the device, SDK will open a dialog and load Spotify Accounts Service
- * into a Custom Tab. User will have to enter their username and password to login to Spotify.
+ * into a Custom Tab of a supported browser. In case there's no browser installed that supports
+ * Custom Tabs API, the SDK will fallback to opening the Accounts page in the users default browser.
+ * User will have to enter their username and password to login to Spotify.
  * They will also need to approve any scopes the the SDK application requests and that they
  * haven't approved before.</p>
  *
- * <p>In both cases (SSO and Custom Tab fallback) the result of the authorization flow will be returned
+ * <p>In both cases, (SSO and browser fallback) the result of the authorization flow will be returned
  * in the {@code onActivityResult} method of the activity that initiated it.</p>
  *
  * <p>
- * For login flow to work, LoginActivity needs to be added to the {@code AndroidManifest.xml}:
- *
- * <pre>{@code
- * <activity
- *         android:name="LoginActivity"
- *         android:theme="@android:style/Theme.Translucent.NoTitleBar" />
- * }</pre>
- *
  * <pre>{@code
  * // Code called from an activity
  * private static final int REQUEST_CODE = 1337;
@@ -93,7 +89,7 @@ import java.util.List;
  * AuthorizationClient.stopLoginActivity(getActivity(), REQUEST_CODE);
  * }</pre>
  * <p>
- * To process the result activity needs to override {@code onActivityResult} callback
+ * To process the result, your activity needs to override {@code onActivityResult} callback:
  *
  * <pre>{@code
  * protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -137,36 +133,9 @@ import java.util.List;
  *
  * AuthorizationClient.openLoginInBrowser(this, request);
  * }</pre>
- * <p>
- * To receive the result {@code AndroidManifest.xml} must contain following:
  *
- * <pre>{@code
- * // The activity that should process the response from auth flow
- * <activity
- *     android:name=".MainActivity"
- *     android:label="@string/app_name"
- *     android:launchMode="singleInstance" >
- *     <intent-filter>
- *         // Any other intent filters that this activity requires
- *     </intent-filter>
- *
- *     // An intent filter that will receive the response from the authorization service
- *     <intent-filter>
- *         <action android:name="android.intent.action.VIEW"/>
- *
- *         <category android:name="android.intent.category.DEFAULT"/>
- *         <category android:name="android.intent.category.BROWSABLE"/>
- *
- *         // this needs to match the scheme and host of the redirect uri
- *         <data
- *             android:host="callback"
- *             android:scheme="yourcustomprotocol"/>
- *    </intent-filter>
- * </activity>
- * }</pre>
- * <p>
- * To process the result the receiving activity ({@code MainActivity} in this example) needs to override one of its
- * callbacks. With launch mode set to {@code singleInstance} this callback is {@code onNewIntent}:
+ * To process the result, the receiving activity needs to override one of its callbacks. With launch mode
+ * set to {@code singleInstance} this callback is {@code onNewIntent}:
  *
  * <pre><code>
  * protected void onNewIntent(Intent intent) {
@@ -198,7 +167,7 @@ import java.util.List;
  *
  * @see <a href="https://developer.spotify.com/web-api/authorization-guide">Web API Authorization guide</a>
  */
-public class AuthorizationClient {
+public final class AuthorizationClient {
     private static final String TAG = "Spotify Auth Client";
 
     static final String MARKET_VIEW_PATH = "market://";
@@ -521,6 +490,20 @@ public class AuthorizationClient {
         if (authHandler != null) {
             authHandler.setOnCompleteListener(null);
             authHandler.stop();
+        }
+    }
+
+    /**
+     * Send empty response signaling the user canceled the auth flow if the current handler
+     * has an auth flow in progress.
+     */
+    void notifyInCaseUserCanceledAuth() {
+        if (mCurrentHandler != null && mCurrentHandler.isAuthInProgress()) {
+            Log.i(TAG, "Spotify auth response: User cancelled");
+            AuthorizationResponse response = new AuthorizationResponse.Builder()
+                    .setType(AuthorizationResponse.Type.EMPTY)
+                    .build();
+            complete(response);
         }
     }
 }
