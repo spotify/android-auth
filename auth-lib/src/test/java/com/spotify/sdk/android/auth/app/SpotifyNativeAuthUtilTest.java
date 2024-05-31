@@ -1,14 +1,21 @@
 package com.spotify.sdk.android.auth.app;
 
+import static com.spotify.sdk.android.auth.AuthorizationRequest.ANDROID_SDK;
+import static com.spotify.sdk.android.auth.AuthorizationRequest.SPOTIFY_SDK;
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -18,8 +25,14 @@ import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
 import android.os.Build;
 
+import com.spotify.sdk.android.auth.AuthorizationRequest;
+import com.spotify.sdk.android.auth.AuthorizationResponse;
+import com.spotify.sdk.android.auth.IntentExtras;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -63,14 +76,7 @@ public class SpotifyNativeAuthUtilTest {
     public void shouldReturnTrueWhenInstalledWithCorrectSignatureAboveAPIP() {
         Context mockedContext = mock(Context.class);
         mSha1HashUtil = new FakeSha1HashUtil(Collections.singletonMap(DEFAULT_TEST_SIGNATURE, SPOTIFY_HASH));
-        PackageInfo packageInfo = new PackageInfo();
-        Signature mockedSignature = mock(Signature.class);
-        when(mockedSignature.toCharsString()).thenReturn(DEFAULT_TEST_SIGNATURE);
-        SigningInfo mockedSigningInfo = mock(SigningInfo.class);
-        when(mockedSigningInfo.hasMultipleSigners()).thenReturn(false);
-        when(mockedSigningInfo.getSigningCertificateHistory()).thenReturn(new Signature[]{mockedSignature});
-        packageInfo.signingInfo = mockedSigningInfo;
-        configureMocks(mockedContext, packageInfo);
+        configureMocksWithSigningInfo(mockedContext);
         boolean isInstalled = SpotifyNativeAuthUtil.isSpotifyInstalled(
                 mockedContext,
                 mSha1HashUtil
@@ -136,11 +142,50 @@ public class SpotifyNativeAuthUtilTest {
         assertFalse(isInstalled);
     }
 
+    @Test
+    public void hasUtmExtrasSetToLoginIntent() {
+        String campaign = "campaign";
+        Activity activity = mock(Activity.class);
+        Mockito.doNothing().when(activity).startActivityForResult(any(Intent.class), anyInt());
+        AuthorizationRequest authorizationRequest =
+                new AuthorizationRequest
+                        .Builder("test", AuthorizationResponse.Type.TOKEN, "to://me")
+                        .setScopes(new String[]{"testa", "toppen"})
+                        .setCampaign(campaign)
+                        .build();
+        configureMocksWithSigningInfo(activity);
+        SpotifyNativeAuthUtil authUtil = new SpotifyNativeAuthUtil(
+                activity,
+                authorizationRequest,
+                new FakeSha1HashUtil(Collections.singletonMap(DEFAULT_TEST_SIGNATURE, SPOTIFY_HASH))
+        );
+        authUtil.startAuthActivity();
+
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(activity, times(1)).startActivityForResult(captor.capture(), anyInt());
+        Intent intent = captor.getValue();
+
+        assertEquals(SPOTIFY_SDK, intent.getStringExtra(IntentExtras.KEY_UTM_SOURCE));
+        assertEquals(ANDROID_SDK, intent.getStringExtra(IntentExtras.KEY_UTM_MEDIUM));
+        assertEquals(campaign, intent.getStringExtra(IntentExtras.KEY_UTM_CAMPAIGN));
+    }
+
     private void configureDefaultMocks(Context mockedContext) {
         PackageInfo packageInfo = new PackageInfo();
         Signature mockedSignature = mock(Signature.class);
         when(mockedSignature.toCharsString()).thenReturn(DEFAULT_TEST_SIGNATURE);
         packageInfo.signatures = new Signature[]{mockedSignature};
+        configureMocks(mockedContext, packageInfo);
+    }
+
+    private void configureMocksWithSigningInfo(Context mockedContext) {
+        PackageInfo packageInfo = new PackageInfo();
+        Signature mockedSignature = mock(Signature.class);
+        when(mockedSignature.toCharsString()).thenReturn(DEFAULT_TEST_SIGNATURE);
+        SigningInfo mockedSigningInfo = mock(SigningInfo.class);
+        when(mockedSigningInfo.hasMultipleSigners()).thenReturn(false);
+        when(mockedSigningInfo.getSigningCertificateHistory()).thenReturn(new Signature[]{mockedSignature});
+        packageInfo.signingInfo = mockedSigningInfo;
         configureMocks(mockedContext, packageInfo);
     }
 

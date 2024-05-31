@@ -27,6 +27,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,8 +45,10 @@ public class AuthorizationRequest implements Parcelable {
     static final String ACCOUNTS_AUTHORITY = "accounts.spotify.com";
     static final String ACCOUNTS_PATH = "authorize";
     static final String SCOPES_SEPARATOR = " ";
-    static final String SPOTIFY_SDK = "spotify-sdk";
-    static final String ANDROID_SDK = "android-sdk";
+    @VisibleForTesting
+    public static final String SPOTIFY_SDK = "spotify-sdk";
+    @VisibleForTesting
+    public static final String ANDROID_SDK = "android-sdk";
 
     private final String mClientId;
     private final String mResponseType;
@@ -163,7 +168,14 @@ public class AuthorizationRequest implements Parcelable {
         return mCustomParams.get(key);
     }
 
+    @NonNull
     public String getCampaign() { return TextUtils.isEmpty(mCampaign) ? ANDROID_SDK : mCampaign; }
+
+    @NonNull
+    public String getSource() { return SPOTIFY_SDK; }
+
+    @NonNull
+    public String getMedium() { return ANDROID_SDK; }
 
     private AuthorizationRequest(String clientId,
                                  AuthorizationResponse.Type responseType,
@@ -193,8 +205,8 @@ public class AuthorizationRequest implements Parcelable {
                 .appendQueryParameter(AccountsQueryParameters.RESPONSE_TYPE, mResponseType)
                 .appendQueryParameter(AccountsQueryParameters.REDIRECT_URI, mRedirectUri)
                 .appendQueryParameter(AccountsQueryParameters.SHOW_DIALOG, String.valueOf(mShowDialog))
-                .appendQueryParameter(AccountsQueryParameters.UTM_SOURCE, SPOTIFY_SDK)
-                .appendQueryParameter(AccountsQueryParameters.UTM_MEDIUM, ANDROID_SDK)
+                .appendQueryParameter(AccountsQueryParameters.UTM_SOURCE, getSource())
+                .appendQueryParameter(AccountsQueryParameters.UTM_MEDIUM, getMedium())
                 .appendQueryParameter(AccountsQueryParameters.UTM_CAMPAIGN, getCampaign());
 
         if (mScopes != null && mScopes.length > 0) {

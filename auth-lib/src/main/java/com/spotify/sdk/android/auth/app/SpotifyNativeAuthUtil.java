@@ -26,6 +26,9 @@ import static com.spotify.sdk.android.auth.IntentExtras.KEY_REDIRECT_URI;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_REQUESTED_SCOPES;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_RESPONSE_TYPE;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_STATE;
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_UTM_CAMPAIGN;
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_UTM_MEDIUM;
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_UTM_SOURCE;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_VERSION;
 
 import android.annotation.SuppressLint;
@@ -97,6 +100,9 @@ public class SpotifyNativeAuthUtil {
         intent.putExtra(KEY_RESPONSE_TYPE, mRequest.getResponseType());
         intent.putExtra(KEY_REQUESTED_SCOPES, mRequest.getScopes());
         intent.putExtra(KEY_STATE, mRequest.getState());
+        intent.putExtra(KEY_UTM_SOURCE, mRequest.getSource());
+        intent.putExtra(KEY_UTM_CAMPAIGN, mRequest.getCampaign());
+        intent.putExtra(KEY_UTM_MEDIUM, mRequest.getMedium());
 
         try {
             mContextActivity.startActivityForResult(intent, LoginActivity.REQUEST_CODE);
