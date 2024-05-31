@@ -10,6 +10,9 @@ public interface IntentExtras {
     String KEY_CLIENT_ID = "CLIENT_ID";
     String KEY_REQUESTED_SCOPES = "SCOPES";
     String KEY_STATE = "STATE";
+    String KEY_UTM_SOURCE = "UTM_SOURCE";
+    String KEY_UTM_MEDIUM = "UTM_MEDIUM";
+    String KEY_UTM_CAMPAIGN = "UTM_CAMPAIGN";
     String KEY_REDIRECT_URI = "REDIRECT_URI";
     String KEY_RESPONSE_TYPE = "RESPONSE_TYPE";
     String KEY_ACCESS_TOKEN = "ACCESS_TOKEN";

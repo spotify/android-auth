@@ -80,10 +80,12 @@ public class AuthorizationClientTest {
 
     @Test
     public void createLoginActivityIntentShouldReturnAnIntentWithExtrasInIt() {
+        String campaign = "campaign";
         AuthorizationRequest authorizationRequest =
                 new AuthorizationRequest
                         .Builder("test", AuthorizationResponse.Type.TOKEN, "to://me")
                         .setScopes(new String[]{"testa", "toppen"})
+                        .setCampaign(campaign)
                         .build();
 
         Activity activity = mock(Activity.class);
@@ -98,6 +100,7 @@ public class AuthorizationClientTest {
         assertEquals("test", extra.getClientId());
         assertEquals("token", extra.getResponseType());
         assertEquals("to://me", extra.getRedirectUri());
+        assertEquals(campaign, extra.getCampaign());
         assertEquals(2, extra.getScopes().length);
     }
 
