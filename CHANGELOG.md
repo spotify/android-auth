@@ -1,5 +1,8 @@
 Change Log
 ==========
+## Version 2.1.2
+* Propagate tracking parameters when opening the native login flow
+
 ## Version 2.1.1
 * Introduced RedirectUriReceiverActivity for web based auth flow
 * Restructured web based flow, removed LoginDialog class
