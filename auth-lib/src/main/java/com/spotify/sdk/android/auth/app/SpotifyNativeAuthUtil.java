@@ -108,7 +108,7 @@ public class SpotifyNativeAuthUtil {
 
     /**
      * Creates an intent that will launch the auth flow on the currently installed Spotify application
-     *
+     * @param context The context of the caller
      * @return The auth Intent or null if the Spotify application couldn't be found
      */
     @Nullable
