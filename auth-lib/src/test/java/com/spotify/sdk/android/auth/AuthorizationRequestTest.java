@@ -215,6 +215,26 @@ public class AuthorizationRequestTest {
         assertEquals(uri, authorizationRequest.toUri());
     }
 
+    @Test
+    public void shouldSetContent() {
+        String contentUri = "spotify:track:1234567890";
+        String contentUrl = "https://open.spotify.com/track/1234567890";
+        String encodedContent = "eyJ1cmkiOiJzcG90aWZ5OnRyYWNrOjEyMzQ1Njc4OTAiLCJ1cmwiOiJodHRwczpcL1wvb3Blbi5zcG90aWZ5LmNvbVwvdHJhY2tcLzEyMzQ1Njc4OTAifQ==";
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+                .setContentUri(contentUri)
+                .setContentUrl(contentUrl)
+                .build();
+
+        assertEquals(authorizationRequest.getEncodedContent(), encodedContent);
+
+        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
+        uriBuilder.appendQueryParameter(AccountsQueryParameters.ASSOCIATED_CONTENT, encodedContent);
+        Uri uri = uriBuilder.build();
+
+        assertEquals(uri, authorizationRequest.toUri());
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowWithNullCustomParamKey() {
         new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)

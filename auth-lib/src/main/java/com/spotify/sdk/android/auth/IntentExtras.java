@@ -24,4 +24,5 @@ public interface IntentExtras {
      * DO NOT CHANGE THIS.
      */
     String KEY_VERSION = "VERSION";
+    String KEY_ASSOCIATED_CONTENT = "associated_content";
 }

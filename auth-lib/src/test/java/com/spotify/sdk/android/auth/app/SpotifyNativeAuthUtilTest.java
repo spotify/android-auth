@@ -170,6 +170,37 @@ public class SpotifyNativeAuthUtilTest {
         assertEquals(campaign, intent.getStringExtra(IntentExtras.KEY_UTM_CAMPAIGN));
     }
 
+    @Test
+    public void hasContentExtrasSetToLoginIntent() {
+        String campaign = "campaign";
+        String contentUri = "spotify:track:1234567890";
+        String contentUrl = "https://open.spotify.com/track/1234567890";
+        String encodedContent = "eyJ1cmkiOiJzcG90aWZ5OnRyYWNrOjEyMzQ1Njc4OTAiLCJ1cmwiOiJodHRwczpcL1wvb3Blbi5zcG90aWZ5LmNvbVwvdHJhY2tcLzEyMzQ1Njc4OTAifQ==";
+        Activity activity = mock(Activity.class);
+        Mockito.doNothing().when(activity).startActivityForResult(any(Intent.class), anyInt());
+        AuthorizationRequest authorizationRequest =
+                new AuthorizationRequest
+                        .Builder("test", AuthorizationResponse.Type.TOKEN, "to://me")
+                        .setScopes(new String[]{"testa", "toppen"})
+                        .setCampaign(campaign)
+                        .setContentUri(contentUri)
+                        .setContentUrl(contentUrl)
+                        .build();
+        configureMocksWithSigningInfo(activity);
+        SpotifyNativeAuthUtil authUtil = new SpotifyNativeAuthUtil(
+                activity,
+                authorizationRequest,
+                new FakeSha1HashUtil(Collections.singletonMap(DEFAULT_TEST_SIGNATURE, SPOTIFY_HASH))
+        );
+        authUtil.startAuthActivity();
+
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(activity, times(1)).startActivityForResult(captor.capture(), anyInt());
+        Intent intent = captor.getValue();
+
+        assertEquals(encodedContent, intent.getStringExtra(IntentExtras.KEY_ASSOCIATED_CONTENT));
+    }
+
     private void configureDefaultMocks(Context mockedContext) {
         PackageInfo packageInfo = new PackageInfo();
         Signature mockedSignature = mock(Signature.class);
