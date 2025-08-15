@@ -30,6 +30,8 @@ import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 @RunWith(RobolectricTestRunner.class)
 public class AuthorizationRequestTest {
@@ -269,5 +271,121 @@ public class AuthorizationRequestTest {
         assertEquals(request.getState(), requestFromParcel.getState());
         assertEquals(request.getCustomParam(key1), requestFromParcel.getCustomParam(key1));
         assertEquals(request.getCustomParam(key2), requestFromParcel.getCustomParam(key2));
+    }
+
+    @Test
+    public void shouldSetPkceInformation() {
+        String verifier = "test_verifier_1234567890";
+        String challenge = "test_challenge_abcdef";
+        PKCEInformation pkceInfo = PKCEInformation.sha256(verifier, challenge);
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+                .setPkceInformation(pkceInfo)
+                .build();
+
+        assertEquals(pkceInfo, authorizationRequest.getPkceInformation());
+
+        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
+        uriBuilder.appendQueryParameter(AccountsQueryParameters.CODE_CHALLENGE, pkceInfo.getChallenge());
+        uriBuilder.appendQueryParameter(AccountsQueryParameters.CODE_CHALLENGE_METHOD, pkceInfo.getCodeChallengeMethod());
+        Uri uri = uriBuilder.build();
+
+        assertEquals(uri, authorizationRequest.toUri());
+    }
+
+    @Test
+    public void shouldNotSetNullPkceInformation() {
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+                .setPkceInformation(null)
+                .build();
+
+        assertNull(authorizationRequest.getPkceInformation());
+
+        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
+        Uri uri = uriBuilder.build();
+
+        assertEquals(uri, authorizationRequest.toUri());
+    }
+
+    @Test
+    public void shouldMarshallPkceInformationCorrectly() {
+        String verifier = "test_verifier_1234567890";
+        String challenge = "test_challenge_abcdef";
+        PKCEInformation pkceInfo = PKCEInformation.sha256(verifier, challenge);
+
+        AuthorizationRequest request =
+                new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+                        .setState("testState")
+                        .setScopes(new String[]{"scope1", "scope2"})
+                        .setPkceInformation(pkceInfo)
+                        .build();
+
+        Parcel parcel = Parcel.obtain();
+        request.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+
+        AuthorizationRequest requestFromParcel = AuthorizationRequest.CREATOR.createFromParcel(parcel);
+
+        assertEquals(request.getClientId(), requestFromParcel.getClientId());
+        assertEquals(request.getRedirectUri(), requestFromParcel.getRedirectUri());
+        assertEquals(request.getResponseType(), requestFromParcel.getResponseType());
+        assertArrayEquals(request.getScopes(), requestFromParcel.getScopes());
+        assertEquals(request.getState(), requestFromParcel.getState());
+        
+        PKCEInformation originalPkce = request.getPkceInformation();
+        PKCEInformation parceledPkce = requestFromParcel.getPkceInformation();
+        
+        assertNotNull(originalPkce);
+        assertNotNull(parceledPkce);
+        assertEquals(originalPkce.getVerifier(), parceledPkce.getVerifier());
+        assertEquals(originalPkce.getChallenge(), parceledPkce.getChallenge());
+        assertEquals(originalPkce.getCodeChallengeMethod(), parceledPkce.getCodeChallengeMethod());
+    }
+
+    @Test
+    public void shouldMarshallWithoutPkceInformationCorrectly() {
+        AuthorizationRequest request =
+                new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+                        .setState("testState")
+                        .setScopes(new String[]{"scope1", "scope2"})
+                        .build();
+
+        Parcel parcel = Parcel.obtain();
+        request.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+
+        AuthorizationRequest requestFromParcel = AuthorizationRequest.CREATOR.createFromParcel(parcel);
+
+        assertEquals(request.getClientId(), requestFromParcel.getClientId());
+        assertEquals(request.getRedirectUri(), requestFromParcel.getRedirectUri());
+        assertEquals(request.getResponseType(), requestFromParcel.getResponseType());
+        assertArrayEquals(request.getScopes(), requestFromParcel.getScopes());
+        assertEquals(request.getState(), requestFromParcel.getState());
+        assertNull(request.getPkceInformation());
+        assertNull(requestFromParcel.getPkceInformation());
+    }
+
+    @Test
+    public void shouldIncludePkceParametersInUriWithAllFields() {
+        String verifier = "test_verifier_1234567890";
+        String challenge = "test_challenge_abcdef";
+        PKCEInformation pkceInfo = PKCEInformation.sha256(verifier, challenge);
+        String testState = "test_state";
+        String[] testScopes = {"scope1", "scope2"};
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+                .setState(testState)
+                .setScopes(testScopes)
+                .setPkceInformation(pkceInfo)
+                .build();
+
+        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
+        uriBuilder.appendQueryParameter(AccountsQueryParameters.SCOPE, "scope1 scope2");
+        uriBuilder.appendQueryParameter(AccountsQueryParameters.STATE, testState);
+        uriBuilder.appendQueryParameter(AccountsQueryParameters.CODE_CHALLENGE, pkceInfo.getChallenge());
+        uriBuilder.appendQueryParameter(AccountsQueryParameters.CODE_CHALLENGE_METHOD, pkceInfo.getCodeChallengeMethod());
+        Uri expectedUri = uriBuilder.build();
+
+        assertEquals(expectedUri, authorizationRequest.toUri());
     }
 }

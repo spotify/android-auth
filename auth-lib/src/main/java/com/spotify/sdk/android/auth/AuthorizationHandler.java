@@ -23,20 +23,21 @@ package com.spotify.sdk.android.auth;
 
 import android.app.Activity;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public interface AuthorizationHandler {
 
     interface OnCompleteListener {
-        void onComplete(AuthorizationResponse response);
+        void onComplete(@NonNull AuthorizationResponse response);
 
         void onCancel();
 
-        void onError(Throwable error);
+        void onError(@NonNull Throwable error);
 
     }
 
-    boolean start(Activity contextActivity, AuthorizationRequest request);
+    boolean start(@NonNull Activity contextActivity, @NonNull AuthorizationRequest request);
 
     void stop();
 

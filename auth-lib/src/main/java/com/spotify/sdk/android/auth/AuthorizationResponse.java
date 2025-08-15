@@ -25,6 +25,9 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 /**
  * An object that contains the parsed response from the Spotify authorization service.
  * To create one use {@link AuthorizationResponse.Builder} or
@@ -151,7 +154,7 @@ public class AuthorizationResponse implements Parcelable {
         mExpiresIn = expiresIn;
     }
 
-    public AuthorizationResponse(Parcel source) {
+    public AuthorizationResponse(@NonNull Parcel source) {
         mExpiresIn = source.readInt();
         mError = source.readString();
         mState = source.readString();
@@ -167,7 +170,8 @@ public class AuthorizationResponse implements Parcelable {
      * @return Authorization response. If parsing failed, this object will be populated with
      * the given error codes.
      */
-    public static AuthorizationResponse fromUri(Uri uri) {
+    @NonNull
+    public static AuthorizationResponse fromUri(@Nullable Uri uri) {
         AuthorizationResponse.Builder builder = new AuthorizationResponse.Builder();
         if (uri == null) {
             builder.setType(Type.EMPTY);
@@ -229,22 +233,27 @@ public class AuthorizationResponse implements Parcelable {
         return builder.build();
     }
 
+    @NonNull
     public Type getType() {
         return mType;
     }
 
+    @Nullable
     public String getCode() {
         return mCode;
     }
 
+    @Nullable
     public String getAccessToken() {
         return mAccessToken;
     }
 
+    @Nullable
     public String getState() {
         return mState;
     }
 
+    @Nullable
     public String getError() {
         return mError;
     }
@@ -259,7 +268,7 @@ public class AuthorizationResponse implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mExpiresIn);
         dest.writeString(mError);
         dest.writeString(mState);
@@ -270,11 +279,13 @@ public class AuthorizationResponse implements Parcelable {
 
     public static final Parcelable.Creator<AuthorizationResponse> CREATOR = new Parcelable.Creator<AuthorizationResponse>() {
         @Override
-        public AuthorizationResponse createFromParcel(Parcel source) {
+        @NonNull
+        public AuthorizationResponse createFromParcel(@NonNull Parcel source) {
             return new AuthorizationResponse(source);
         }
 
         @Override
+        @NonNull
         public AuthorizationResponse[] newArray(int size) {
             return new AuthorizationResponse[size];
         }

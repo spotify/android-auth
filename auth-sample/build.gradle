@@ -68,8 +68,8 @@ android {
 }
 
 dependencies {
-//    implementation files('../auth-lib/build/outputs/aar/auth-release.aar')
-    implementation 'com.spotify.android:auth:2.1.1'
+    implementation files('../auth-lib/build/outputs/aar/auth-release.aar')
+//    implementation 'com.spotify.android:auth:2.1.1'
 
     implementation 'androidx.browser:browser:1.4.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'

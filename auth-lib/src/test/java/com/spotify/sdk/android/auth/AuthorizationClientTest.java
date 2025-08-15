@@ -22,6 +22,7 @@ package com.spotify.sdk.android.auth;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -79,7 +80,7 @@ public class AuthorizationClientTest {
     }
 
     @Test
-    public void createLoginActivityIntentShouldReturnAnIntentWithExtrasInIt() {
+    public void createLoginActivityIntentShouldReturnAnIntentWithExtrasInIt() throws Exception {
         String campaign = "campaign";
         AuthorizationRequest authorizationRequest =
                 new AuthorizationRequest
@@ -89,6 +90,11 @@ public class AuthorizationClientTest {
                         .build();
 
         Activity activity = mock(Activity.class);
+        PackageManager packageManager = mock(PackageManager.class);
+        when(activity.getPackageManager()).thenReturn(packageManager);
+        // Mock getPackageInfo to throw NameNotFoundException (Spotify not installed)
+        when(packageManager.getPackageInfo(any(String.class), eq(0)))
+            .thenThrow(new PackageManager.NameNotFoundException());
 
         Intent intent =
                 AuthorizationClient.createLoginActivityIntent(activity, authorizationRequest);
@@ -135,10 +141,12 @@ public class AuthorizationClientTest {
     public void shouldCreateAnInstanceOfAuthorizationClientAndSendEvents() {
         Activity mContext = Robolectric.buildActivity(Activity.class).create().get();
         AuthorizationClient client = new AuthorizationClient(mContext);
+        PKCEInformation pkceInfo = PKCEInformation.sha256("test_verifier", "test_challenge");
         AuthorizationRequest authorizationRequest =
                 new AuthorizationRequest
                         .Builder("test", AuthorizationResponse.Type.TOKEN, "to://me")
                         .setScopes(new String[]{"testa", "toppen"})
+                        .setPkceInformation(pkceInfo)
                         .build();
 
         client.authorize(authorizationRequest);
@@ -156,5 +164,50 @@ public class AuthorizationClientTest {
         ArgumentCaptor<AuthorizationResponse> captor = ArgumentCaptor.forClass(AuthorizationResponse.class);
         verify(mockListener, times(1)).onClientComplete(captor.capture());
         assertEquals(AuthorizationResponse.Type.ERROR, captor.getValue().getType());
+    }
+
+    @Test
+    public void shouldCreateLoginActivityIntentWithPkceForTokenRequest() throws Exception {
+        // Create a TOKEN request (PKCE should be automatically added)
+        AuthorizationRequest tokenRequest = new AuthorizationRequest.Builder(
+                "test_client_id", 
+                AuthorizationResponse.Type.TOKEN, 
+                "redirect://uri")
+                .setScopes(new String[]{"user-read-private", "playlist-read"})
+                .setState("test_state")
+                .setCampaign("test_campaign")
+                .build();
+
+        Activity activity = mock(Activity.class);
+        PackageManager packageManager = mock(PackageManager.class);
+        when(activity.getPackageManager()).thenReturn(packageManager);
+        // Mock getPackageInfo to throw NameNotFoundException (Spotify not installed)
+        when(packageManager.getPackageInfo(any(String.class), eq(0)))
+            .thenThrow(new PackageManager.NameNotFoundException());
+
+        Intent intent = AuthorizationClient.createLoginActivityIntent(activity, tokenRequest);
+
+        // Extract the request from the intent
+        AuthorizationRequest extractedRequest = intent
+                .getBundleExtra(LoginActivity.EXTRA_AUTH_REQUEST)
+                .getParcelable(LoginActivity.REQUEST_KEY);
+
+        assertNotNull(extractedRequest);
+        
+        // Verify TOKEN request now has PKCE information
+        assertEquals("test_client_id", extractedRequest.getClientId());
+        assertEquals("token", extractedRequest.getResponseType());
+        assertEquals("redirect://uri", extractedRequest.getRedirectUri());
+        assertEquals("test_state", extractedRequest.getState());
+        assertEquals("test_campaign", extractedRequest.getCampaign());
+        assertEquals(2, extractedRequest.getScopes().length);
+        assertEquals("user-read-private", extractedRequest.getScopes()[0]);
+        assertEquals("playlist-read", extractedRequest.getScopes()[1]);
+        
+        // Verify PKCE was automatically added
+        assertNotNull(extractedRequest.getPkceInformation());
+        assertNotNull(extractedRequest.getPkceInformation().getVerifier());
+        assertNotNull(extractedRequest.getPkceInformation().getChallenge());
+        assertEquals("S256", extractedRequest.getPkceInformation().getCodeChallengeMethod());
     }
 }

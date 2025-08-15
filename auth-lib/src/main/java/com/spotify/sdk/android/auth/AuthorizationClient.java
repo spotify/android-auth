@@ -30,10 +30,18 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.spotify.sdk.android.auth.app.SpotifyAuthHandler;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
+import com.spotify.sdk.android.auth.app.SpotifyAuthHandler;
+import com.spotify.sdk.android.auth.app.SpotifyNativeAuthUtil;
+
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.spotify.sdk.android.auth.AuthorizationResponse.Type.TOKEN;
 
 /**
  * AuthorizationClient provides helper methods to initialize an manage the Spotify authorization flow.
@@ -183,6 +191,13 @@ public final class AuthorizationClient {
     static final String ANDROID_SDK = "android-sdk";
     static final String DEFAULT_CAMPAIGN = "android-sdk";
 
+    /**
+     * Minimum Spotify app version code required for TOKEN to CODE conversion.
+     * Corresponds to version name 9.0.78.360.
+     */
+    @VisibleForTesting
+    static final int MIN_SPOTIFY_VERSION_FOR_TOKEN_CONVERSION = 132384743;
+
     static final class PlayStoreParams {
         public static final String ID = "id";
         public static final String REFERRER = "referrer";
@@ -244,7 +259,7 @@ public final class AuthorizationClient {
      * @param contextActivity The activity that should start the intent to open a browser.
      * @param request         Authorization request
      */
-    public static void openLoginInBrowser(Activity contextActivity, AuthorizationRequest request) {
+    public static void openLoginInBrowser(@NonNull Activity contextActivity, @NonNull AuthorizationRequest request) {
         Intent launchBrowser = new Intent(Intent.ACTION_VIEW, request.toUri());
         contextActivity.startActivity(launchBrowser);
     }
@@ -267,8 +282,18 @@ public final class AuthorizationClient {
      * @return The intent to open LoginActivity with.
      * @throws IllegalArgumentException if any of the arguments is null
      */
-    public static Intent createLoginActivityIntent(Activity contextActivity, AuthorizationRequest request) {
-        Intent intent = LoginActivity.getAuthIntent(contextActivity, request);
+    @NonNull
+    public static Intent createLoginActivityIntent(@NonNull Activity contextActivity, @NonNull AuthorizationRequest request) {
+        if (contextActivity == null) {
+            throw new IllegalArgumentException("Context activity cannot be null");
+        }
+        if (request == null) {
+            throw new IllegalArgumentException("Authorization request cannot be null");
+        }
+
+        // Append PKCE to TOKEN requests before creating intent
+        final AuthorizationRequest processedRequest = appendPkceIfTokenRequest(contextActivity, request);
+        Intent intent = LoginActivity.getAuthIntent(contextActivity, processedRequest);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         return intent;
     }
@@ -285,7 +310,7 @@ public final class AuthorizationClient {
      * @param request         Authorization request
      * @throws IllegalArgumentException if any of the arguments is null
      */
-    public static void openLoginActivity(Activity contextActivity, int requestCode, AuthorizationRequest request) {
+    public static void openLoginActivity(@NonNull Activity contextActivity, int requestCode, @NonNull AuthorizationRequest request) {
         Intent intent = createLoginActivityIntent(contextActivity, request);
         contextActivity.startActivityForResult(intent, requestCode);
     }
@@ -297,7 +322,7 @@ public final class AuthorizationClient {
      *                        with {@link #openLoginActivity(android.app.Activity, int, AuthorizationRequest)}
      * @param requestCode     Request code that was used to launch LoginActivity
      */
-    public static void stopLoginActivity(Activity contextActivity, int requestCode) {
+    public static void stopLoginActivity(@NonNull Activity contextActivity, int requestCode) {
         contextActivity.finishActivity(requestCode);
     }
 
@@ -309,7 +334,8 @@ public final class AuthorizationClient {
      * @param intent     Intent received with activity result. Should contain a Uri with result data.
      * @return response object.
      */
-    public static AuthorizationResponse getResponse(int resultCode, Intent intent) {
+    @NonNull
+    public static AuthorizationResponse getResponse(int resultCode, @Nullable Intent intent) {
         if (resultCode == Activity.RESULT_OK && LoginActivity.getResponseFromIntent(intent) != null) {
             return LoginActivity.getResponseFromIntent(intent);
         } else {
@@ -324,7 +350,7 @@ public final class AuthorizationClient {
      *
      * @param contextActivity The activity that should start the intent to open the download page.
      */
-    public static void openDownloadSpotifyActivity(Activity contextActivity) {
+    public static void openDownloadSpotifyActivity(@NonNull Activity contextActivity) {
         openDownloadSpotifyActivity(contextActivity, DEFAULT_CAMPAIGN);
     }
 
@@ -334,7 +360,7 @@ public final class AuthorizationClient {
      * @param contextActivity The activity that should start the intent to open the download page.
      * @param campaign A Spotify-provided campaign ID. <code>null</code> if not provided.
      */
-    public static void openDownloadSpotifyActivity(Activity contextActivity, String campaign) {
+    public static void openDownloadSpotifyActivity(@NonNull Activity contextActivity, @Nullable String campaign) {
 
         Uri.Builder uriBuilder = new Uri.Builder();
 
@@ -364,7 +390,7 @@ public final class AuthorizationClient {
         contextActivity.startActivity(new Intent(Intent.ACTION_VIEW, uriBuilder.build()));
     }
 
-    public static boolean isAvailable(Context ctx, Intent intent) {
+    public static boolean isAvailable(@NonNull Context ctx, @NonNull Intent intent) {
         final PackageManager mgr = ctx.getPackageManager();
         List<ResolveInfo> list =
                 mgr.queryIntentActivities(intent,
@@ -372,7 +398,7 @@ public final class AuthorizationClient {
         return list.size() > 0;
     }
 
-    public AuthorizationClient(Activity activity) {
+    public AuthorizationClient(@NonNull Activity activity) {
         mLoginActivity = activity;
 
         mAuthorizationHandlers.add(new SpotifyAuthHandler());
@@ -398,12 +424,97 @@ public final class AuthorizationClient {
     void authorize(AuthorizationRequest request) {
         if (mAuthorizationPending) return;
         mAuthorizationPending = true;
+
+        // Validate TOKEN requests have PKCE and convert to CODE for handlers
+        final AuthorizationRequest processedRequest = validateAndConvertTokenRequest(request);
+
         for (AuthorizationHandler authHandler : mAuthorizationHandlers) {
-            if (tryAuthorizationHandler(authHandler, request)) {
+            if (tryAuthorizationHandler(authHandler, processedRequest)) {
                 mCurrentHandler = authHandler;
                 break;
             }
         }
+    }
+
+    /**
+     * Appends PKCE information to TOKEN requests before starting LoginActivity.
+     * PKCE is added if Spotify app is not installed (web fallback) or if the installed
+     * Spotify app version supports it.
+     *
+     * @param context The context used to check Spotify app version
+     * @param request The original authorization request
+     * @return The request with PKCE appended if it's a TOKEN request and appropriate
+     */
+    private static AuthorizationRequest appendPkceIfTokenRequest(Context context, AuthorizationRequest request) {
+        final boolean isTokenRequest = TOKEN.toString().equals(request.getResponseType());
+        final boolean isSpotifyInstalled = SpotifyNativeAuthUtil.isSpotifyInstalled(context);
+        final boolean isPKCESpotifyVersion = SpotifyNativeAuthUtil.isSpotifyVersionAtLeast(
+                context,
+                MIN_SPOTIFY_VERSION_FOR_TOKEN_CONVERSION);
+        final boolean hasSpotifyVersionWithoutPKCESupportInstalled = isSpotifyInstalled && !isPKCESpotifyVersion;
+        if (!isTokenRequest || hasSpotifyVersionWithoutPKCESupportInstalled) {
+            return request;
+        }
+
+        try {
+            // Generate PKCE information
+            final PKCEInformation pkceInfo = PKCEInformationFactory.create();
+
+            // Create a new request with PKCE appended (keep TOKEN type for now)
+            return new AuthorizationRequest.Builder(
+                    request.getClientId(),
+                    AuthorizationResponse.Type.TOKEN,
+                    request.getRedirectUri())
+                    .setState(request.getState())
+                    .setScopes(request.getScopes())
+                    .setCampaign(request.getCampaign())
+                    .setPkceInformation(pkceInfo)
+                    .build();
+
+        } catch (final NoSuchAlgorithmException e) {
+            throw new RuntimeException("Failed to generate PKCE information: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Validates TOKEN requests have PKCE and converts them to CODE requests for handlers
+     * if the Spotify app version supports it or if web fallback will be used.
+     *
+     * @param request The authorization request
+     * @return The processed request (converted to CODE if TOKEN with PKCE and appropriate)
+     */
+    private AuthorizationRequest validateAndConvertTokenRequest(AuthorizationRequest request) {
+        final boolean isTokenRequest = TOKEN.toString().equals(request.getResponseType());
+        final boolean hasPkce = request.getPkceInformation() != null;
+
+        if (!isTokenRequest || !hasPkce) {
+            return request;
+        }
+
+        final boolean isSpotifyInstalled = SpotifyNativeAuthUtil.isSpotifyInstalled(mLoginActivity);
+        final boolean isPKCESpotifyVersion = SpotifyNativeAuthUtil.isSpotifyVersionAtLeast(
+                mLoginActivity,
+                MIN_SPOTIFY_VERSION_FOR_TOKEN_CONVERSION);
+
+        // Convert TOKEN to CODE if:
+        // 1. Spotify not installed (will use web fallback with code exchange)
+        // 2. Spotify installed and supports PKCE
+        final boolean shouldConvert = !isSpotifyInstalled || isPKCESpotifyVersion;
+
+        if (!shouldConvert) {
+            return request;
+        }
+
+        // Convert to CODE request for handlers
+        return new AuthorizationRequest.Builder(
+                request.getClientId(),
+                AuthorizationResponse.Type.CODE,
+                request.getRedirectUri())
+                .setState(request.getState())
+                .setScopes(request.getScopes())
+                .setCampaign(request.getCampaign())
+                .setPkceInformation(request.getPkceInformation())
+                .build();
     }
 
     /**
@@ -504,6 +615,14 @@ public final class AuthorizationClient {
                     .setType(AuthorizationResponse.Type.EMPTY)
                     .build();
             complete(response);
+        }
+    }
+
+    void clearAuthInProgress() {
+        if (mCurrentHandler != null) {
+            Log.d(TAG, "Clearing auth in progress state");
+            mCurrentHandler.stop();
+            mCurrentHandler = null;
         }
     }
 }
