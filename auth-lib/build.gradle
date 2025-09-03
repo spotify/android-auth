@@ -23,7 +23,7 @@ apply plugin: 'com.android.library'
 
 project.group = 'com.spotify.android'
 project.archivesBaseName = 'auth'
-project.version = '2.2.0'
+project.version = '2.2.1'
 
 android {
     compileSdk 33
@@ -85,6 +85,9 @@ android {
     def manifestPlaceholdersForTests = [redirectSchemeName: "spotify-sdk", redirectHostName: "auth"]
     namespace 'com.spotify.sdk.android.auth'
     unitTestVariants.configureEach {
+        it.mergedFlavor.manifestPlaceholders += manifestPlaceholdersForTests
+    }
+    testVariants.configureEach {
         it.mergedFlavor.manifestPlaceholders += manifestPlaceholdersForTests
     }
 }

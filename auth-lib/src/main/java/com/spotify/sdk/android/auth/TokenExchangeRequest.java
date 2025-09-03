@@ -31,7 +31,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 /**
  * A utility class for exchanging an authorization code for an access token using PKCE verifier.
@@ -102,7 +101,12 @@ public class TokenExchangeRequest {
             final String requestBody = buildRequestBody();
 
             try (final OutputStream outputStream = connection.getOutputStream()) {
-                outputStream.write(requestBody.getBytes(StandardCharsets.UTF_8));
+                try {
+                    outputStream.write(requestBody.getBytes("UTF-8"));
+                } catch (final java.io.UnsupportedEncodingException e) {
+                    // UTF-8 is guaranteed to be supported on all platforms
+                    throw new RuntimeException("UTF-8 encoding not supported", e);
+                }
                 outputStream.flush();
             }
 
@@ -138,7 +142,7 @@ public class TokenExchangeRequest {
     private String readResponse(@NonNull final HttpURLConnection connection, final boolean isError) throws IOException {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
                 isError ? connection.getErrorStream() : connection.getInputStream(),
-                StandardCharsets.UTF_8))) {
+                "UTF-8"))) {
 
             final StringBuilder response = new StringBuilder();
             String line;

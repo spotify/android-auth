@@ -25,7 +25,6 @@ import android.util.Base64;
 
 import androidx.annotation.NonNull;
 
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -57,9 +56,14 @@ public class PKCEInformationFactory {
 
     @NonNull
     private static String generateCodeChallenge(@NonNull String codeVerifier) throws NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = digest.digest(codeVerifier.getBytes(StandardCharsets.US_ASCII));
-        return Base64.encodeToString(hash, Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(codeVerifier.getBytes("US-ASCII"));
+            return Base64.encodeToString(hash, Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
+        } catch (final java.io.UnsupportedEncodingException e) {
+            // US-ASCII is guaranteed to be supported on all platforms
+            throw new RuntimeException("US-ASCII encoding not supported", e);
+        }
     }
 }
 
