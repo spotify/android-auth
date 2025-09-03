@@ -23,7 +23,7 @@ apply plugin: 'com.android.library'
 
 project.group = 'com.spotify.android'
 project.archivesBaseName = 'auth'
-project.version = '2.1.2'
+project.version = '2.2.0'
 
 android {
     compileSdk 33
