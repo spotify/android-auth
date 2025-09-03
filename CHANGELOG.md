@@ -1,11 +1,13 @@
 Change Log
 ==========
 
+## Version 2.2.1
+- Resolve gradle check errors
+
 ## Version 2.2.0
 - Requesting token now uses PKCE when:
     - There is an installed Spotify app that supports PKCE.
     - When web fallback is used.
-
 
 ## Version 2.1.2
 * Propagate tracking parameters when opening the native login flow
