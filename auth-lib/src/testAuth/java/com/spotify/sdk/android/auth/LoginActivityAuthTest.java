@@ -53,7 +53,10 @@ public class LoginActivityAuthTest {
                 .create()
                 .get();
 
-        AuthorizationRequest request = new AuthorizationRequest.Builder("test", AuthorizationResponse.Type.TOKEN, "test://test").build();
+        PKCEInformation pkceInfo = PKCEInformation.sha256("test_verifier", "test_challenge");
+        AuthorizationRequest request = new AuthorizationRequest.Builder("test", AuthorizationResponse.Type.TOKEN, "test://test")
+                .setPkceInformation(pkceInfo)
+                .build();
         AuthorizationResponse response = new AuthorizationResponse.Builder()
                 .setType(AuthorizationResponse.Type.TOKEN)
                 .setAccessToken("test_token")

@@ -18,6 +18,8 @@ public interface IntentExtras {
     String KEY_ACCESS_TOKEN = "ACCESS_TOKEN";
     String KEY_AUTHORIZATION_CODE = "AUTHORIZATION_CODE";
     String KEY_EXPIRES_IN = "EXPIRES_IN";
+    String KEY_CODE_CHALLENGE = "CODE_CHALLENGE";
+    String KEY_CODE_CHALLENGE_METHOD = "CODE_CHALLENGE_METHOD";
     /*
      * This is used to pass information about the protocol version
      * to the AuthorizationActivity.

@@ -14,4 +14,6 @@ public interface AccountsQueryParameters {
   String CODE = "code";
   String ACCESS_TOKEN = "access_token";
   String EXPIRES_IN = "expires_in";
+  String CODE_CHALLENGE = "code_challenge";
+  String CODE_CHALLENGE_METHOD = "code_challenge_method";
 }

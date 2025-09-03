@@ -25,9 +25,15 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_ACCESS_TOKEN;
+import static com.spotify.sdk.android.auth.AuthorizationResponse.Type.TOKEN;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_AUTHORIZATION_CODE;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_EXPIRES_IN;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_RESPONSE_TYPE;
@@ -59,6 +65,8 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
     public static final String RESPONSE_KEY = "response";
 
     private final AuthorizationClient mAuthorizationClient = new AuthorizationClient(this);
+    private final ExecutorService mExecutorService = Executors.newSingleThreadExecutor();
+    private final Handler mMainHandler = new Handler(Looper.getMainLooper());
 
     public static final int REQUEST_CODE = 1138;
 
@@ -66,9 +74,36 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
 
     @Override
     protected void onNewIntent(Intent intent) {
+        final AuthorizationRequest originalRequest = getRequestFromIntent();
         super.onNewIntent(intent);
         final Uri responseUri = intent.getData();
-        mAuthorizationClient.complete(AuthorizationResponse.fromUri(responseUri));
+        
+        // Clear auth-in-progress state to prevent onResume from thinking user canceled
+        if (responseUri != null) {
+            mAuthorizationClient.clearAuthInProgress();
+        }
+        
+        final AuthorizationResponse response = AuthorizationResponse.fromUri(responseUri);
+
+        // Check if this is a CODE response from web fallback that needs token exchange
+        if (response.getType() == AuthorizationResponse.Type.CODE) {
+            // Check if original request was for TOKEN and has PKCE info
+            if (originalRequest != null &&
+                originalRequest.getResponseType().equals(TOKEN.toString()) &&
+                originalRequest.getPkceInformation() != null) {
+                    
+                // Perform PKCE token exchange for web fallback
+                final AuthorizationResponse.Builder responseBuilder = new AuthorizationResponse.Builder()
+                        .setType(AuthorizationResponse.Type.TOKEN)
+                        .setState(response.getState());
+
+                performPkceTokenExchange(response.getCode(), originalRequest, responseBuilder);
+                return; // Don't complete immediately, wait for async result
+            }
+        }
+
+        // Handle normal responses (TOKEN from web, errors, etc.)
+        mAuthorizationClient.complete(response);
     }
 
     public static Intent getAuthIntent(Activity contextActivity, AuthorizationRequest request) {
@@ -143,6 +178,9 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
     protected void onDestroy() {
         mAuthorizationClient.cancel();
         mAuthorizationClient.setOnCompleteListener(null);
+        if (mExecutorService != null) {
+            mExecutorService.shutdown();
+        }
         super.onDestroy();
     }
 
@@ -186,9 +224,26 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
                             response.setExpiresIn(expiresIn);
                             break;
                         case RESPONSE_TYPE_CODE:
-                            String code = data.getString(KEY_AUTHORIZATION_CODE);
-                            response.setType(AuthorizationResponse.Type.CODE);
-                            response.setCode(code);
+                            final String code = data.getString(KEY_AUTHORIZATION_CODE);
+                            final AuthorizationRequest originalRequest = getRequestFromIntent();
+
+                            // Check if original request was for TOKEN and has PKCE info
+                            if (originalRequest != null &&
+                                originalRequest.getResponseType().equals(TOKEN.toString())) {
+
+                                if (originalRequest.getPkceInformation() != null) {
+                                    // Perform PKCE token exchange
+                                    performPkceTokenExchange(code, originalRequest, response);
+                                    return; // Don't complete immediately, wait for async result
+                                } else {
+                                    throw new IllegalStateException(
+                                        "Exchanging the code for a token requires PKCE parameters");
+                                }
+                            } else {
+                                // Regular code response
+                                response.setType(AuthorizationResponse.Type.CODE);
+                                response.setCode(code);
+                            }
                             break;
                         default:
                             response.setType(AuthorizationResponse.Type.UNKNOWN);
@@ -225,5 +280,69 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
         // Called only when LoginActivity is destroyed and no other result is set.
         Log.w(TAG, "Spotify Auth cancelled due to LoginActivity being finished");
         setResult(Activity.RESULT_CANCELED);
+    }
+
+    private void performPkceTokenExchange(final String code,
+                                         final AuthorizationRequest originalRequest,
+                                         final AuthorizationResponse.Builder responseBuilder) {
+        Log.d(TAG, "Performing PKCE token exchange for code: " + code);
+
+        mExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final PKCEInformation pkceInfo = originalRequest.getPkceInformation();
+                    final TokenExchangeRequest tokenRequest = new TokenExchangeRequest.Builder()
+                            .setClientId(originalRequest.getClientId())
+                            .setCode(code)
+                            .setRedirectUri(originalRequest.getRedirectUri())
+                            .setCodeVerifier(pkceInfo.getVerifier())
+                            .build();
+
+                    final TokenExchangeResponse tokenResponse = tokenRequest.execute();
+
+                    // Switch back to main thread to complete the response
+                    mMainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (tokenResponse.isSuccess()) {
+                                // Convert to TOKEN response
+                                responseBuilder.setType(AuthorizationResponse.Type.TOKEN);
+                                responseBuilder.setAccessToken(tokenResponse.getAccessToken());
+                                responseBuilder.setExpiresIn(tokenResponse.getExpiresIn());
+                                Log.d(TAG, "PKCE token exchange successful");
+                            } else {
+                                // Convert to ERROR response
+                                responseBuilder.setType(AuthorizationResponse.Type.ERROR);
+                                final String errorMsg = tokenResponse.getError() +
+                                    (tokenResponse.getErrorDescription() != null ?
+                                        ": " + tokenResponse.getErrorDescription() : "");
+                                responseBuilder.setError(errorMsg);
+                                Log.e(TAG, "PKCE token exchange failed: " + errorMsg);
+                            }
+
+                            // Complete the authorization flow
+                            mAuthorizationClient.setOnCompleteListener(LoginActivity.this);
+                            mAuthorizationClient.complete(responseBuilder.build());
+                        }
+                    });
+
+                } catch (final Exception e) {
+                    Log.e(TAG, "PKCE token exchange error", e);
+
+                    // Switch back to main thread to complete with error
+                    mMainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            responseBuilder.setType(AuthorizationResponse.Type.ERROR);
+                            responseBuilder.setError("Token exchange failed: " + e.getMessage());
+
+                            mAuthorizationClient.setOnCompleteListener(LoginActivity.this);
+                            mAuthorizationClient.complete(responseBuilder.build());
+                        }
+                    });
+                }
+            }
+        });
     }
 }
