@@ -27,6 +27,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -575,7 +577,9 @@ public final class AuthorizationClient {
                         .setType(AuthorizationResponse.Type.EMPTY)
                         .build();
 
-                sendComplete(authHandler, response);
+                new Handler(Looper.getMainLooper()).post((Runnable) () -> {
+                    sendComplete(authHandler, response);
+                });
             }
 
             @Override
