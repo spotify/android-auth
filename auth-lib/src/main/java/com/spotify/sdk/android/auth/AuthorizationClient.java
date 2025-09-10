@@ -75,7 +75,6 @@ import static com.spotify.sdk.android.auth.AuthorizationResponse.Type.TOKEN;
  * <p>In both cases, (SSO and browser fallback) the result of the authorization flow will be returned
  * in the {@code onActivityResult} method of the activity that initiated it.</p>
  *
- * <p>
  * <pre>{@code
  * // Code called from an activity
  * private static final int REQUEST_CODE = 1337;
