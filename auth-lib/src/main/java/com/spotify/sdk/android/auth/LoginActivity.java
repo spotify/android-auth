@@ -77,12 +77,12 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
         final AuthorizationRequest originalRequest = getRequestFromIntent();
         super.onNewIntent(intent);
         final Uri responseUri = intent.getData();
-        
+
         // Clear auth-in-progress state to prevent onResume from thinking user canceled
         if (responseUri != null) {
             mAuthorizationClient.clearAuthInProgress();
         }
-        
+
         final AuthorizationResponse response = AuthorizationResponse.fromUri(responseUri);
 
         // Check if this is a CODE response from web fallback that needs token exchange
@@ -91,7 +91,7 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
             if (originalRequest != null &&
                 originalRequest.getResponseType().equals(TOKEN.toString()) &&
                 originalRequest.getPkceInformation() != null) {
-                    
+
                 // Perform PKCE token exchange for web fallback
                 final AuthorizationResponse.Builder responseBuilder = new AuthorizationResponse.Builder()
                         .setType(AuthorizationResponse.Type.TOKEN)
@@ -310,6 +310,7 @@ public class LoginActivity extends Activity implements AuthorizationClient.Autho
                                 responseBuilder.setType(AuthorizationResponse.Type.TOKEN);
                                 responseBuilder.setAccessToken(tokenResponse.getAccessToken());
                                 responseBuilder.setExpiresIn(tokenResponse.getExpiresIn());
+                                responseBuilder.setRefreshToken(tokenResponse.getRefreshToken());
                                 Log.d(TAG, "PKCE token exchange successful");
                             } else {
                                 // Convert to ERROR response

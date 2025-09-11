@@ -90,6 +90,8 @@ public class AuthorizationResponse implements Parcelable {
     private final String mState;
     private final String mError;
     private final int mExpiresIn;
+    @Nullable
+    private final String mRefreshToken;
 
     /**
      * Use this builder to create an {@link AuthorizationResponse}
@@ -104,6 +106,8 @@ public class AuthorizationResponse implements Parcelable {
         private String mState;
         private String mError;
         private int mExpiresIn;
+        @Nullable
+        private String mRefreshToken;
 
         Builder setType(Type type) {
             mType = type;
@@ -135,8 +139,13 @@ public class AuthorizationResponse implements Parcelable {
             return this;
         }
 
+        Builder setRefreshToken(@Nullable String refreshToken) {
+            mRefreshToken = refreshToken;
+            return this;
+        }
+
         AuthorizationResponse build() {
-            return new AuthorizationResponse(mType, mCode, mAccessToken, mState, mError, mExpiresIn);
+            return new AuthorizationResponse(mType, mCode, mAccessToken, mState, mError, mExpiresIn, mRefreshToken);
         }
     }
 
@@ -145,13 +154,15 @@ public class AuthorizationResponse implements Parcelable {
                                   String accessToken,
                                   String state,
                                   String error,
-                                  int expiresIn) {
+                                  int expiresIn,
+                                  String refreshToken) {
         mType = type != null ? type : Type.UNKNOWN;
         mCode = code;
         mAccessToken = accessToken;
         mState = state;
         mError = error;
         mExpiresIn = expiresIn;
+        mRefreshToken = refreshToken;
     }
 
     public AuthorizationResponse(@NonNull Parcel source) {
@@ -161,6 +172,7 @@ public class AuthorizationResponse implements Parcelable {
         mAccessToken = source.readString();
         mCode = source.readString();
         mType = Type.values()[source.readInt()];
+        mRefreshToken = source.readString();
     }
 
     /**
@@ -262,6 +274,11 @@ public class AuthorizationResponse implements Parcelable {
         return mExpiresIn;
     }
 
+    @Nullable
+    public String getRefreshToken() {
+        return mRefreshToken;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -275,6 +292,7 @@ public class AuthorizationResponse implements Parcelable {
         dest.writeString(mAccessToken);
         dest.writeString(mCode);
         dest.writeInt(mType.ordinal());
+        dest.writeString(mRefreshToken);
     }
 
     public static final Parcelable.Creator<AuthorizationResponse> CREATOR = new Parcelable.Creator<AuthorizationResponse>() {

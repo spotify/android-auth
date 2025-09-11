@@ -178,7 +178,7 @@ public class SpotifyNativeAuthUtil {
             try {
                 PackageInfo packageInfo = context.getPackageManager()
                         .getPackageInfo(packageName, 0);
-                
+
                 // Validate signature before returning version info
                 if (validateSignature(context, packageName, sha1HashUtil)) {
                     return packageInfo.versionCode;
@@ -195,7 +195,7 @@ public class SpotifyNativeAuthUtil {
      *
      * @param context The context of the caller, used to check package info
      * @param minVersionCode Minimum required version code
-     * @return true if installed version >= minVersionCode, false otherwise
+     * @return true if installed {@code version >= minVersionCode}, false otherwise
      */
     public static boolean isSpotifyVersionAtLeast(@NonNull Context context, int minVersionCode) {
         return isSpotifyVersionAtLeast(context, minVersionCode, new Sha1HashUtilImpl());
