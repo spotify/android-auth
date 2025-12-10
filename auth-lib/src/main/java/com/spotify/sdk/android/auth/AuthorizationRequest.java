@@ -144,6 +144,8 @@ public class AuthorizationRequest implements Parcelable {
 
         public Builder setContentUrl(String contentUrl) {
             mContentUrl = contentUrl;
+            return this;
+        }
 
         public Builder setPkceInformation(PKCEInformation pkceInformation) {
             mPkceInformation = pkceInformation;

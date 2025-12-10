@@ -195,30 +195,29 @@ public class SpotifyNativeAuthUtilTest {
                 new FakeSha1HashUtil(Collections.singletonMap(DEFAULT_TEST_SIGNATURE, SPOTIFY_HASH))
         );
         authUtil.startAuthActivity();
-        
+
         final ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
         verify(activity, times(1)).startActivityForResult(captor.capture(), anyInt());
         final Intent intent = captor.getValue();
-      
-        assertEquals(encodedContent, intent.getStringExtra(IntentExtras.KEY_ASSOCIATED_CONTENT))
-        assertEquals(challenge, intent.getStringExtra(IntentExtras.KEY_CODE_CHALLENGE));
-        assertEquals("S256", intent.getStringExtra(IntentExtras.KEY_CODE_CHALLENGE_METHOD));
-    } 
-        
+
+        assertEquals(encodedContent, intent.getStringExtra(IntentExtras.KEY_ASSOCIATED_CONTENT));
+    }
+
+    @Test
     public void shouldIncludePkceParametersInIntent() {
         final String verifier = "test_verifier_1234567890";
         final String challenge = "test_challenge_abcdef";
         final PKCEInformation pkceInfo = PKCEInformation.sha256(verifier, challenge);
         final Activity activity = mock(Activity.class);
         Mockito.doNothing().when(activity).startActivityForResult(any(Intent.class), anyInt());
-        
+
         final AuthorizationRequest authorizationRequest =
                 new AuthorizationRequest
                         .Builder("test", AuthorizationResponse.Type.TOKEN, "to://me")
                         .setScopes(new String[]{"testa", "toppen"})
                         .setPkceInformation(pkceInfo)
                         .build();
-        
+
         configureMocksWithSigningInfo(activity);
         final SpotifyNativeAuthUtil authUtil = new SpotifyNativeAuthUtil(
                 activity,
@@ -239,14 +238,14 @@ public class SpotifyNativeAuthUtilTest {
     public void shouldNotIncludePkceParametersWhenNull() {
         final Activity activity = mock(Activity.class);
         Mockito.doNothing().when(activity).startActivityForResult(any(Intent.class), anyInt());
-        
+
         final AuthorizationRequest authorizationRequest =
                 new AuthorizationRequest
                         .Builder("test", AuthorizationResponse.Type.TOKEN, "to://me")
                         .setScopes(new String[]{"testa", "toppen"})
                         .setPkceInformation(null)
                         .build();
-        
+
         configureMocksWithSigningInfo(activity);
         final SpotifyNativeAuthUtil authUtil = new SpotifyNativeAuthUtil(
                 activity,
