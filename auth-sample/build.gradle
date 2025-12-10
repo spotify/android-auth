@@ -41,7 +41,11 @@ android {
         versionCode 1
         versionName "1.0"
 
-        manifestPlaceholders = [redirectSchemeName: "spotify-sdk", redirectHostName: "auth"]
+        manifestPlaceholders = [
+            redirectSchemeName: "spotify-sdk",
+            redirectHostName: "auth",
+            redirectPathPattern: ".*"
+        ]
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -68,8 +72,8 @@ android {
 }
 
 dependencies {
-//    implementation files('../auth-lib/build/outputs/aar/auth-release.aar')
-    implementation 'com.spotify.android:auth:2.1.1'
+    implementation files('../auth-lib/build/outputs/aar/auth-release.aar')
+//    implementation 'com.spotify.android:auth:2.1.1'
 
     implementation 'androidx.browser:browser:1.4.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'

@@ -1,17 +1,22 @@
 package com.spotify.sdk.android.auth.app;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 
 interface Sha1HashUtil {
-    String sha1Hash(String toHash);
+    @Nullable
+    String sha1Hash(@NonNull String toHash);
 }
 final class Sha1HashUtilImpl implements Sha1HashUtil {
 
     @Override
-    public String sha1Hash(String toHash) {
+    @Nullable
+    public String sha1Hash(@NonNull String toHash) {
         String hash = null;
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-1");
@@ -28,7 +33,8 @@ final class Sha1HashUtilImpl implements Sha1HashUtil {
 
     private final char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
 
-    private String bytesToHex(byte[] bytes) {
+    @NonNull
+    private String bytesToHex(@NonNull byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {
             int v = bytes[j] & 0xFF;

@@ -25,6 +25,9 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 /**
  * An object that contains the parsed response from the Spotify authorization service.
  * To create one use {@link AuthorizationResponse.Builder} or
@@ -87,6 +90,8 @@ public class AuthorizationResponse implements Parcelable {
     private final String mState;
     private final String mError;
     private final int mExpiresIn;
+    @Nullable
+    private final String mRefreshToken;
 
     /**
      * Use this builder to create an {@link AuthorizationResponse}
@@ -101,6 +106,8 @@ public class AuthorizationResponse implements Parcelable {
         private String mState;
         private String mError;
         private int mExpiresIn;
+        @Nullable
+        private String mRefreshToken;
 
         Builder setType(Type type) {
             mType = type;
@@ -132,8 +139,13 @@ public class AuthorizationResponse implements Parcelable {
             return this;
         }
 
+        Builder setRefreshToken(@Nullable String refreshToken) {
+            mRefreshToken = refreshToken;
+            return this;
+        }
+
         AuthorizationResponse build() {
-            return new AuthorizationResponse(mType, mCode, mAccessToken, mState, mError, mExpiresIn);
+            return new AuthorizationResponse(mType, mCode, mAccessToken, mState, mError, mExpiresIn, mRefreshToken);
         }
     }
 
@@ -142,22 +154,25 @@ public class AuthorizationResponse implements Parcelable {
                                   String accessToken,
                                   String state,
                                   String error,
-                                  int expiresIn) {
+                                  int expiresIn,
+                                  String refreshToken) {
         mType = type != null ? type : Type.UNKNOWN;
         mCode = code;
         mAccessToken = accessToken;
         mState = state;
         mError = error;
         mExpiresIn = expiresIn;
+        mRefreshToken = refreshToken;
     }
 
-    public AuthorizationResponse(Parcel source) {
+    public AuthorizationResponse(@NonNull Parcel source) {
         mExpiresIn = source.readInt();
         mError = source.readString();
         mState = source.readString();
         mAccessToken = source.readString();
         mCode = source.readString();
         mType = Type.values()[source.readInt()];
+        mRefreshToken = source.readString();
     }
 
     /**
@@ -167,7 +182,8 @@ public class AuthorizationResponse implements Parcelable {
      * @return Authorization response. If parsing failed, this object will be populated with
      * the given error codes.
      */
-    public static AuthorizationResponse fromUri(Uri uri) {
+    @NonNull
+    public static AuthorizationResponse fromUri(@Nullable Uri uri) {
         AuthorizationResponse.Builder builder = new AuthorizationResponse.Builder();
         if (uri == null) {
             builder.setType(Type.EMPTY);
@@ -229,22 +245,27 @@ public class AuthorizationResponse implements Parcelable {
         return builder.build();
     }
 
+    @NonNull
     public Type getType() {
         return mType;
     }
 
+    @Nullable
     public String getCode() {
         return mCode;
     }
 
+    @Nullable
     public String getAccessToken() {
         return mAccessToken;
     }
 
+    @Nullable
     public String getState() {
         return mState;
     }
 
+    @Nullable
     public String getError() {
         return mError;
     }
@@ -253,28 +274,36 @@ public class AuthorizationResponse implements Parcelable {
         return mExpiresIn;
     }
 
+    @Nullable
+    public String getRefreshToken() {
+        return mRefreshToken;
+    }
+
     @Override
     public int describeContents() {
         return 0;
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mExpiresIn);
         dest.writeString(mError);
         dest.writeString(mState);
         dest.writeString(mAccessToken);
         dest.writeString(mCode);
         dest.writeInt(mType.ordinal());
+        dest.writeString(mRefreshToken);
     }
 
     public static final Parcelable.Creator<AuthorizationResponse> CREATOR = new Parcelable.Creator<AuthorizationResponse>() {
         @Override
-        public AuthorizationResponse createFromParcel(Parcel source) {
+        @NonNull
+        public AuthorizationResponse createFromParcel(@NonNull Parcel source) {
             return new AuthorizationResponse(source);
         }
 
         @Override
+        @NonNull
         public AuthorizationResponse[] newArray(int size) {
             return new AuthorizationResponse[size];
         }

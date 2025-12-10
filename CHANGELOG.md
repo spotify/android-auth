@@ -1,5 +1,30 @@
 Change Log
 ==========
+
+## Version 3.0.0
+- Add mandatory redirect path pattern.
+
+You can now define the path pattern in your app's build.gradle file as follows:
+```gradle
+defaultConfig {
+    manifestPlaceholders = [
+        redirectSchemeName: "your-redirect-scheme",
+        redirectHostName: "your-redirect-host",
+        redirectPathPattern: "your/redirect/path/pattern" // New mandatory field
+    ]
+    ...
+}
+```
+
+If you want to retain the previous behavior (accepting any path), use .* as the path pattern.
+For more details, see the [Google documentation](https://developer.android.com/guide/topics/manifest/data-element#path).
+
+## Version 2.2.0
+- Requesting token now uses PKCE when:
+    - There is an installed Spotify app that supports PKCE.
+    - When web fallback is used.
+- Token requests may return a refresh token if PKCE was used.
+
 ## Version 2.1.2
 * Propagate tracking parameters when opening the native login flow
 

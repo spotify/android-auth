@@ -30,6 +30,7 @@ import android.text.TextUtils;
 import android.util.Base64;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import org.json.JSONObject;
@@ -67,6 +68,7 @@ public class AuthorizationRequest implements Parcelable {
     private final String mCampaign;
     private final String mContentUri;
     private final String mContentUrl;
+    private final PKCEInformation mPkceInformation;
 
     /**
      * Use this builder to create an {@link AuthorizationRequest}
@@ -83,6 +85,7 @@ public class AuthorizationRequest implements Parcelable {
         private String[] mScopes;
         private boolean mShowDialog;
         private String mCampaign;
+        private PKCEInformation mPkceInformation;
         private final Map<String, String> mCustomParams = new HashMap<>();
         private String mContentUri;
         private String mContentUrl;
@@ -141,12 +144,15 @@ public class AuthorizationRequest implements Parcelable {
 
         public Builder setContentUrl(String contentUrl) {
             mContentUrl = contentUrl;
+
+        public Builder setPkceInformation(PKCEInformation pkceInformation) {
+            mPkceInformation = pkceInformation;
             return this;
         }
 
         public AuthorizationRequest build() {
             return new AuthorizationRequest(mClientId, mResponseType, mRedirectUri,
-                    mState, mScopes, mShowDialog, mCustomParams, mCampaign, mContentUri, mContentUrl);
+                    mState, mScopes, mShowDialog, mCustomParams, mCampaign, mContentUri, mContentUrl, mPkceInformation);
         }
     }
 
@@ -161,6 +167,7 @@ public class AuthorizationRequest implements Parcelable {
         mCampaign = source.readString();
         mContentUri = source.readString();
         mContentUrl = source.readString();
+        mPkceInformation = source.readParcelable(PKCEInformation.class.getClassLoader());
         Bundle bundle = source.readBundle(getClass().getClassLoader());
         for (String key : bundle.keySet()) {
             mCustomParams.put(key, bundle.getString(key));
@@ -232,6 +239,10 @@ public class AuthorizationRequest implements Parcelable {
     @NonNull
     public String getMedium() { return ANDROID_SDK; }
 
+    public PKCEInformation getPkceInformation() {
+        return mPkceInformation;
+    }
+
     private AuthorizationRequest(String clientId,
                                  AuthorizationResponse.Type responseType,
                                  String redirectUri,
@@ -241,9 +252,9 @@ public class AuthorizationRequest implements Parcelable {
                                  Map<String, String> customParams,
                                  String campaign,
                                  String contentUri,
-                                 String contentUrl
+                                 String contentUrl,
+                                 PKCEInformation pkceInformation
                                  ) {
-
         mClientId = clientId;
         mResponseType = responseType.toString();
         mRedirectUri = redirectUri;
@@ -254,6 +265,7 @@ public class AuthorizationRequest implements Parcelable {
         mCampaign = campaign;
         mContentUri = contentUri;
         mContentUrl = contentUrl;
+        mPkceInformation = pkceInformation;
     }
 
     public Uri toUri() {
@@ -288,6 +300,10 @@ public class AuthorizationRequest implements Parcelable {
         if(associatedContent != null) {
             uriBuilder.appendQueryParameter(ASSOCIATED_CONTENT, associatedContent);
         }
+        if (mPkceInformation != null) {
+            uriBuilder.appendQueryParameter(AccountsQueryParameters.CODE_CHALLENGE, mPkceInformation.getChallenge());
+            uriBuilder.appendQueryParameter(AccountsQueryParameters.CODE_CHALLENGE_METHOD, mPkceInformation.getCodeChallengeMethod());
+        }
 
         return uriBuilder.build();
     }
@@ -317,6 +333,7 @@ public class AuthorizationRequest implements Parcelable {
         dest.writeString(mCampaign);
         dest.writeString(mContentUri);
         dest.writeString(mContentUrl);
+        dest.writeParcelable(mPkceInformation, flags);
 
         Bundle bundle = new Bundle();
         for (Map.Entry<String, String> entry : mCustomParams.entrySet()) {

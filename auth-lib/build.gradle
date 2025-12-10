@@ -23,7 +23,7 @@ apply plugin: 'com.android.library'
 
 project.group = 'com.spotify.android'
 project.archivesBaseName = 'auth'
-project.version = '2.1.2'
+project.version = '3.0.0'
 
 android {
     compileSdk 33
@@ -85,6 +85,9 @@ android {
     def manifestPlaceholdersForTests = [redirectSchemeName: "spotify-sdk", redirectHostName: "auth"]
     namespace 'com.spotify.sdk.android.auth'
     unitTestVariants.configureEach {
+        it.mergedFlavor.manifestPlaceholders += manifestPlaceholdersForTests
+    }
+    testVariants.configureEach {
         it.mergedFlavor.manifestPlaceholders += manifestPlaceholdersForTests
     }
 }
@@ -157,9 +160,8 @@ afterEvaluate {
             maven {
                 getSigningVariables()
 
-                def releaseRepo = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-                def snapshotRepo = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-                url = isReleaseVersion ? releaseRepo : snapshotRepo
+                name = 'ossrh-staging-api'
+                url = "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
                 credentials {
                     username = project.ext["ossrhUsername"]
                     password = project.ext["ossrhPassword"]

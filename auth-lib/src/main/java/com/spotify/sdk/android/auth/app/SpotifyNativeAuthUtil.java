@@ -23,6 +23,8 @@ package com.spotify.sdk.android.auth.app;
 
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_ASSOCIATED_CONTENT;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_CLIENT_ID;
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_CODE_CHALLENGE;
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_CODE_CHALLENGE_METHOD;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_REDIRECT_URI;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_REQUESTED_SCOPES;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_RESPONSE_TYPE;
@@ -49,6 +51,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.LoginActivity;
+import com.spotify.sdk.android.auth.PKCEInformation;
 
 public class SpotifyNativeAuthUtil {
 
@@ -81,8 +84,8 @@ public class SpotifyNativeAuthUtil {
     @NonNull
     private final Sha1HashUtil mSha1HashUtil;
 
-    public SpotifyNativeAuthUtil(Activity contextActivity,
-                                 AuthorizationRequest request,
+    public SpotifyNativeAuthUtil(@NonNull Activity contextActivity,
+                                 @NonNull AuthorizationRequest request,
                                  @NonNull Sha1HashUtil sha1HashUtil) {
         mContextActivity = contextActivity;
         mRequest = request;
@@ -110,6 +113,11 @@ public class SpotifyNativeAuthUtil {
         if(associatedContent != null) {
             intent.putExtra(KEY_ASSOCIATED_CONTENT, associatedContent);
         }
+        final PKCEInformation pkceInfo = mRequest.getPkceInformation();
+        if (pkceInfo != null) {
+            intent.putExtra(KEY_CODE_CHALLENGE, pkceInfo.getChallenge());
+            intent.putExtra(KEY_CODE_CHALLENGE_METHOD, pkceInfo.getCodeChallengeMethod());
+        }
 
         try {
             mContextActivity.startActivityForResult(intent, LoginActivity.REQUEST_CODE);
@@ -130,6 +138,7 @@ public class SpotifyNativeAuthUtil {
     }
 
     @VisibleForTesting
+    @Nullable
     static Intent createAuthActivityIntent(@NonNull Context context, @NonNull Sha1HashUtil sha1HashUtil) {
         Intent intent = null;
         for (String suffix : SPOTIFY_PACKAGE_SUFFIXES) {
@@ -158,6 +167,52 @@ public class SpotifyNativeAuthUtil {
         return createAuthActivityIntent(context, sha1HashUtil) != null;
     }
 
+    /**
+     * Get the version code of the installed Spotify app
+     *
+     * @param context The context of the caller, used to check package info
+     * @return Version code of Spotify app, or -1 if not installed or signature validation fails
+     */
+    public static int getSpotifyAppVersionCode(@NonNull Context context) {
+        return getSpotifyAppVersionCode(context, new Sha1HashUtilImpl());
+    }
+
+    @VisibleForTesting
+    static int getSpotifyAppVersionCode(@NonNull Context context, @NonNull Sha1HashUtil sha1HashUtil) {
+        for (String suffix : SPOTIFY_PACKAGE_SUFFIXES) {
+            String packageName = SPOTIFY_PACKAGE_NAME + suffix;
+            try {
+                PackageInfo packageInfo = context.getPackageManager()
+                        .getPackageInfo(packageName, 0);
+
+                // Validate signature before returning version info
+                if (validateSignature(context, packageName, sha1HashUtil)) {
+                    return packageInfo.versionCode;
+                }
+            } catch (PackageManager.NameNotFoundException ignored) {
+                // Try next package variant
+            }
+        }
+        return -1; // Not found or signature validation failed
+    }
+
+    /**
+     * Check if Spotify app version meets minimum requirement
+     *
+     * @param context The context of the caller, used to check package info
+     * @param minVersionCode Minimum required version code
+     * @return true if installed {@code version >= minVersionCode}, false otherwise
+     */
+    public static boolean isSpotifyVersionAtLeast(@NonNull Context context, int minVersionCode) {
+        return isSpotifyVersionAtLeast(context, minVersionCode, new Sha1HashUtilImpl());
+    }
+
+    @VisibleForTesting
+    static boolean isSpotifyVersionAtLeast(@NonNull Context context, int minVersionCode, @NonNull Sha1HashUtil sha1HashUtil) {
+        int currentVersion = getSpotifyAppVersionCode(context, sha1HashUtil);
+        return currentVersion >= minVersionCode;
+    }
+
     @Nullable
     private static Intent tryResolveActivity(@NonNull Context context,
                                              @NonNull String packageName,
@@ -180,7 +235,7 @@ public class SpotifyNativeAuthUtil {
 
     @SuppressLint("PackageManagerGetSignatures")
     private static boolean validateSignature(@NonNull Context context,
-                                             String spotifyPackageName,
+                                             @NonNull String spotifyPackageName,
                                              @NonNull Sha1HashUtil sha1HashUtil) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
