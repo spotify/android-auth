@@ -51,7 +51,7 @@ If you want to retain the previous behavior (accepting any path), use .* as the 
 For more details, see the [Google documentation](https://developer.android.com/guide/topics/manifest/data-element#path).
 
 To learn more see the [Authentication Guide](https://developer.spotify.com/technologies/spotify-android-sdk/android-sdk-authentication-guide/)
-and the [API reference](https://spotify.github.io/android-sdk/auth-lib/docs/index.html).
+and the [API reference](https://spotify.github.io/android-auth/auth-lib/docs/index.html).
 
 # Flavors
 
@@ -59,6 +59,12 @@ Since Spotify Auth library version 2.1.0, two versions of the library are provid
 their behaviour if the Spotify application cannot be used to login:
 * `auth` - Opens the web browser to login to Spotify
 * `store` - Redirects to the Android Play store to download the Spotify application
+
+# Documentation
+
+Complete API documentation is available for both library flavors:
+* [Auth Flavor Javadoc](https://spotify.github.io/android-auth/auth-lib/docs/index.html) - Opens web browser for login
+* [Store Flavor Javadoc](https://spotify.github.io/android-auth/auth-lib/docs-store/index.html) - Play Store fallback variant
 
 # Sample Code
 
