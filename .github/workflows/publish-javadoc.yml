@@ -1,0 +1,133 @@
+name: Publish Javadoc
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  publish-javadoc:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Generate Auth Javadoc
+        run: ./gradlew auth-lib:authReleaseJavadoc
+
+      - name: Generate Store Javadoc
+        run: ./gradlew auth-lib:storeReleaseJavadoc
+
+      - name: Prepare gh-pages directory structure
+        run: |
+          mkdir -p gh-pages-temp/auth-lib/docs
+          mkdir -p gh-pages-temp/auth-lib/docs-store
+          cp -r docs/* gh-pages-temp/auth-lib/docs/ || echo "Auth docs generated"
+          cp -r docs-store/* gh-pages-temp/auth-lib/docs-store/ || echo "Store docs generated"
+
+      - name: Create index page
+        run: |
+          cat > gh-pages-temp/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Spotify Android Auth SDK Documentation</title>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                  body {
+                      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                      max-width: 800px;
+                      margin: 50px auto;
+                      padding: 20px;
+                      line-height: 1.6;
+                  }
+                  h1 {
+                      color: #1DB954;
+                      border-bottom: 2px solid #1DB954;
+                      padding-bottom: 10px;
+                  }
+                  .flavor {
+                      margin: 20px 0;
+                      padding: 20px;
+                      border: 1px solid #ddd;
+                      border-radius: 8px;
+                      background-color: #f9f9f9;
+                  }
+                  .flavor h2 {
+                      margin-top: 0;
+                      color: #333;
+                  }
+                  .flavor p {
+                      color: #666;
+                      margin: 10px 0;
+                  }
+                  a {
+                      color: #1DB954;
+                      text-decoration: none;
+                      font-weight: 500;
+                  }
+                  a:hover {
+                      text-decoration: underline;
+                  }
+                  .footer {
+                      margin-top: 40px;
+                      padding-top: 20px;
+                      border-top: 1px solid #ddd;
+                      text-align: center;
+                      color: #999;
+                      font-size: 0.9em;
+                  }
+              </style>
+          </head>
+          <body>
+              <h1>Spotify Android Auth SDK Documentation</h1>
+
+              <div class="flavor">
+                  <h2>Auth Flavor</h2>
+                  <p>Standard authentication flavor - opens web browser for login</p>
+                  <a href="auth-lib/docs/index.html">View Auth Javadoc →</a>
+              </div>
+
+              <div class="flavor">
+                  <h2>Store Flavor</h2>
+                  <p>Play Store fallback flavor - redirects to Play Store if Spotify app unavailable</p>
+                  <a href="auth-lib/docs-store/index.html">View Store Javadoc →</a>
+              </div>
+
+              <div class="footer">
+                  <p>Generated from <a href="https://github.com/spotify/android-auth">spotify/android-auth</a></p>
+              </div>
+          </body>
+          </html>
+          EOF
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./gh-pages-temp
+          publish_branch: gh-pages
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'Update javadoc from ${{ github.sha }}'
