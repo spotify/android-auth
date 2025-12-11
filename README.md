@@ -2,11 +2,6 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.spotify.android/auth.svg)](https://search.maven.org/search?q=g:com.spotify.android)
 
-# This repository is now a part of [spotify/android-sdk](https://github.com/spotify/android-sdk). Please post new issues there!
-
-This library is responsible for authenticating the user and fetching the authorization code/access token
-that can subsequently be used to play music or in requests to the [Spotify Web API](https://developer.spotify.com/web-api/).
-
 # Breaking changes in Spotify Auth library version 2.0.0
 
 In this version we replaced use of WebView with [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/) since Google and Facebook Login no longer support WebViews for authenticating users.
@@ -38,6 +33,22 @@ Below is an example of how this looks for [the auth sample project](auth-sample)
         ...
     }
 ```
+
+Since Spotify Auth library version 3.0.0 you also need to provide the path pattern of your redirect URI
+
+```gradle
+defaultConfig {
+    manifestPlaceholders = [
+        redirectSchemeName: "your-redirect-scheme",
+        redirectHostName: "your-redirect-host",
+        redirectPathPattern: "your/redirect/path/pattern" // New mandatory field
+    ]
+    ...
+}
+```
+
+If you want to retain the previous behavior (accepting any path), use .* as the path pattern.
+For more details, see the [Google documentation](https://developer.android.com/guide/topics/manifest/data-element#path).
 
 To learn more see the [Authentication Guide](https://developer.spotify.com/technologies/spotify-android-sdk/android-sdk-authentication-guide/)
 and the [API reference](https://spotify.github.io/android-sdk/auth-lib/docs/index.html).
