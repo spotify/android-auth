@@ -21,6 +21,7 @@
 
 package com.spotify.sdk.android.auth.app;
 
+import static com.spotify.sdk.android.auth.IntentExtras.KEY_ASSOCIATED_CONTENT;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_CLIENT_ID;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_CODE_CHALLENGE;
 import static com.spotify.sdk.android.auth.IntentExtras.KEY_CODE_CHALLENGE_METHOD;
@@ -107,6 +108,11 @@ public class SpotifyNativeAuthUtil {
         intent.putExtra(KEY_UTM_CAMPAIGN, mRequest.getCampaign());
         intent.putExtra(KEY_UTM_MEDIUM, mRequest.getMedium());
 
+        String associatedContent = mRequest.getEncodedContent();
+
+        if(associatedContent != null) {
+            intent.putExtra(KEY_ASSOCIATED_CONTENT, associatedContent);
+        }
         final PKCEInformation pkceInfo = mRequest.getPkceInformation();
         if (pkceInfo != null) {
             intent.putExtra(KEY_CODE_CHALLENGE, pkceInfo.getChallenge());

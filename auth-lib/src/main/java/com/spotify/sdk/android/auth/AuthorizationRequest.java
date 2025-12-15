@@ -21,16 +21,21 @@
 
 package com.spotify.sdk.android.auth;
 
+import static com.spotify.sdk.android.auth.AccountsQueryParameters.ASSOCIATED_CONTENT;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Base64;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import org.json.JSONObject;
+
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,6 +55,8 @@ public class AuthorizationRequest implements Parcelable {
     public static final String SPOTIFY_SDK = "spotify-sdk";
     @VisibleForTesting
     public static final String ANDROID_SDK = "android-sdk";
+    private static final String KEY_URI = "uri";
+    private static final String KEY_URL = "url";
 
     private final String mClientId;
     private final String mResponseType;
@@ -59,6 +66,8 @@ public class AuthorizationRequest implements Parcelable {
     private final boolean mShowDialog;
     private final Map<String, String> mCustomParams;
     private final String mCampaign;
+    private final String mContentUri;
+    private final String mContentUrl;
     private final PKCEInformation mPkceInformation;
 
     /**
@@ -78,6 +87,8 @@ public class AuthorizationRequest implements Parcelable {
         private String mCampaign;
         private PKCEInformation mPkceInformation;
         private final Map<String, String> mCustomParams = new HashMap<>();
+        private String mContentUri;
+        private String mContentUrl;
 
         public Builder(String clientId, AuthorizationResponse.Type responseType, String redirectUri) {
             if (clientId == null) {
@@ -126,6 +137,16 @@ public class AuthorizationRequest implements Parcelable {
             return this;
         }
 
+        public Builder setContentUri(String contentUri) {
+            mContentUri = contentUri;
+            return this;
+        }
+
+        public Builder setContentUrl(String contentUrl) {
+            mContentUrl = contentUrl;
+            return this;
+        }
+
         public Builder setPkceInformation(PKCEInformation pkceInformation) {
             mPkceInformation = pkceInformation;
             return this;
@@ -133,7 +154,7 @@ public class AuthorizationRequest implements Parcelable {
 
         public AuthorizationRequest build() {
             return new AuthorizationRequest(mClientId, mResponseType, mRedirectUri,
-                    mState, mScopes, mShowDialog, mCustomParams, mCampaign, mPkceInformation);
+                    mState, mScopes, mShowDialog, mCustomParams, mCampaign, mContentUri, mContentUrl, mPkceInformation);
         }
     }
 
@@ -146,6 +167,8 @@ public class AuthorizationRequest implements Parcelable {
         mShowDialog = source.readByte() == 1;
         mCustomParams = new HashMap<>();
         mCampaign = source.readString();
+        mContentUri = source.readString();
+        mContentUrl = source.readString();
         mPkceInformation = source.readParcelable(PKCEInformation.class.getClassLoader());
         Bundle bundle = source.readBundle(getClass().getClassLoader());
         for (String key : bundle.keySet()) {
@@ -177,6 +200,38 @@ public class AuthorizationRequest implements Parcelable {
         return mCustomParams.get(key);
     }
 
+    public String getEncodedContent() {
+        JSONObject contentJson = getContentsJson();
+
+        if(contentJson.length() == 0) {
+            return null; // No content to encode
+        }
+
+        return Base64.encodeToString(contentJson.toString().getBytes(Charset.forName("UTF-8")), Base64.URL_SAFE | Base64.NO_WRAP);
+    }
+
+    @NonNull
+    private JSONObject getContentsJson() {
+        JSONObject contentJson = new JSONObject();
+
+        if(mContentUri != null && !mContentUri.isEmpty()) {
+            try {
+                contentJson.put(KEY_URI, mContentUri);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Error creating JSON for content URI: " + e.getMessage());
+            }
+        }
+
+        if(mContentUrl != null && !mContentUrl.isEmpty()) {
+            try {
+                contentJson.put(KEY_URL, mContentUrl);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Error creating JSON for content URL: " + e.getMessage());
+            }
+        }
+        return contentJson;
+    }
+
     @NonNull
     public String getCampaign() { return TextUtils.isEmpty(mCampaign) ? ANDROID_SDK : mCampaign; }
 
@@ -198,8 +253,10 @@ public class AuthorizationRequest implements Parcelable {
                                  boolean showDialog,
                                  Map<String, String> customParams,
                                  String campaign,
-                                 PKCEInformation pkceInformation) {
-
+                                 String contentUri,
+                                 String contentUrl,
+                                 PKCEInformation pkceInformation
+                                 ) {
         mClientId = clientId;
         mResponseType = responseType.toString();
         mRedirectUri = redirectUri;
@@ -208,6 +265,8 @@ public class AuthorizationRequest implements Parcelable {
         mShowDialog = showDialog;
         mCustomParams = customParams;
         mCampaign = campaign;
+        mContentUri = contentUri;
+        mContentUrl = contentUrl;
         mPkceInformation = pkceInformation;
     }
 
@@ -238,6 +297,11 @@ public class AuthorizationRequest implements Parcelable {
             }
         }
 
+        String associatedContent = getEncodedContent();
+
+        if(associatedContent != null) {
+            uriBuilder.appendQueryParameter(ASSOCIATED_CONTENT, associatedContent);
+        }
         if (mPkceInformation != null) {
             uriBuilder.appendQueryParameter(AccountsQueryParameters.CODE_CHALLENGE, mPkceInformation.getChallenge());
             uriBuilder.appendQueryParameter(AccountsQueryParameters.CODE_CHALLENGE_METHOD, mPkceInformation.getCodeChallengeMethod());
@@ -269,6 +333,8 @@ public class AuthorizationRequest implements Parcelable {
         dest.writeStringArray(mScopes);
         dest.writeByte((byte) (mShowDialog ? 1 : 0));
         dest.writeString(mCampaign);
+        dest.writeString(mContentUri);
+        dest.writeString(mContentUrl);
         dest.writeParcelable(mPkceInformation, flags);
 
         Bundle bundle = new Bundle();
