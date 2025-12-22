@@ -82,7 +82,7 @@ android {
         }
     }
 
-    def manifestPlaceholdersForTests = [redirectSchemeName: "spotify-sdk", redirectHostName: "auth"]
+    def manifestPlaceholdersForTests = [redirectSchemeName: "spotify-sdk", redirectHostName: "auth", redirectPathPattern: "/.*"]
     namespace 'com.spotify.sdk.android.auth'
     unitTestVariants.configureEach {
         it.mergedFlavor.manifestPlaceholders += manifestPlaceholdersForTests
