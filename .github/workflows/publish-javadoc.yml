@@ -32,11 +32,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Generate Auth Javadoc
-        run: ./gradlew auth-lib:authReleaseJavadoc
+      - name: Generate Auth Documentation
+        run: ./gradlew auth-lib:authReleaseDokka
 
-      - name: Generate Store Javadoc
-        run: ./gradlew auth-lib:storeReleaseJavadoc
+      - name: Generate Store Documentation
+        run: ./gradlew auth-lib:storeReleaseDokka
 
       - name: Prepare gh-pages directory structure
         run: |

@@ -48,10 +48,13 @@ public class AuthorizationClientTest {
 
     @Test
     public void shouldLaunchIntentForPassedActivity() {
-        AuthorizationRequest authorizationRequest = mock(AuthorizationRequest.class);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(
+                "test_client_id",
+                AuthorizationResponse.Type.TOKEN,
+                "to://me"
+        ).build();
         Activity activity = mock(Activity.class);
 
-        when(authorizationRequest.toUri()).thenReturn(Uri.parse("to://me"));
         Mockito.doNothing().when(activity).startActivity(any(Intent.class));
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
 
@@ -59,21 +62,25 @@ public class AuthorizationClientTest {
 
         verify(activity, times(1)).startActivity(captor.capture());
         assertEquals(Intent.ACTION_VIEW, captor.getValue().getAction());
-        assertEquals("to://me", captor.getValue().getData().toString());
+        assertEquals(authorizationRequest.toUri().toString(), captor.getValue().getData().toString());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void createLoginActivityIntentShouldThrowExceptionWhenBothPassedIsNull() {
         AuthorizationClient.createLoginActivityIntent(null, null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void createLoginActivityIntentShouldThrowExceptionWhenFirstPassedIsNull() {
-        AuthorizationRequest authorizationRequest = mock(AuthorizationRequest.class);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(
+                "test_client_id",
+                AuthorizationResponse.Type.TOKEN,
+                "redirect://uri"
+        ).build();
         AuthorizationClient.createLoginActivityIntent(null, authorizationRequest);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void createLoginActivityIntentShouldThrowExceptionWhenSecondPassedIsNull() {
         Activity activity = mock(Activity.class);
         AuthorizationClient.createLoginActivityIntent(activity, null);

@@ -62,7 +62,7 @@ public class TokenExchangeRequestTest {
         assertNotNull(request);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void shouldThrowWithNullClientId() {
         new TokenExchangeRequest(null, TEST_CODE, TEST_REDIRECT_URI, TEST_CODE_VERIFIER);
     }
@@ -72,7 +72,7 @@ public class TokenExchangeRequestTest {
         new TokenExchangeRequest("", TEST_CODE, TEST_REDIRECT_URI, TEST_CODE_VERIFIER);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void shouldThrowWithNullCode() {
         new TokenExchangeRequest(TEST_CLIENT_ID, null, TEST_REDIRECT_URI, TEST_CODE_VERIFIER);
     }
@@ -82,7 +82,7 @@ public class TokenExchangeRequestTest {
         new TokenExchangeRequest(TEST_CLIENT_ID, "", TEST_REDIRECT_URI, TEST_CODE_VERIFIER);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void shouldThrowWithNullRedirectUri() {
         new TokenExchangeRequest(TEST_CLIENT_ID, TEST_CODE, null, TEST_CODE_VERIFIER);
     }
@@ -92,7 +92,7 @@ public class TokenExchangeRequestTest {
         new TokenExchangeRequest(TEST_CLIENT_ID, TEST_CODE, "", TEST_CODE_VERIFIER);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void shouldThrowWithNullCodeVerifier() {
         new TokenExchangeRequest(TEST_CLIENT_ID, TEST_CODE, TEST_REDIRECT_URI, null);
     }
