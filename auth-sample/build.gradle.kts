@@ -78,7 +78,7 @@ android {
 
 dependencies {
     implementation(project(":auth-lib"))
-//    implementation("com.spotify.android:auth:2.1.1")
+//    implementation("com.spotify.android:auth:3.1.0")
 
     implementation("androidx.browser:browser:1.4.0")
     implementation("androidx.appcompat:appcompat:1.1.0")
