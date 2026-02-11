@@ -36,11 +36,11 @@ import static org.junit.Assert.assertNull;
 @RunWith(RobolectricTestRunner.class)
 public class AuthorizationRequestTest {
 
-    private AuthorizationResponse.Type mResponseType = AuthorizationResponse.Type.TOKEN;
-    private String mRedirectUri = "redirect:uri";
-    private String mClientId = "12345567";
+    private AuthorizationResponse.Type responseType = AuthorizationResponse.Type.TOKEN;
+    private String redirectUri = "redirect:uri";
+    private String clientId = "12345567";
 
-    private String mDefaultCampaign = AuthorizationRequest.ANDROID_SDK;
+    private String defaultCampaign = AuthorizationRequest.ANDROID_SDK;
 
     private Uri.Builder getBaseAuthUri(String clientId, String responseType, String redirectUrl, String campaign) {
         Uri.Builder uriBuilder = new Uri.Builder();
@@ -52,39 +52,39 @@ public class AuthorizationRequestTest {
                 .appendQueryParameter(AccountsQueryParameters.REDIRECT_URI, redirectUrl)
                 .appendQueryParameter(AccountsQueryParameters.SHOW_DIALOG, String.valueOf(false))
                 .appendQueryParameter(AccountsQueryParameters.UTM_SOURCE, AuthorizationRequest.SPOTIFY_SDK)
-                .appendQueryParameter(AccountsQueryParameters.UTM_MEDIUM, mDefaultCampaign)
+                .appendQueryParameter(AccountsQueryParameters.UTM_MEDIUM, defaultCampaign)
                 .appendQueryParameter(AccountsQueryParameters.UTM_CAMPAIGN, campaign);
 
         return uriBuilder;
     }
 
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void shouldThrowIfClientIdIsNull() {
-        new AuthorizationRequest.Builder(null, mResponseType, mRedirectUri);
+        new AuthorizationRequest.Builder(null, responseType, redirectUri);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void shouldThrowIfResponseTypeIsNull() {
-        new AuthorizationRequest.Builder(mClientId, null, mRedirectUri);
+        new AuthorizationRequest.Builder(clientId, null, redirectUri);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void shouldThrowIfRedirectUriIsNull() {
-        new AuthorizationRequest.Builder(mClientId, mResponseType, null);
+        new AuthorizationRequest.Builder(clientId, responseType, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowIfRedirectUriIsEmpty() {
-        new AuthorizationRequest.Builder(mClientId, mResponseType, "");
+        new AuthorizationRequest.Builder(clientId, responseType, "");
     }
 
     @Test
     public void shouldBuildCorrectUri() {
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri).build();
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(clientId, responseType, redirectUri).build();
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
+        Uri.Builder uriBuilder = getBaseAuthUri(clientId, responseType.toString(), redirectUri, defaultCampaign);
         Uri uri = uriBuilder.build();
 
         assertEquals(uri, authorizationRequest.toUri());
@@ -95,7 +95,7 @@ public class AuthorizationRequestTest {
     public void shouldSetScopes() {
         String[] expectedScopes = {"scope1", "scope2"};
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                 .setScopes(expectedScopes)
                 .build();
 
@@ -105,7 +105,7 @@ public class AuthorizationRequestTest {
         assertEquals(expectedScopes[0], scopes[0]);
         assertEquals(expectedScopes[1], scopes[1]);
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
+        Uri.Builder uriBuilder = getBaseAuthUri(clientId, responseType.toString(), redirectUri, defaultCampaign);
         uriBuilder.appendQueryParameter(AccountsQueryParameters.SCOPE, "scope1 scope2");
         Uri uri = uriBuilder.build();
 
@@ -115,11 +115,11 @@ public class AuthorizationRequestTest {
 
     @Test
     public void shouldNotSetNullScopes() {
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                 .setScopes(null)
                 .build();
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
+        Uri.Builder uriBuilder = getBaseAuthUri(clientId, responseType.toString(), redirectUri, defaultCampaign);
         Uri uri = uriBuilder.build();
 
         assertEquals(uri, authorizationRequest.toUri());
@@ -127,11 +127,11 @@ public class AuthorizationRequestTest {
 
     @Test
     public void shouldNotSetEmptyScopes() {
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                 .setScopes(new String[]{})
                 .build();
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
+        Uri.Builder uriBuilder = getBaseAuthUri(clientId, responseType.toString(), redirectUri, defaultCampaign);
         Uri uri = uriBuilder.build();
 
         assertEquals(uri, authorizationRequest.toUri());
@@ -141,13 +141,13 @@ public class AuthorizationRequestTest {
     public void shouldSetState() {
         String testState = "test_state";
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                 .setState(testState)
                 .build();
 
         assertEquals(authorizationRequest.getState(), testState);
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
+        Uri.Builder uriBuilder = getBaseAuthUri(clientId, responseType.toString(), redirectUri, defaultCampaign);
         uriBuilder.appendQueryParameter(AccountsQueryParameters.STATE, testState);
         Uri uri = uriBuilder.build();
 
@@ -159,13 +159,13 @@ public class AuthorizationRequestTest {
     public void shouldSetCampaign() {
         String testCampaign = "test_campaign";
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                 .setCampaign(testCampaign)
                 .build();
 
         assertEquals(authorizationRequest.getCampaign(), testCampaign);
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, testCampaign);
+        Uri.Builder uriBuilder = getBaseAuthUri(clientId, responseType.toString(), redirectUri, testCampaign);
         Uri uri = uriBuilder.build();
 
         assertEquals(uri, authorizationRequest.toUri());
@@ -174,12 +174,12 @@ public class AuthorizationRequestTest {
     @Test
     public void shouldUseDefaultCampaign() {
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                 .build();
 
-        assertEquals(authorizationRequest.getCampaign(), mDefaultCampaign);
+        assertEquals(authorizationRequest.getCampaign(), defaultCampaign);
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
+        Uri.Builder uriBuilder = getBaseAuthUri(clientId, responseType.toString(), redirectUri, defaultCampaign);
         Uri uri = uriBuilder.build();
 
         assertEquals(uri, authorizationRequest.toUri());
@@ -187,11 +187,11 @@ public class AuthorizationRequestTest {
 
     @Test
     public void shouldNotSetNullState() {
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                 .setState(null)
                 .build();
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
+        Uri.Builder uriBuilder = getBaseAuthUri(clientId, responseType.toString(), redirectUri, defaultCampaign);
         Uri uri = uriBuilder.build();
 
         assertEquals(uri, authorizationRequest.toUri());
@@ -204,12 +204,12 @@ public class AuthorizationRequestTest {
         String customKey2 = "custom_key_2";
         String customValue2 = "custom_value_2";
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                 .setCustomParam(customKey1, customValue1)
                 .setCustomParam(customKey2, customValue2)
                 .build();
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
+        Uri.Builder uriBuilder = getBaseAuthUri(clientId, responseType.toString(), redirectUri, defaultCampaign);
         uriBuilder.appendQueryParameter(customKey1, customValue1);
         uriBuilder.appendQueryParameter(customKey2, customValue2);
         Uri uri = uriBuilder.build();
@@ -217,30 +217,30 @@ public class AuthorizationRequestTest {
         assertEquals(uri, authorizationRequest.toUri());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void shouldThrowWithNullCustomParamKey() {
-        new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+        new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                 .setCustomParam(null, "testValue")
                 .build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowWithEmptyCustomParamKey() {
-        new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+        new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                 .setCustomParam("", "testValue")
                 .build();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void shouldThrowWithNullCustomParamValue() {
-        new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+        new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                 .setCustomParam("testKey", null)
                 .build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowWithEmptyCustomParamValue() {
-        new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+        new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                 .setCustomParam("testKey", "")
                 .build();
     }
@@ -251,7 +251,7 @@ public class AuthorizationRequestTest {
         String key2 = "key_2";
 
         AuthorizationRequest request =
-                new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+                new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                         .setState("testState")
                         .setScopes(new String[]{"scope1", "scope2"})
                         .setCustomParam(key1, "value_1")
@@ -279,13 +279,13 @@ public class AuthorizationRequestTest {
         String challenge = "test_challenge_abcdef";
         PKCEInformation pkceInfo = PKCEInformation.sha256(verifier, challenge);
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                 .setPkceInformation(pkceInfo)
                 .build();
 
         assertEquals(pkceInfo, authorizationRequest.getPkceInformation());
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
+        Uri.Builder uriBuilder = getBaseAuthUri(clientId, responseType.toString(), redirectUri, defaultCampaign);
         uriBuilder.appendQueryParameter(AccountsQueryParameters.CODE_CHALLENGE, pkceInfo.getChallenge());
         uriBuilder.appendQueryParameter(AccountsQueryParameters.CODE_CHALLENGE_METHOD, pkceInfo.getCodeChallengeMethod());
         Uri uri = uriBuilder.build();
@@ -295,13 +295,13 @@ public class AuthorizationRequestTest {
 
     @Test
     public void shouldNotSetNullPkceInformation() {
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                 .setPkceInformation(null)
                 .build();
 
         assertNull(authorizationRequest.getPkceInformation());
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
+        Uri.Builder uriBuilder = getBaseAuthUri(clientId, responseType.toString(), redirectUri, defaultCampaign);
         Uri uri = uriBuilder.build();
 
         assertEquals(uri, authorizationRequest.toUri());
@@ -314,7 +314,7 @@ public class AuthorizationRequestTest {
         PKCEInformation pkceInfo = PKCEInformation.sha256(verifier, challenge);
 
         AuthorizationRequest request =
-                new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+                new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                         .setState("testState")
                         .setScopes(new String[]{"scope1", "scope2"})
                         .setPkceInformation(pkceInfo)
@@ -331,10 +331,10 @@ public class AuthorizationRequestTest {
         assertEquals(request.getResponseType(), requestFromParcel.getResponseType());
         assertArrayEquals(request.getScopes(), requestFromParcel.getScopes());
         assertEquals(request.getState(), requestFromParcel.getState());
-        
+
         PKCEInformation originalPkce = request.getPkceInformation();
         PKCEInformation parceledPkce = requestFromParcel.getPkceInformation();
-        
+
         assertNotNull(originalPkce);
         assertNotNull(parceledPkce);
         assertEquals(originalPkce.getVerifier(), parceledPkce.getVerifier());
@@ -345,7 +345,7 @@ public class AuthorizationRequestTest {
     @Test
     public void shouldMarshallWithoutPkceInformationCorrectly() {
         AuthorizationRequest request =
-                new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+                new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                         .setState("testState")
                         .setScopes(new String[]{"scope1", "scope2"})
                         .build();
@@ -373,13 +373,13 @@ public class AuthorizationRequestTest {
         String testState = "test_state";
         String[] testScopes = {"scope1", "scope2"};
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(mClientId, mResponseType, mRedirectUri)
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest.Builder(clientId, responseType, redirectUri)
                 .setState(testState)
                 .setScopes(testScopes)
                 .setPkceInformation(pkceInfo)
                 .build();
 
-        Uri.Builder uriBuilder = getBaseAuthUri(mClientId, mResponseType.toString(), mRedirectUri, mDefaultCampaign);
+        Uri.Builder uriBuilder = getBaseAuthUri(clientId, responseType.toString(), redirectUri, defaultCampaign);
         uriBuilder.appendQueryParameter(AccountsQueryParameters.SCOPE, "scope1 scope2");
         uriBuilder.appendQueryParameter(AccountsQueryParameters.STATE, testState);
         uriBuilder.appendQueryParameter(AccountsQueryParameters.CODE_CHALLENGE, pkceInfo.getChallenge());
