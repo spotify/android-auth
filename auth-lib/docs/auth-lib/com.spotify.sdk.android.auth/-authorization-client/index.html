@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>AuthorizationClient</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../index.html">
+                            auth-lib
+                    </a>
+            </div>
+            <div class="library-version">
+3.0.0            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":auth-lib:authReleaseDokka/storeRelease">androidJvm</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="auth-lib::com.spotify.sdk.android.auth/AuthorizationClient///PointingToDeclaration//-1021925289">
+  <div class="breadcrumbs"><a href="../../../index.html">auth-lib</a><span class="delimiter">/</span><a href="../index.html">com.spotify.sdk.android.auth</a><span class="delimiter">/</span><span class="current">AuthorizationClient</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Authorization</span><wbr></wbr><span><span>Client</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":auth-lib:authReleaseDokka/storeRelease"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">AuthorizationClient</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">loginActivity<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/app/Activity.html">Activity</a></span></span><span class="token punctuation">)</span></div><p class="paragraph">AuthorizationClient provides helper methods to initialize and manage the Spotify authorization flow.</p><p class="paragraph">This client provides two versions of authorization:</p><h2 class=""> 1. Single Sign-On using Spotify Android application with browser fallback</h2><p class="paragraph">The SDK will try to fetch the authorization code/access token using the Spotify Android client. If Spotify is not installed on the device, SDK will fallback to Custom Tabs based authorization and open <a href="https://accounts.spotify.com">Spotify Accounts Service</a> in a dialog. After authorization flow is completed, result is returned to the activity that invoked <a href="index.html">AuthorizationClient</a>.</p><p class="paragraph"><strong>If Spotify is installed:</strong> SDK will connect to the Spotify client and fetch the authorization code/access token for current user. Since the user is already logged into Spotify they don't need to fill their username and password. If the SDK application requests scopes that have not been approved, the user will see a list of scopes and can choose to approve or reject them.</p><p class="paragraph"><strong>If Spotify is not installed:</strong> SDK will open a dialog and load Spotify Accounts Service into a <a href="https://developer.chrome.com/docs/android/custom-tabs/">Custom Tab</a> of a supported browser. In case there's no browser installed that supports Custom Tabs API, the SDK will fallback to opening the Accounts page in the user's default browser. User will have to enter their username and password to login to Spotify. They will also need to approve any scopes that the SDK application requests and that they haven't approved before.</p><p class="paragraph">In both cases (SSO and browser fallback), the result of the authorization flow will be returned in the <code class="lang-kotlin">onActivityResult</code> method of the activity that initiated it.</p><h3 class=""> Example: Using from an Activity</h3><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">// Code called from an activity<br>private const val REQUEST_CODE = 1337<br><br>val request = AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)<br>    .setScopes(arrayOf(&quot;user-read-private&quot;, &quot;playlist-read&quot;, &quot;playlist-read-private&quot;, &quot;streaming&quot;))<br>    .build()<br><br>AuthorizationClient.openLoginActivity(this, REQUEST_CODE, request)</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><h3 class=""> Example: Using from a Fragment</h3><p class="paragraph">It is also possible to use <a href="../-login-activity/index.html">LoginActivity</a> from other components such as Fragments:</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">// To start LoginActivity from a Fragment:<br>val intent = AuthorizationClient.createLoginActivityIntent(requireActivity(), request)<br>startActivityForResult(intent, REQUEST_CODE)<br><br>// To close LoginActivity<br>AuthorizationClient.stopLoginActivity(requireActivity(), REQUEST_CODE)</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><h3 class=""> Example: Processing the result</h3><p class="paragraph">To process the result, your activity needs to override <code class="lang-kotlin">onActivityResult</code> callback:</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {<br>    super.onActivityResult(requestCode, resultCode, intent)<br><br>    // Check if result comes from the correct activity<br>    if (requestCode == REQUEST_CODE) {<br>        val response = AuthorizationClient.getResponse(resultCode, intent)<br>        when (response.type) {<br>            // Response was successful and contains auth token<br>            AuthorizationResponse.Type.TOKEN -&gt; {<br>                // Handle successful response<br>                val token = response.accessToken<br>            }<br>            // Auth flow returned an error<br>            AuthorizationResponse.Type.ERROR -&gt; {<br>                // Handle error response<br>            }<br>            // Most likely auth flow was cancelled<br>            else -&gt; {<br>                // Handle other cases<br>            }<br>        }<br>    }<br>}</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><h2 class=""> 2. Opening Spotify Accounts Service in a web browser</h2><p class="paragraph">In this scenario the SDK creates an intent that will open the browser. Authorization takes part in the browser (not in the SDK application). After authorization is completed browser redirects back to the SDK app.</p><h3 class=""> Example: Browser-based authorization</h3><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">// Code called from an activity<br>val request = AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)<br>    .setScopes(arrayOf(&quot;user-read-private&quot;, &quot;playlist-read&quot;, &quot;playlist-read-private&quot;, &quot;streaming&quot;))<br>    .build()<br><br>AuthorizationClient.openLoginInBrowser(this, request)</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">To process the result, the receiving activity needs to override one of its callbacks. With launch mode set to <code class="lang-kotlin">singleInstance</code> this callback is <code class="lang-kotlin">onNewIntent</code>:</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">override fun onNewIntent(intent: Intent) {<br>    super.onNewIntent(intent)<br>    val uri = intent.data<br>    if (uri != null) {<br>        val response = AuthorizationResponse.fromUri(uri)<br>        when (response.type) {<br>            // Response was successful and contains auth token<br>            AuthorizationResponse.Type.TOKEN -&gt; {<br>                // Handle successful response<br>                val token = response.accessToken<br>            }<br>            // Auth flow returned an error<br>            AuthorizationResponse.Type.ERROR -&gt; {<br>                // Handle error response<br>            }<br>            // Most likely auth flow was cancelled<br>            else -&gt; {<br>                // Handle other cases<br>            }<br>        }<br>    }<br>}</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><h4 class="">See also</h4><div class="table"><div class="table-row" data-filterable-current=":auth-lib:authReleaseDokka/storeRelease" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div></div></span></div><div><div class="title"><p class="paragraph"><a href="https://developer.spotify.com/web-api/authorization-guide">Web API Authorization guide</a></p></div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="1807939260%2FConstructors%2F-1021925289" anchor-label="AuthorizationClient" id="1807939260%2FConstructors%2F-1021925289" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":auth-lib:authReleaseDokka/storeRelease" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-authorization-client.html"><span>Authorization</span><wbr></wbr><span><span>Client</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1807939260%2FConstructors%2F-1021925289"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":auth-lib:authReleaseDokka/storeRelease"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">loginActivity<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/app/Activity.html">Activity</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="-867964362%2FClasslikes%2F-1021925289" anchor-label="AuthorizationClientListener" id="-867964362%2FClasslikes%2F-1021925289" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease"></a>
+          <div class="table-row" data-filterable-current=":auth-lib:authReleaseDokka/storeRelease" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-authorization-client-listener/index.html"><span>Authorization</span><wbr></wbr><span>Client</span><wbr></wbr><span><span>Listener</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-867964362%2FClasslikes%2F-1021925289"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":auth-lib:authReleaseDokka/storeRelease"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-authorization-client-listener/index.html">AuthorizationClientListener</a></div><div class="brief "><p class="paragraph">Listener interface for receiving authorization flow completion events.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-236293790%2FClasslikes%2F-1021925289" anchor-label="Companion" id="-236293790%2FClasslikes%2F-1021925289" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease"></a>
+          <div class="table-row" data-filterable-current=":auth-lib:authReleaseDokka/storeRelease" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-236293790%2FClasslikes%2F-1021925289"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":auth-lib:authReleaseDokka/storeRelease"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-1805580856%2FFunctions%2F-1021925289" anchor-label="authorize" id="-1805580856%2FFunctions%2F-1021925289" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease"></a>
+          <div class="table-row" data-filterable-current=":auth-lib:authReleaseDokka/storeRelease" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="authorize.html"><span><span>authorize</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1805580856%2FFunctions%2F-1021925289"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":auth-lib:authReleaseDokka/storeRelease"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="authorize.html"><span class="token function">authorize</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">request<span class="token operator">: </span><a href="../-authorization-request/index.html">AuthorizationRequest</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="497771237%2FFunctions%2F-1021925289" anchor-label="cancel" id="497771237%2FFunctions%2F-1021925289" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease"></a>
+          <div class="table-row" data-filterable-current=":auth-lib:authReleaseDokka/storeRelease" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="cancel.html"><span><span>cancel</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="497771237%2FFunctions%2F-1021925289"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":auth-lib:authReleaseDokka/storeRelease"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="cancel.html"><span class="token function">cancel</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="531424916%2FFunctions%2F-1021925289" anchor-label="clearAuthInProgress" id="531424916%2FFunctions%2F-1021925289" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease"></a>
+          <div class="table-row" data-filterable-current=":auth-lib:authReleaseDokka/storeRelease" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-auth-in-progress.html"><span>clear</span><wbr></wbr><span>Auth</span><wbr></wbr><span>In</span><wbr></wbr><span><span>Progress</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="531424916%2FFunctions%2F-1021925289"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":auth-lib:authReleaseDokka/storeRelease"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="clear-auth-in-progress.html"><span class="token function">clearAuthInProgress</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1903927938%2FFunctions%2F-1021925289" anchor-label="complete" id="-1903927938%2FFunctions%2F-1021925289" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease"></a>
+          <div class="table-row" data-filterable-current=":auth-lib:authReleaseDokka/storeRelease" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="complete.html"><span><span>complete</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1903927938%2FFunctions%2F-1021925289"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":auth-lib:authReleaseDokka/storeRelease"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="complete.html"><span class="token function">complete</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">response<span class="token operator">: </span><a href="../-authorization-response/index.html">AuthorizationResponse</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1422885333%2FFunctions%2F-1021925289" anchor-label="notifyInCaseUserCanceledAuth" id="1422885333%2FFunctions%2F-1021925289" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease"></a>
+          <div class="table-row" data-filterable-current=":auth-lib:authReleaseDokka/storeRelease" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="notify-in-case-user-canceled-auth.html"><span>notify</span><wbr></wbr><span>In</span><wbr></wbr><span>Case</span><wbr></wbr><span>User</span><wbr></wbr><span>Canceled</span><wbr></wbr><span><span>Auth</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1422885333%2FFunctions%2F-1021925289"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":auth-lib:authReleaseDokka/storeRelease"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="notify-in-case-user-canceled-auth.html"><span class="token function">notifyInCaseUserCanceledAuth</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-23345358%2FFunctions%2F-1021925289" anchor-label="setOnCompleteListener" id="-23345358%2FFunctions%2F-1021925289" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease"></a>
+          <div class="table-row" data-filterable-current=":auth-lib:authReleaseDokka/storeRelease" data-filterable-set=":auth-lib:authReleaseDokka/storeRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-on-complete-listener.html"><span>set</span><wbr></wbr><span>On</span><wbr></wbr><span>Complete</span><wbr></wbr><span><span>Listener</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-23345358%2FFunctions%2F-1021925289"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":auth-lib:authReleaseDokka/storeRelease"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-on-complete-listener.html"><span class="token function">setOnCompleteListener</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">listener<span class="token operator">: </span><a href="-authorization-client-listener/index.html">AuthorizationClient.AuthorizationClientListener</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Sets the listener that will be used when authorization flow returns a result.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2026 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
