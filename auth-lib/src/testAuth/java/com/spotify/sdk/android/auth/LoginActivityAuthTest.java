@@ -45,9 +45,17 @@ import org.robolectric.shadows.ShadowActivity;
 @RunWith(RobolectricTestRunner.class)
 public class LoginActivityAuthTest {
 
-    @Test
-    public void shouldFinishLoginActivityWhenCompleted() {
+    private static class LoginActivitySetup {
+        final LoginActivity loginActivity;
+        final ShadowActivity shadowLoginActivity;
 
+        LoginActivitySetup(LoginActivity loginActivity, ShadowActivity shadowLoginActivity) {
+            this.loginActivity = loginActivity;
+            this.shadowLoginActivity = shadowLoginActivity;
+        }
+    }
+
+    private LoginActivitySetup createLoginActivity() {
         Activity context = Robolectric
                 .buildActivity(Activity.class)
                 .create()
@@ -57,11 +65,6 @@ public class LoginActivityAuthTest {
         AuthorizationRequest request = new AuthorizationRequest.Builder("test", AuthorizationResponse.Type.TOKEN, "test://test")
                 .setPkceInformation(pkceInfo)
                 .build();
-        AuthorizationResponse response = new AuthorizationResponse.Builder()
-                .setType(AuthorizationResponse.Type.TOKEN)
-                .setAccessToken("test_token")
-                .setExpiresIn(3600)
-                .build();
 
         Bundle bundle = new Bundle();
         bundle.putParcelable(LoginActivity.REQUEST_KEY, request);
@@ -69,22 +72,58 @@ public class LoginActivityAuthTest {
         Intent intent = new Intent(context, LoginActivity.class);
         intent.putExtra(LoginActivity.EXTRA_AUTH_REQUEST, bundle);
 
-        ActivityController<LoginActivity> loginActivityActivityController = buildActivity(LoginActivity.class, intent);
-
-        final LoginActivity loginActivity = loginActivityActivityController.get();
-
-        final ShadowActivity shadowLoginActivity = shadowOf(loginActivity);
+        ActivityController<LoginActivity> loginActivityController = buildActivity(LoginActivity.class, intent);
+        LoginActivity loginActivity = loginActivityController.get();
+        ShadowActivity shadowLoginActivity = shadowOf(loginActivity);
         shadowLoginActivity.setCallingActivity(context.getComponentName());
+        loginActivityController.create();
 
-        loginActivityActivityController.create();
+        return new LoginActivitySetup(loginActivity, shadowLoginActivity);
+    }
 
-        assertFalse(loginActivity.isFinishing());
+    private void assertCompletion(LoginActivitySetup setup, AuthorizationResponse response, int expectedResultCode) {
+        setup.loginActivity.onClientComplete(response);
 
-        loginActivity.onClientComplete(response);
+        assertTrue(setup.loginActivity.isFinishing());
+        assertEquals(expectedResultCode, setup.shadowLoginActivity.getResultCode());
+        assertEquals(response, setup.shadowLoginActivity.getResultIntent().getBundleExtra(LoginActivity.EXTRA_AUTH_RESPONSE).get(LoginActivity.RESPONSE_KEY));
+    }
 
-        assertTrue(loginActivity.isFinishing());
-        assertEquals(Activity.RESULT_OK, shadowLoginActivity.getResultCode());
-        assertEquals(response, shadowLoginActivity.getResultIntent().getBundleExtra(LoginActivity.EXTRA_AUTH_RESPONSE).get(LoginActivity.RESPONSE_KEY));
+    @Test
+    public void shouldFinishLoginActivityWhenCompleted() {
+        LoginActivitySetup setup = createLoginActivity();
+
+        AuthorizationResponse response = new AuthorizationResponse.Builder()
+                .setType(AuthorizationResponse.Type.TOKEN)
+                .setAccessToken("test_token")
+                .setExpiresIn(3600)
+                .build();
+
+        assertFalse(setup.loginActivity.isFinishing());
+
+        assertCompletion(setup, response, Activity.RESULT_OK);
+    }
+
+    @Test
+    public void shouldReturnResultCanceledWhenUserCancels() {
+        LoginActivitySetup setup = createLoginActivity();
+
+        AuthorizationResponse response = new AuthorizationResponse.Builder()
+                .setType(AuthorizationResponse.Type.CANCELLED)
+                .build();
+
+        assertCompletion(setup, response, Activity.RESULT_CANCELED);
+    }
+
+    @Test
+    public void shouldReturnResultOkForTechnicalErrors() {
+        LoginActivitySetup setup = createLoginActivity();
+
+        AuthorizationResponse response = new AuthorizationResponse.Builder()
+                .setType(AuthorizationResponse.Type.EMPTY)
+                .build();
+
+        assertCompletion(setup, response, Activity.RESULT_OK);
     }
 
 }
