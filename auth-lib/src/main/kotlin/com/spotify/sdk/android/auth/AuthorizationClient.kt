@@ -270,7 +270,7 @@ class AuthorizationClient(
             override fun onCancel() {
                 Log.i(TAG, "Spotify auth response: User cancelled")
                 val response = AuthorizationResponse.Builder()
-                    .setType(AuthorizationResponse.Type.EMPTY)
+                    .setType(AuthorizationResponse.Type.CANCELLED)
                     .build()
                 sendComplete(authHandler, response)
             }
@@ -301,7 +301,7 @@ class AuthorizationClient(
         if (currentHandler?.isAuthInProgress() == true) {
             Log.i(TAG, "Spotify auth response: User cancelled")
             val response = AuthorizationResponse.Builder()
-                .setType(AuthorizationResponse.Type.EMPTY)
+                .setType(AuthorizationResponse.Type.CANCELLED)
                 .build()
             complete(response)
         }

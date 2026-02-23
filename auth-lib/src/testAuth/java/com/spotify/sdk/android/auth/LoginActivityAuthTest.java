@@ -87,4 +87,76 @@ public class LoginActivityAuthTest {
         assertEquals(response, shadowLoginActivity.getResultIntent().getBundleExtra(LoginActivity.EXTRA_AUTH_RESPONSE).get(LoginActivity.RESPONSE_KEY));
     }
 
+    @Test
+    public void shouldReturnResultCanceledWhenUserCancels() {
+        Activity context = Robolectric
+                .buildActivity(Activity.class)
+                .create()
+                .get();
+
+        PKCEInformation pkceInfo = PKCEInformation.sha256("test_verifier", "test_challenge");
+        AuthorizationRequest request = new AuthorizationRequest.Builder("test", AuthorizationResponse.Type.TOKEN, "test://test")
+                .setPkceInformation(pkceInfo)
+                .build();
+
+        // Create CANCELLED response type (user cancellation)
+        AuthorizationResponse response = new AuthorizationResponse.Builder()
+                .setType(AuthorizationResponse.Type.CANCELLED)
+                .build();
+
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(LoginActivity.REQUEST_KEY, request);
+
+        Intent intent = new Intent(context, LoginActivity.class);
+        intent.putExtra(LoginActivity.EXTRA_AUTH_REQUEST, bundle);
+
+        ActivityController<LoginActivity> loginActivityActivityController = buildActivity(LoginActivity.class, intent);
+        final LoginActivity loginActivity = loginActivityActivityController.get();
+        final ShadowActivity shadowLoginActivity = shadowOf(loginActivity);
+        shadowLoginActivity.setCallingActivity(context.getComponentName());
+        loginActivityActivityController.create();
+
+        loginActivity.onClientComplete(response);
+
+        assertTrue(loginActivity.isFinishing());
+        assertEquals(Activity.RESULT_CANCELED, shadowLoginActivity.getResultCode());
+        assertEquals(response, shadowLoginActivity.getResultIntent().getBundleExtra(LoginActivity.EXTRA_AUTH_RESPONSE).get(LoginActivity.RESPONSE_KEY));
+    }
+
+    @Test
+    public void shouldReturnResultOkForTechnicalErrors() {
+        Activity context = Robolectric
+                .buildActivity(Activity.class)
+                .create()
+                .get();
+
+        PKCEInformation pkceInfo = PKCEInformation.sha256("test_verifier", "test_challenge");
+        AuthorizationRequest request = new AuthorizationRequest.Builder("test", AuthorizationResponse.Type.TOKEN, "test://test")
+                .setPkceInformation(pkceInfo)
+                .build();
+
+        // Create EMPTY response (technical error)
+        AuthorizationResponse response = new AuthorizationResponse.Builder()
+                .setType(AuthorizationResponse.Type.EMPTY)
+                .build();
+
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(LoginActivity.REQUEST_KEY, request);
+
+        Intent intent = new Intent(context, LoginActivity.class);
+        intent.putExtra(LoginActivity.EXTRA_AUTH_REQUEST, bundle);
+
+        ActivityController<LoginActivity> loginActivityActivityController = buildActivity(LoginActivity.class, intent);
+        final LoginActivity loginActivity = loginActivityActivityController.get();
+        final ShadowActivity shadowLoginActivity = shadowOf(loginActivity);
+        shadowLoginActivity.setCallingActivity(context.getComponentName());
+        loginActivityActivityController.create();
+
+        loginActivity.onClientComplete(response);
+
+        assertTrue(loginActivity.isFinishing());
+        assertEquals(Activity.RESULT_OK, shadowLoginActivity.getResultCode());  // Technical errors return OK
+        assertEquals(response, shadowLoginActivity.getResultIntent().getBundleExtra(LoginActivity.EXTRA_AUTH_RESPONSE).get(LoginActivity.RESPONSE_KEY));
+    }
+
 }

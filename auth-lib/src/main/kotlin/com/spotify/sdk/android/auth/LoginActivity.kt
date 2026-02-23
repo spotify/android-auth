@@ -182,7 +182,10 @@ class LoginActivity : Activity(), AuthorizationClient.AuthorizationClientListene
                     }
                 }
 
+            } else if (resultCode == RESULT_CANCELED) {
+                response.setType(Type.CANCELLED)
             } else {
+                // Unknown/invalid result code - treat as technical error
                 response.setType(Type.EMPTY)
             }
 
@@ -201,7 +204,15 @@ class LoginActivity : Activity(), AuthorizationClient.AuthorizationClientListene
         bundle.putParcelable(RESPONSE_KEY, response)
 
         resultIntent.putExtra(EXTRA_AUTH_RESPONSE, bundle)
-        setResult(RESULT_OK, resultIntent)
+
+        // Return RESULT_CANCELED for user cancellations
+        val resultCode = if (response.type == Type.CANCELLED) {
+            RESULT_CANCELED
+        } else {
+            RESULT_OK
+        }
+
+        setResult(resultCode, resultIntent)
         finish()
     }
 

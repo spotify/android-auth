@@ -69,9 +69,14 @@ data class AuthorizationResponse internal constructor(
         ERROR("error"),
 
         /**
-         * Response doesn't contain data because auth flow was cancelled or LoginActivity killed.
+         * Response doesn't contain data due to technical error (malformed response, missing data, etc.)
          */
         EMPTY("empty"),
+
+        /**
+         * User explicitly cancelled the authorization flow (closed browser, pressed back, etc.)
+         */
+        CANCELLED("cancelled"),
 
         /**
          * The response is unknown.
