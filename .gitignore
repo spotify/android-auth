@@ -4,5 +4,5 @@
 .idea/
 .DS_Store
 build/
-doc/
-doc-store/
+docs/
+docs-store/
