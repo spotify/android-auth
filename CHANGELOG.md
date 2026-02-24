@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+## Version 4.0.0
+- **Breaking Change**: Added new `AuthorizationResponse.Type.CANCELLED` to differentiate user-initiated cancellations from technical errors.
+  - User cancellations (browser closed, back button pressed) now return `Type.CANCELLED` with `RESULT_CANCELED`
+  - Technical errors (malformed responses, missing data) return `Type.EMPTY` with `RESULT_OK`
+  - OAuth errors (e.g., `access_denied`) continue to return `Type.ERROR` with `RESULT_OK`
+  - Client applications should update their authorization result handling to account for the new `CANCELLED` type and `RESULT_CANCELED` result code.
+
 ## Version 3.0.0
 - Add mandatory redirect path pattern.
 
