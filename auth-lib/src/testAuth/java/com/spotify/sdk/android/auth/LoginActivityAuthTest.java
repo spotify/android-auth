@@ -29,6 +29,7 @@ import static org.robolectric.Shadows.shadowOf;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import com.spotify.sdk.android.auth.AuthorizationRequest;
@@ -124,6 +125,97 @@ public class LoginActivityAuthTest {
                 .build();
 
         assertCompletion(setup, response, Activity.RESULT_OK);
+    }
+
+    @Test
+    public void shouldDetectCancellationAfterRecreationWithoutResponse() {
+        Activity context = Robolectric.buildActivity(Activity.class).create().get();
+
+        PKCEInformation pkceInfo = PKCEInformation.sha256("test_verifier", "test_challenge");
+        AuthorizationRequest request = new AuthorizationRequest.Builder(
+                "test", AuthorizationResponse.Type.TOKEN, "test://test")
+                .setPkceInformation(pkceInfo)
+                .build();
+
+        Bundle requestBundle = new Bundle();
+        requestBundle.putParcelable(LoginActivity.REQUEST_KEY, request);
+
+        Intent intent = new Intent(context, LoginActivity.class);
+        intent.putExtra(LoginActivity.EXTRA_AUTH_REQUEST, requestBundle);
+
+        // Create and initialize the first activity (triggers authorize, sets authInProgress=true)
+        ActivityController<LoginActivity> controller = buildActivity(LoginActivity.class, intent);
+        shadowOf(controller.get()).setCallingActivity(context.getComponentName());
+        controller.create();
+
+        // Save instance state before "destruction"
+        Bundle savedState = new Bundle();
+        controller.saveInstanceState(savedState);
+
+        // Simulate recreation: new activity with same intent but no response URI
+        Intent recreatedIntent = new Intent(context, LoginActivity.class);
+        recreatedIntent.putExtra(LoginActivity.EXTRA_AUTH_REQUEST, requestBundle);
+
+        ActivityController<LoginActivity> controller2 = buildActivity(LoginActivity.class, recreatedIntent);
+        LoginActivity recreatedActivity = controller2.get();
+        ShadowActivity recreatedShadow = shadowOf(recreatedActivity);
+        recreatedShadow.setCallingActivity(context.getComponentName());
+        controller2.create(savedState).start().resume();
+
+        // onResume should detect authInProgress=true with no handler and deliver CANCELLED
+        assertTrue(recreatedActivity.isFinishing());
+        assertEquals(Activity.RESULT_CANCELED, recreatedShadow.getResultCode());
+        AuthorizationResponse response = recreatedShadow.getResultIntent()
+                .getBundleExtra(LoginActivity.EXTRA_AUTH_RESPONSE)
+                .getParcelable(LoginActivity.RESPONSE_KEY);
+        assertEquals(AuthorizationResponse.Type.CANCELLED, response.getType());
+    }
+
+    @Test
+    public void shouldProcessResponseInIntentDataAfterRecreation() {
+        Activity context = Robolectric.buildActivity(Activity.class).create().get();
+
+        PKCEInformation pkceInfo = PKCEInformation.sha256("test_verifier", "test_challenge");
+        AuthorizationRequest request = new AuthorizationRequest.Builder(
+                "test", AuthorizationResponse.Type.TOKEN, "test://test")
+                .setPkceInformation(pkceInfo)
+                .build();
+
+        Bundle requestBundle = new Bundle();
+        requestBundle.putParcelable(LoginActivity.REQUEST_KEY, request);
+
+        Intent intent = new Intent(context, LoginActivity.class);
+        intent.putExtra(LoginActivity.EXTRA_AUTH_REQUEST, requestBundle);
+
+        // Create and initialize the first activity
+        ActivityController<LoginActivity> controller = buildActivity(LoginActivity.class, intent);
+        shadowOf(controller.get()).setCallingActivity(context.getComponentName());
+        controller.create();
+
+        // Save instance state before "destruction"
+        Bundle savedState = new Bundle();
+        controller.saveInstanceState(savedState);
+
+        // Simulate recreation with a response URI in the intent
+        // (redirect arrived while activity was destroyed)
+        Intent recreatedIntent = new Intent(context, LoginActivity.class);
+        recreatedIntent.putExtra(LoginActivity.EXTRA_AUTH_REQUEST, requestBundle);
+        recreatedIntent.setData(Uri.parse("test://test?code=test_code"));
+
+        ActivityController<LoginActivity> controller2 = buildActivity(LoginActivity.class, recreatedIntent);
+        LoginActivity recreatedActivity = controller2.get();
+        ShadowActivity recreatedShadow = shadowOf(recreatedActivity);
+        recreatedShadow.setCallingActivity(context.getComponentName());
+        controller2.create(savedState);
+
+        // Response should be processed in onCreate, activity should finish with RESULT_OK
+        assertTrue(recreatedActivity.isFinishing());
+        assertEquals(Activity.RESULT_OK, recreatedShadow.getResultCode());
+        AuthorizationResponse response = recreatedShadow.getResultIntent()
+                .getBundleExtra(LoginActivity.EXTRA_AUTH_RESPONSE)
+                .getParcelable(LoginActivity.RESPONSE_KEY);
+        assertEquals(AuthorizationResponse.Type.CODE, response.getType());
+        assertEquals("test_code", response.getCode());
     }
 
 }

@@ -297,15 +297,13 @@ class AuthorizationClient(
         authHandler?.stop()
     }
 
-    fun notifyInCaseUserCanceledAuth() {
-        if (currentHandler?.isAuthInProgress() == true) {
-            Log.i(TAG, "Spotify auth response: User cancelled")
-            val response = AuthorizationResponse.Builder()
-                .setType(AuthorizationResponse.Type.CANCELLED)
-                .build()
-            complete(response)
-        }
-    }
+    /**
+     * Returns true when a handler exists but has not yet entered the auth-in-progress state
+     * (e.g. Custom Tabs service binding is still in progress). In this case cancellation
+     * should be suppressed because the user hasn't actually seen the auth UI yet.
+     */
+    fun hasHandlerWithPendingAuth(): Boolean =
+        currentHandler != null && currentHandler?.isAuthInProgress() != true
 
     fun clearAuthInProgress() {
         if (currentHandler != null) {

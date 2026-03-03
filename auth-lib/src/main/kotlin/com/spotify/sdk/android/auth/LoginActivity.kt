@@ -42,11 +42,14 @@ class LoginActivity : Activity(), AuthorizationClient.AuthorizationClientListene
     private val authorizationClient = AuthorizationClient(this)
     private val executorService: ExecutorService = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
+    private var authInProgress = false
 
     override fun onNewIntent(intent: Intent) {
         val originalRequest = getRequestFromIntent()
         super.onNewIntent(intent)
         val responseUri = intent.data
+
+        authInProgress = false
 
         // Clear auth-in-progress state to prevent onResume from thinking user canceled
         if (responseUri != null) {
@@ -96,7 +99,24 @@ class LoginActivity : Activity(), AuthorizationClient.AuthorizationClientListene
         } else if (savedInstanceState == null) {
             Log.d(TAG, String.format("Spotify Auth starting with the request [%s]", request.toUri().toString()))
             authorizationClient.authorize(request)
+            authInProgress = true
+        } else {
+            authInProgress = savedInstanceState.getBoolean(KEY_AUTH_IN_PROGRESS, false)
+            if (authInProgress) {
+                val responseUri = intent.data
+                if (responseUri != null) {
+                    authInProgress = false
+                    authorizationClient.clearAuthInProgress()
+                    val response = AuthorizationResponse.fromUri(responseUri)
+                    authorizationClient.complete(response)
+                }
+            }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(KEY_AUTH_IN_PROGRESS, authInProgress)
     }
 
     private fun getRequestFromIntent(): AuthorizationRequest? {
@@ -106,10 +126,13 @@ class LoginActivity : Activity(), AuthorizationClient.AuthorizationClientListene
 
     override fun onResume() {
         super.onResume()
-        // onResume is called (except other cases) in the case
-        // of browser based auth flow when user pressed back/closed the Custom Tab and
-        // LoginActivity came to the foreground again.
-        authorizationClient.notifyInCaseUserCanceledAuth()
+        if (authInProgress && !authorizationClient.hasHandlerWithPendingAuth()) {
+            authInProgress = false
+            val response = AuthorizationResponse.Builder()
+                .setType(AuthorizationResponse.Type.CANCELLED)
+                .build()
+            authorizationClient.complete(response)
+        }
     }
 
     override fun onDestroy() {
@@ -122,6 +145,7 @@ class LoginActivity : Activity(), AuthorizationClient.AuthorizationClientListene
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         super.onActivityResult(requestCode, resultCode, intent)
+        authInProgress = false
         if (requestCode == REQUEST_CODE) {
             val response = AuthorizationResponse.Builder()
 
@@ -290,6 +314,8 @@ class LoginActivity : Activity(), AuthorizationClient.AuthorizationClientListene
     }
 
     companion object {
+        private const val KEY_AUTH_IN_PROGRESS = "KEY_AUTH_IN_PROGRESS"
+
         const val EXTRA_REPLY = "REPLY"
         const val EXTRA_ERROR = "ERROR"
 
