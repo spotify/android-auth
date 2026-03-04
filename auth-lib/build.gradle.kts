@@ -35,7 +35,7 @@ plugins {
 }
 
 group = "com.spotify.android"
-version = "4.0.0"
+version = "4.0.1"
 
 val archivesBaseName = "auth"
 

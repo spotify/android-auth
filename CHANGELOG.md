@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+## Version 4.0.1
+- Fix: Ensure auth progress is preserved across configuration changes, preventing cases where a headless activity remains open and blocks user input.
+
 ## Version 4.0.0
 - **Breaking Change**: Added new `AuthorizationResponse.Type.CANCELLED` to differentiate user-initiated cancellations from technical errors.
   - User cancellations (browser closed, back button pressed) now return `Type.CANCELLED` with `RESULT_CANCELED`
