@@ -40,16 +40,16 @@ version = "4.0.1"
 val archivesBaseName = "auth"
 
 android {
-    compileSdk = 33
-    buildToolsVersion = "33.0.0"
+    compileSdk = 34
+    buildToolsVersion = "34.0.0"
 
     buildFeatures {
         buildConfig = true
     }
 
     defaultConfig {
-        minSdk = 16
-        targetSdk = 33
+        minSdk = 21
+        targetSdk = 34
         buildConfigField("String", "LIB_VERSION_NAME", "\"${project.version}\"")
     }
 
@@ -80,6 +80,15 @@ android {
                     "auth-${buildType.name}.aar"
             }
         }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 
     lint {
