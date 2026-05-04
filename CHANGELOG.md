@@ -1,5 +1,8 @@
 Change Log
 ==========
+## Version 4.0.2
+- Bumped targetSdkVersion to 35
+- Bumped to Gradle 8.0
 
 ## Version 4.0.1
 - Fix: Ensure auth progress is preserved across configuration changes, preventing cases where a headless activity remains open and blocks user input.

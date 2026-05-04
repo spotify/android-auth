@@ -35,13 +35,13 @@ plugins {
 }
 
 group = "com.spotify.android"
-version = "4.0.1"
+version = "4.0.2"
 
 val archivesBaseName = "auth"
 
 android {
-    compileSdk = 34
-    buildToolsVersion = "34.0.0"
+    compileSdk = 35
+    buildToolsVersion = "35.0.0"
 
     buildFeatures {
         buildConfig = true
@@ -49,7 +49,7 @@ android {
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 35
         buildConfigField("String", "LIB_VERSION_NAME", "\"${project.version}\"")
     }
 
