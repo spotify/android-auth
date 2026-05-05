@@ -26,8 +26,16 @@ plugins {
 }
 
 android {
-    compileSdk = 33
-    buildToolsVersion = "33.0.0"
+    compileSdk = 36
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 
     signingConfigs {
         getByName("debug") {
@@ -40,8 +48,8 @@ android {
 
     defaultConfig {
         applicationId = "com.spotify.sdk.android.authentication.sample"
-        minSdk = 16
-        targetSdk = 33
+        minSdk = 21
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
