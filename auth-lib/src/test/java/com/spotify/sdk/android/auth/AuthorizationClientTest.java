@@ -32,6 +32,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import static org.robolectric.Shadows.shadowOf;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -53,16 +54,13 @@ public class AuthorizationClientTest {
                 AuthorizationResponse.Type.TOKEN,
                 "to://me"
         ).build();
-        Activity activity = mock(Activity.class);
-
-        Mockito.doNothing().when(activity).startActivity(any(Intent.class));
-        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        Activity activity = Robolectric.buildActivity(Activity.class).create().get();
 
         AuthorizationClient.openLoginInBrowser(activity, authorizationRequest);
 
-        verify(activity, times(1)).startActivity(captor.capture());
-        assertEquals(Intent.ACTION_VIEW, captor.getValue().getAction());
-        assertEquals(authorizationRequest.toUri().toString(), captor.getValue().getData().toString());
+        Intent startedIntent = shadowOf(activity).getNextStartedActivity();
+        assertEquals(Intent.ACTION_VIEW, startedIntent.getAction());
+        assertEquals(authorizationRequest.toUri().toString(), startedIntent.getData().toString());
     }
 
     @Test(expected = NullPointerException.class)

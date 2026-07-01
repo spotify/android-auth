@@ -35,21 +35,21 @@ plugins {
 }
 
 group = "com.spotify.android"
-version = "4.0.1"
+version = "5.0.0"
 
 val archivesBaseName = "auth"
 
 android {
-    compileSdk = 33
-    buildToolsVersion = "33.0.0"
+    compileSdk = 35
+    buildToolsVersion = "35.0.0"
 
     buildFeatures {
         buildConfig = true
     }
 
     defaultConfig {
-        minSdk = 16
-        targetSdk = 33
+        minSdk = 21
+        targetSdk = 35
         buildConfigField("String", "LIB_VERSION_NAME", "\"${project.version}\"")
     }
 
@@ -82,6 +82,15 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
     lint {
         lintConfig = file("${project.rootDir}/config/lint.xml")
         quiet = false
@@ -97,20 +106,7 @@ android {
         }
     }
 
-    val manifestPlaceholdersForTests = mapOf(
-        "redirectSchemeName" to "spotify-sdk",
-        "redirectHostName" to "auth",
-        "redirectPathPattern" to "/.*"
-    )
-
     namespace = "com.spotify.sdk.android.auth"
-
-    unitTestVariants.configureEach {
-        mergedFlavor.manifestPlaceholders.putAll(manifestPlaceholdersForTests)
-    }
-    testVariants.configureEach {
-        mergedFlavor.manifestPlaceholders.putAll(manifestPlaceholdersForTests)
-    }
 }
 
 val kotlinVersion = rootProject.extra["kotlin_version"] as String
@@ -121,7 +117,7 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:2.28.2")
-    testImplementation("org.robolectric:robolectric:4.11.1")
+    testImplementation("org.robolectric:robolectric:4.14.1")
 }
 
 /*

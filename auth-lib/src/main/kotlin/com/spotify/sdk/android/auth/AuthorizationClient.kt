@@ -219,6 +219,8 @@ class AuthorizationClient(
         if (authorizationPending) return
         authorizationPending = true
 
+        checkRedirectUriConfiguration(loginActivity.packageManager, request.redirectUri)
+
         val processedRequest = validateAndConvertTokenRequest(request)
 
         for (authHandler in authorizationHandlers) {
@@ -228,6 +230,7 @@ class AuthorizationClient(
             }
         }
     }
+
 
     fun cancel() {
         if (!authorizationPending) {
@@ -348,6 +351,25 @@ class AuthorizationClient(
     companion object {
         private const val TAG = "Spotify Auth Client"
 
+        // Hardcoded because RedirectUriReceiverActivity is in the auth flavor source set
+        private const val REDIRECT_ACTIVITY_NAME =
+            "com.spotify.sdk.android.auth.browser.RedirectUriReceiverActivity"
+
+        private fun checkRedirectUriConfiguration(pm: PackageManager, redirectUri: String) {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(redirectUri)).apply {
+                addCategory(Intent.CATEGORY_DEFAULT)
+                addCategory(Intent.CATEGORY_BROWSABLE)
+            }
+            val hasRedirectActivity = pm
+                .queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER)
+                .any { it.activityInfo.name == REDIRECT_ACTIVITY_NAME }
+            check(hasRedirectActivity) {
+                "No intent-filter found for RedirectUriReceiverActivity matching redirect URI " +
+                    "'$redirectUri'. Add an intent-filter for RedirectUriReceiverActivity " +
+                    "to your AndroidManifest.xml. See https://github.com/spotify/android-auth#breaking-changes-in-spotify-auth-library-version-500"
+            }
+        }
+
         const val MARKET_VIEW_PATH = "market://"
         const val MARKET_SCHEME = "market"
         const val MARKET_PATH = "details"
@@ -391,6 +413,7 @@ class AuthorizationClient(
          */
         @JvmStatic
         fun openLoginInBrowser(contextActivity: Activity, request: AuthorizationRequest) {
+            checkRedirectUriConfiguration(contextActivity.packageManager, request.redirectUri)
             val launchBrowser = Intent(Intent.ACTION_VIEW, request.toUri())
             contextActivity.startActivity(launchBrowser)
         }

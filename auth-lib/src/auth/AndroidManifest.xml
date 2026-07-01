@@ -34,17 +34,7 @@
         <activity
             android:name="com.spotify.sdk.android.auth.browser.RedirectUriReceiverActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:exported="true">
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data
-                    android:host="${redirectHostName}"
-                    android:scheme="${redirectSchemeName}"
-                    android:pathPattern="${redirectPathPattern}"/>
-            </intent-filter>
-        </activity>
+            android:exported="true"/>
 
     </application>
 

@@ -2,6 +2,32 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.spotify.android/auth.svg)](https://search.maven.org/search?q=g:com.spotify.android)
 
+# Breaking changes in Spotify Auth library version 5.0.0
+
+The `RedirectUriReceiverActivity` intent-filter is no longer provided by the library. You must declare it in your app's `AndroidManifest.xml` with your redirect URI values:
+
+```xml
+<activity
+    android:name="com.spotify.sdk.android.auth.browser.RedirectUriReceiverActivity"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data
+            android:scheme="your-redirect-scheme"
+            android:host="your-redirect-host"
+            android:pathPattern="your-path-pattern"/>
+    </intent-filter>
+</activity>
+```
+
+If you were previously using `manifestPlaceholders` for `redirectSchemeName`, `redirectHostName`, and `redirectPathPattern`, replace them with the values directly in the manifest. The `manifestPlaceholders` configuration in `build.gradle` is no longer needed.
+
+If your redirect URI uses `https://`, add `android:autoVerify="true"` to the `<intent-filter>` to enable [Android App Links](https://developer.android.com/training/app-links) verification.
+
+If your app is missing this intent-filter, the library will crash at runtime with an `IllegalStateException` when the auth flow starts.
+
 # Breaking changes in Spotify Auth library version 2.0.0
 
 In this version we replaced use of WebView with [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/) since Google and Facebook Login no longer support WebViews for authenticating users.
@@ -24,31 +50,7 @@ repositories {
 }
 ```
 
-Since Spotify Auth library version 2.0.0 you also need to provide the scheme and host of the redirect URI that your app is using for authorizing in your app `build.gradle` file.
-Below is an example of how this looks for [the auth sample project](auth-sample) using `spotify-sdk://auth` redirect URI:
-
-```gradle
-    defaultConfig {
-        manifestPlaceholders = [redirectSchemeName: "spotify-sdk", redirectHostName: "auth"]
-        ...
-    }
-```
-
-Since Spotify Auth library version 3.0.0 you also need to provide the path pattern of your redirect URI
-
-```gradle
-defaultConfig {
-    manifestPlaceholders = [
-        redirectSchemeName: "your-redirect-scheme",
-        redirectHostName: "your-redirect-host",
-        redirectPathPattern: "your/redirect/path/pattern" // New mandatory field
-    ]
-    ...
-}
-```
-
-If you want to retain the previous behavior (accepting any path), use .* as the path pattern.
-For more details, see the [Google documentation](https://developer.android.com/guide/topics/manifest/data-element#path).
+You must also declare the `RedirectUriReceiverActivity` intent-filter in your app's `AndroidManifest.xml` (see [breaking changes in version 5.0.0](#breaking-changes-in-spotify-auth-library-version-500) above).
 
 To learn more see the [Authentication Guide](https://developer.spotify.com/technologies/spotify-android-sdk/android-sdk-authentication-guide/)
 and the [API reference](https://spotify.github.io/android-auth/auth-lib/docs/index.html).
