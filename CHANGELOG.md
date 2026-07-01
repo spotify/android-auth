@@ -1,5 +1,11 @@
 Change Log
 ==========
+## Version 5.0.0
+- Bumped targetSdkVersion to 35
+- Bumped minSdkVersion to 21
+- Bumped AGP to 8.7.3 and Gradle to 8.11.1
+- Bumped Robolectric to 4.14.1
+- **Breaking Change**: The `RedirectUriReceiverActivity` intent-filter must now be declared in the consuming app's `AndroidManifest.xml`. The library no longer provides it automatically. See the [README](README.md#breaking-changes-in-spotify-auth-library-version-500) for migration instructions.
 
 ## Version 4.0.1
 - Fix: Ensure auth progress is preserved across configuration changes, preventing cases where a headless activity remains open and blocks user input.

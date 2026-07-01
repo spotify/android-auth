@@ -3,9 +3,7 @@ package com.spotify.sdk.android.auth.browser
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.pm.ResolveInfo
 import android.net.Uri
-import android.text.TextUtils
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION
 import com.spotify.sdk.android.auth.AuthorizationRequest
@@ -26,8 +24,7 @@ internal object CustomTabsSupportChecker {
         )
         // CustomTabs seems to have problem with redirecting back the app after auth when URI has http/https scheme
         return if (!redirectUri.startsWith("http") && !redirectUri.startsWith("https") &&
-            hasBrowserSupportForCustomTabs(packageSupportingCustomTabs) &&
-            hasRedirectUriActivity(context.packageManager, redirectUri)
+            hasBrowserSupportForCustomTabs(packageSupportingCustomTabs)
         ) {
             packageSupportingCustomTabs
         } else {
@@ -83,20 +80,4 @@ internal object CustomTabsSupportChecker {
         }
     }
 
-    private fun hasRedirectUriActivity(pm: PackageManager?, redirectUri: String): Boolean {
-        if (pm == null) {
-            return false
-        }
-        val intent = Intent().apply {
-            action = Intent.ACTION_VIEW
-            addCategory(Intent.CATEGORY_DEFAULT)
-            addCategory(Intent.CATEGORY_BROWSABLE)
-            data = Uri.parse(redirectUri)
-        }
-        val infoList = pm.queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER)
-
-        return infoList.any { info ->
-            info.activityInfo.name == RedirectUriReceiverActivity::class.java.name
-        }
-    }
 }
