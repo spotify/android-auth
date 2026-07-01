@@ -6,3 +6,5 @@
 build/
 docs/
 docs-store/
+auth-lib/stdout
+auth-sample/stdout
