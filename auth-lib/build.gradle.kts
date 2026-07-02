@@ -200,34 +200,34 @@ afterEvaluate {
                 tasks.register(dokkaTaskName, DokkaTask::class.java) {
                     description = "Generates Dokka documentation for ${variant.name}."
 
-                    // Configure source sets
-                    dokkaSourceSets {
-                        configureEach {
-                            // Include both Kotlin and Java sources
-                            val sourceDirs = variant.sourceSets.flatMap {
-                                it.javaDirectories
+                    // Dokka 1.x NPEs on androidTest source sets with AGP 8.7+.
+                    // Clear auto-discovered sets and register only this variant.
+                    @Suppress("DEPRECATION")
+                    dokkaSourceSets.clear()
+                    dokkaSourceSets.register(variant.name) {
+                        // Include both Kotlin and Java sources
+                        variant.sourceSets.flatMap {
+                            it.javaDirectories + it.kotlinDirectories
+                        }.forEach { sourceDir ->
+                            if (sourceDir.exists()) {
+                                sourceRoots.from(sourceDir)
                             }
-                            sourceDirs.forEach { sourceDir ->
-                                if (sourceDir.exists()) {
-                                    this@configureEach.sourceRoots.from(sourceDir)
-                                }
-                            }
-
-                            // Configure classpath
-                            classpath.from(variant.javaCompileProvider.get().classpath)
-                            classpath.from(project.files(android.bootClasspath.joinToString(File.pathSeparator)))
-
-                            // External documentation links
-                            externalDocumentationLink {
-                                url.set(uri("https://docs.oracle.com/javase/8/docs/api/").toURL())
-                            }
-                            externalDocumentationLink {
-                                url.set(uri("https://developer.android.com/reference/").toURL())
-                            }
-
-                            // Suppress warnings for undocumented code (optional)
-                            suppressInheritedMembers.set(false)
                         }
+
+                        // Configure classpath
+                        classpath.from(variant.javaCompileProvider.get().classpath)
+                        classpath.from(project.files(android.bootClasspath.joinToString(File.pathSeparator)))
+
+                        // External documentation links
+                        externalDocumentationLink {
+                            url.set(uri("https://docs.oracle.com/javase/8/docs/api/").toURL())
+                        }
+                        externalDocumentationLink {
+                            url.set(uri("https://developer.android.com/reference/").toURL())
+                        }
+
+                        // Suppress warnings for undocumented code (optional)
+                        suppressInheritedMembers.set(false)
                     }
 
                     // Output directory
