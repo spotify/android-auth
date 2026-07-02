@@ -200,11 +200,12 @@ afterEvaluate {
                 tasks.register(dokkaTaskName, DokkaTask::class.java) {
                     description = "Generates Dokka documentation for ${variant.name}."
 
-                    // Dokka 1.x crashes with AGP 8.7 when auto-discovering source sets
-                    // (NPE on androidTest sets). Clear and manually register.
+                    // Dokka 1.x NPEs on androidTest source sets with AGP 8.7+.
+                    // Clear auto-discovered sets and register only this variant.
                     @Suppress("DEPRECATION")
                     dokkaSourceSets.clear()
                     dokkaSourceSets.register(variant.name) {
+                        // Include both Kotlin and Java sources
                         variant.sourceSets.flatMap {
                             it.javaDirectories + it.kotlinDirectories
                         }.forEach { sourceDir ->
@@ -213,9 +214,11 @@ afterEvaluate {
                             }
                         }
 
+                        // Configure classpath
                         classpath.from(variant.javaCompileProvider.get().classpath)
                         classpath.from(project.files(android.bootClasspath.joinToString(File.pathSeparator)))
 
+                        // External documentation links
                         externalDocumentationLink {
                             url.set(uri("https://docs.oracle.com/javase/8/docs/api/").toURL())
                         }
@@ -223,6 +226,7 @@ afterEvaluate {
                             url.set(uri("https://developer.android.com/reference/").toURL())
                         }
 
+                        // Suppress warnings for undocumented code (optional)
                         suppressInheritedMembers.set(false)
                     }
 
