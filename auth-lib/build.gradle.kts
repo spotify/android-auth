@@ -191,10 +191,6 @@ afterEvaluate {
                 "../docs/"
             }
 
-            val sourceDirs = variant.sourceSets.flatMap {
-                it.javaDirectories + it.resourcesDirectories
-            }
-
             val dokkaTaskName = "${variant.name}Dokka"
             if (tasks.findByName(dokkaTaskName) == null) {
                 tasks.register(dokkaTaskName, DokkaTask::class.java) {
@@ -242,28 +238,19 @@ afterEvaluate {
             if (tasks.findByName(dokkaJarTaskName) == null) {
                 tasks.register(dokkaJarTaskName, org.gradle.jvm.tasks.Jar::class.java) {
                     dependsOn(dokkaTaskName)
+                    archiveAppendix.set(variant.flavorName)
                     archiveClassifier.set("javadoc")
                     from(file(javaDocDir))
                 }
             }
 
-            val sourcesJarTaskName = "${variant.name}SourcesJar"
-            if (tasks.findByName(sourcesJarTaskName) == null) {
-                tasks.register(sourcesJarTaskName, org.gradle.jvm.tasks.Jar::class.java) {
-                    from(sourceDirs)
-                    archiveClassifier.set("sources")
-                }
-            }
-
             val dokkaJar = tasks.named(dokkaJarTaskName)
-            val sourcesJar = tasks.named(sourcesJarTaskName)
 
             publications {
                 create<MavenPublication>("${variant.flavorName}Release") {
                     from(components["${variant.flavorName}Release"])
                     val suffix = if (flavored) "-${variant.flavorName}" else ""
                     artifact(dokkaJar)
-                    artifact(sourcesJar)
                     groupId = project.group.toString()
                     version = project.version.toString()
                     artifactId = archivesBaseName + suffix
